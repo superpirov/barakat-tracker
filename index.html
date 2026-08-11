@@ -74,7 +74,9 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .top{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:22px}
 .dateline{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted)}
 .dateline b{color:var(--accent);font-weight:700}
-.greet{font-family:var(--fd);font-weight:700;font-size:clamp(23px,4vw,38px);line-height:1.15;margin:8px 0 9px}
+.greet{font-family:var(--fd);font-weight:700;font-size:clamp(23px,4vw,38px);line-height:1.15;margin:8px 0 9px;cursor:pointer}
+.name-hint{display:inline-block;margin-left:10px;font:500 11px var(--fb);letter-spacing:.5px;color:var(--muted);border-bottom:1px dashed var(--muted);vertical-align:middle}
+.name-edit{font:700 .95em var(--fd);color:var(--ink);background:transparent;border:0;border-bottom:2px solid var(--accent);outline:none;max-width:200px;padding:2px}
 .quote{color:var(--muted);font-size:14px;max-width:540px;line-height:1.5}
 .head-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .ring-card{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px 18px;box-shadow:var(--shadow)}
@@ -239,7 +241,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
     <header class="top">
       <div>
         <div class="dateline" id="dateline"></div>
-        <h1 class="greet" id="greet"></h1>
+        <h1 class="greet" id="greet" title="Нажми, чтобы изменить имя"></h1>
         <p class="quote" id="quote"></p>
       </div>
       <div class="head-right">
@@ -316,7 +318,7 @@ const plural=(n,f)=>{n=Math.abs(n)%100;const d=n%10;if(n>10&&n<20)return f[2];if
 const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
 const PALETTE=['#9AA7B2','#F0645C','#E86FB0','#E8A23B','#D97B29','#7BC142','#34B87E','#2BB3A5','#4A8DF7','#9A6FE0'];
-const EMOJIS=['✨','🌙','🕌','📚','💪','🧺','','🎯','','🎨','','🍎','️','💰','','🤲','','🎁','','🌟'];
+const EMOJIS=['✨','🌙','🕌','📚','💪','🧺','🎯','🎨','🧠','🍎','💰','🌿','🤲','🎁','🌟','📞','🚗','✈️','🧹','💡'];
 const QUOTES=[
  '«Самые любимые дела — те, что совершаются постоянно, даже если они малы» (хадис)',
  '«Маленький шаг каждый день превращается в большой путь»',
@@ -330,7 +332,7 @@ const QUOTES=[
 /* ── состояние ── */
 function defaults(){return{
  v:1, filter:'all', tab:'active', search:'', newCat:'general', newPrio:null,
- settings:{theme:null,sound:true},
+ settings:{theme:null,sound:true,name:''},
  cats:[
   {id:'general',name:'Общие',emoji:'✨',color:'#9AA7B2',fixed:true},
   {id:'c-pers',name:'Личное',emoji:'🌿',color:'#F0645C'},
@@ -587,15 +589,28 @@ function effTheme(){return state.settings.theme||((new Date().getHours()>=19||ne
 function applyToggles(){
  document.documentElement.dataset.theme=effTheme();
  $$('.theme-btn').forEach(b=>b.textContent=effTheme()==='dark'?'☀️':'🌙');
- $$('.sound-btn').forEach(b=>b.textContent=state.settings.sound?'🔊':'');}
+ $$('.sound-btn').forEach(b=>b.textContent=state.settings.sound?'🔊':'🔇');}
 $$('.theme-btn').forEach(b=>b.onclick=()=>{state.settings.theme=effTheme()==='dark'?'light':'dark';save();applyToggles()});
 $$('.sound-btn').forEach(b=>b.onclick=()=>{state.settings.sound=!state.settings.sound;save();applyToggles();if(state.settings.sound)sndTick()});
+
+/* ── имя пользователя ── */
+let editingName=false;
+function editName(){
+ if(editingName)return;editingName=true;
+ $('#greet').innerHTML=`<input class="name-edit" value="${esc(state.settings.name||'')}" placeholder="Твоё имя" maxlength="20">`;
+ const inp=$('#greet .name-edit');inp.focus();
+ let finished=false;
+ const done=()=>{if(finished)return;finished=true;state.settings.name=inp.value.trim();editingName=false;save();renderHello()};
+ inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape'){finished=true;editingName=false;renderHello()}});
+ inp.addEventListener('blur',done);}
 
 /* ── приветствие, дата, цитата ── */
 function renderHello(){
  const now=new Date(),h=now.getHours();
  const [g,em]=h>=5&&h<11?['Доброе утро','☀️']:h>=11&&h<17?['Добрый день','🌤️']:h>=17&&h<23?['Добрый вечер','🌆']:['Доброй ночи','🌙'];
- $('#greet').textContent=`${g}, Руслан ${em}`;
+ const nm=(state.settings.name||'').trim();
+ $('#greet').innerHTML=nm?`${g}, ${esc(nm)} ${em}`:`${g}! ${em}<span class="name-hint">нажми — впиши своё имя</span>`;
+ $('#greet').onclick=editName;
  let d=now.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
  $('#dateline').innerHTML=`${d[0].toUpperCase()+d.slice(1)} · <b id="clock"></b>`;
  $('#quote').textContent=QUOTES[Math.floor(Date.now()/864e5)%QUOTES.length];
