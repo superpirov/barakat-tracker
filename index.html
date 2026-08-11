@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script>
-/* тема до отрисовки — без мигания */
 try{
   var s = JSON.parse(localStorage.getItem('barakat.v1')||'{}');
   var th = (s.settings&&s.settings.theme) || ((new Date().getHours()>=19||new Date().getHours()<7)?'dark':'light');
@@ -31,14 +30,15 @@ html[data-theme="dark"]{
   --shadow:0 14px 34px rgba(0,0,0,.38);--danger:#FF6B6E;--warn:#F2A63B;color-scheme:dark;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--ink);font-family:var(--fb);min-height:100vh;transition:background .35s,color .35s}
+html,body{overflow-x:clip}
+body{background:var(--bg);color:var(--ink);font-family:var(--fb);min-height:100vh;transition:background .35s,color .35s;-webkit-tap-highlight-color:transparent}
 body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:radial-gradient(var(--dot) 1px,transparent 1px);background-size:22px 22px}
 body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:
   radial-gradient(620px 420px at 6% -6%,var(--tint1),transparent 62%),
   radial-gradient(720px 520px at 104% 108%,var(--tint2),transparent 62%)}
 ::selection{background:color-mix(in srgb,var(--accent) 30%,transparent)}
-button{font:inherit;color:inherit}
+button{font:inherit;color:inherit;touch-action:manipulation}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 #fx{position:fixed;inset:0;z-index:98;pointer-events:none}
 
@@ -74,34 +74,32 @@ button{font:inherit;color:inherit}
 .top{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:22px}
 .dateline{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted)}
 .dateline b{color:var(--accent);font-weight:700}
-.greet{font-family:var(--fd);font-weight:700;font-size:clamp(25px,4vw,38px);line-height:1.15;margin:8px 0 9px}
+.greet{font-family:var(--fd);font-weight:700;font-size:clamp(23px,4vw,38px);line-height:1.15;margin:8px 0 9px}
 .quote{color:var(--muted);font-size:14px;max-width:540px;line-height:1.5}
 .head-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .ring-card{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px 18px;box-shadow:var(--shadow)}
-.ring-wrap{position:relative;width:70px;height:70px}
+.ring-wrap{position:relative;width:70px;height:70px;flex:none}
 .ring-wrap svg{width:70px;height:70px;transform:rotate(-90deg)}
 .ring-bg{fill:none;stroke:var(--panel2);stroke-width:7}
 .ring-fg{fill:none;stroke:var(--accent);stroke-width:7;stroke-linecap:round;stroke-dasharray:201;stroke-dashoffset:201;transition:stroke-dashoffset .9s cubic-bezier(.3,.8,.3,1)}
 .ring-pct{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--fd);font-weight:700;font-size:14px}
 .ring-info b{display:block;font-size:14px;margin-bottom:3px}
 .ring-info small{color:var(--muted);font-size:12.5px}
-.pills{display:flex;gap:8px}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
 .pill{display:inline-flex;gap:7px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;box-shadow:var(--shadow)}
 
 /* ── мобильная шапка ── */
 .m-bar{display:none;align-items:center;gap:10px;margin-bottom:6px}
-.m-cats{display:none;gap:8px;overflow-x:auto;padding:6px 2px 10px;scrollbar-width:none}
-.m-cats::-webkit-scrollbar{display:none}
+.m-cats{display:none;gap:8px;flex-wrap:wrap;padding:6px 2px 10px}
 
 /* ── композер ── */
-.composer{background:var(--panel);border:1px solid var(--line);border-radius:var(--rl);padding:16px 18px 16px;box-shadow:var(--shadow)}
+.composer{background:var(--panel);border:1px solid var(--line);border-radius:var(--rl);padding:16px 18px;box-shadow:var(--shadow)}
 .composer.shake{animation:shake .4s}
 @keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 #newText{width:100%;background:transparent;border:0;outline:none;font:600 18px var(--fb);color:var(--ink);padding:6px 2px}
 #newText::placeholder{color:var(--muted);font-weight:500}
 .composer-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
-.chips{display:flex;gap:8px;overflow-x:auto;flex:1;min-width:180px;padding:2px;scrollbar-width:none;mask-image:linear-gradient(90deg,#000 94%,transparent)}
-.chips::-webkit-scrollbar{display:none}
+.chips{display:flex;gap:8px;flex-wrap:wrap;flex:1;min-width:180px;padding:2px}
 .chip{flex:none;display:inline-flex;gap:6px;align-items:center;padding:7px 13px;border-radius:999px;border:1.5px solid var(--line);background:var(--panel2);font-size:13px;font-weight:600;cursor:pointer;transition:.18s;white-space:nowrap}
 .chip:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--c,#888) 55%,var(--line))}
 .chip.on{background:var(--c);border-color:var(--c);color:#fff;box-shadow:0 5px 14px color-mix(in srgb,var(--c) 40%,transparent)}
@@ -111,7 +109,7 @@ button{font:inherit;color:inherit}
 .prio:hover{transform:translateY(-2px)}
 .prio.on[data-p="low"] svg{fill:#8FA0AE}.prio.on[data-p="mid"] svg{fill:#E8A23B}.prio.on[data-p="high"] svg{fill:#E5484D}
 .prio.on{border-color:currentColor;box-shadow:0 3px 10px rgba(0,0,0,.10)}
-.datein{border:1.5px solid var(--line);border-radius:var(--rs);padding:7px 10px;background:var(--panel2);color:var(--ink);font:500 13px var(--fb);cursor:pointer}
+.datein{border:1.5px solid var(--line);border-radius:var(--rs);padding:7px 10px;background:var(--panel2);color:var(--ink);font:500 13px var(--fb);cursor:pointer;max-width:100%}
 .btn-add{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--accent-ink);border:0;padding:11px 19px;border-radius:13px;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 7px 18px color-mix(in srgb,var(--accent) 38%,transparent);transition:.18s}
 .btn-add:hover{transform:translateY(-2px)}
 .btn-add:active{transform:scale(.96)}
@@ -167,18 +165,18 @@ button{font:inherit;color:inherit}
 footer{margin-top:44px;text-align:center;font-size:12px;color:var(--muted)}
 
 /* ── тост, диалог ── */
-#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);opacity:0;pointer-events:none;transition:.32s cubic-bezier(.3,.8,.3,1);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;display:flex;gap:14px;align-items:center;z-index:99;box-shadow:0 12px 34px rgba(0,0,0,.3);font-size:14px;font-weight:600}
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);opacity:0;pointer-events:none;transition:.32s cubic-bezier(.3,.8,.3,1);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center;max-width:92vw;z-index:99;box-shadow:0 12px 34px rgba(0,0,0,.3);font-size:14px;font-weight:600}
 #toast.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
 #toast button{border:0;background:transparent;color:var(--accent);font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
-dialog{border:0;border-radius:var(--rl);background:var(--panel);color:var(--ink);box-shadow:0 24px 70px rgba(0,0,0,.35);padding:0}
+dialog{border:0;border-radius:var(--rl);background:var(--panel);color:var(--ink);box-shadow:0 24px 70px rgba(0,0,0,.35);padding:0;width:min(400px,92vw);max-width:92vw}
 dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
-.dlg-card{padding:24px;display:flex;flex-direction:column;gap:16px;min-width:min(360px,86vw)}
+.dlg-card{padding:22px;display:flex;flex-direction:column;gap:16px}
 .dlg-card h3{font-family:var(--fd);font-weight:700;font-size:17px}
 .dlg-card label{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:flex;flex-direction:column;gap:7px}
 .dlg-card input[type=text]{border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);padding:10px 12px;font:600 15px var(--fb);color:var(--ink);outline:none}
 .dlg-card input[type=text]:focus{border-color:var(--accent)}
-.egrid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px}
-.egrid button{width:32px;height:32px;font-size:16px;border-radius:8px;border:1.5px solid transparent;background:var(--panel2);cursor:pointer;transition:.15s}
+.egrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(32px,1fr));gap:6px}
+.egrid button{width:100%;height:34px;font-size:16px;border-radius:8px;border:1.5px solid transparent;background:var(--panel2);cursor:pointer;transition:.15s}
 .egrid button:hover{transform:scale(1.12)}
 .egrid button.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
 .cgrid{display:flex;gap:8px;flex-wrap:wrap}
@@ -195,8 +193,16 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
   .sidebar{display:none}
   .m-bar{display:flex}
   .m-cats{display:flex}
-  .top{flex-direction:column;align-items:flex-start;gap:16px}
+  .top{flex-direction:column;align-items:flex-start;gap:16px;margin-bottom:16px}
   .head-right{width:100%;flex-direction:row;align-items:center;justify-content:flex-start;flex-wrap:wrap}
+  .ring-card{width:100%}
+  .composer{padding:14px}
+  .composer-row{gap:8px}
+  .btn-add{width:100%;justify-content:center}
+  .board-bar{gap:10px}
+  .search{flex-basis:100%;max-width:none;margin-left:0;min-width:0}
+  .tabs{width:100%}
+  .tab{flex:1;justify-content:center}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
@@ -310,7 +316,7 @@ const plural=(n,f)=>{n=Math.abs(n)%100;const d=n%10;if(n>10&&n<20)return f[2];if
 const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
 const PALETTE=['#9AA7B2','#F0645C','#E86FB0','#E8A23B','#D97B29','#7BC142','#34B87E','#2BB3A5','#4A8DF7','#9A6FE0'];
-const EMOJIS=['✨','🌙','🕌','📚','💪','🧺','🚗','🎯','💡','🎨','🧠','🍎','✈️','💰','🌿','🤲','📞','🎁','🧹','🌟'];
+const EMOJIS=['✨','🌙','🕌','📚','💪','🧺','','🎯','','🎨','','🍎','️','💰','','🤲','','🎁','','🌟'];
 const QUOTES=[
  '«Самые любимые дела — те, что совершаются постоянно, даже если они малы» (хадис)',
  '«Маленький шаг каждый день превращается в большой путь»',
@@ -463,7 +469,6 @@ function renderStats(){
  $('#ringFg').style.strokeDashoffset=201-(201*pct/100);
  $('#ringPct').textContent=pct+'%';
  $('#ringDone').textContent=done;$('#ringTotal').textContent=total;
- // серия дней
  const days=new Set(state.tasks.filter(t=>t.completedAt).map(t=>ymd(new Date(t.completedAt))));
  let streak=0,cur=new Date();
  if(!days.has(ymd(cur)))cur.setDate(cur.getDate()-1);
@@ -582,7 +587,7 @@ function effTheme(){return state.settings.theme||((new Date().getHours()>=19||ne
 function applyToggles(){
  document.documentElement.dataset.theme=effTheme();
  $$('.theme-btn').forEach(b=>b.textContent=effTheme()==='dark'?'☀️':'🌙');
- $$('.sound-btn').forEach(b=>b.textContent=state.settings.sound?'🔊':'🔇');}
+ $$('.sound-btn').forEach(b=>b.textContent=state.settings.sound?'🔊':'');}
 $$('.theme-btn').forEach(b=>b.onclick=()=>{state.settings.theme=effTheme()==='dark'?'light':'dark';save();applyToggles()});
 $$('.sound-btn').forEach(b=>b.onclick=()=>{state.settings.sound=!state.settings.sound;save();applyToggles();if(state.settings.sound)sndTick()});
 
