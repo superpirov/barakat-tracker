@@ -42,7 +42,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 #fx{position:fixed;inset:0;z-index:98;pointer-events:none}
 
-.app{position:relative;z-index:1;display:grid;grid-template-columns:272px minmax(0,1fr);gap:28px;max-width:1180px;margin:0 auto;padding:26px 24px 56px}
+.app{position:relative;z-index:1;display:grid;grid-template-columns:272px minmax(0,1fr);gap:28px;max-width:1180px;margin:0 auto;padding:26px 24px 80px}
 
 /* ── сайдбар ── */
 .sidebar{position:sticky;top:24px;align-self:start;display:flex;flex-direction:column;gap:6px;
@@ -167,7 +167,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 footer{margin-top:44px;text-align:center;font-size:12px;color:var(--muted)}
 
 /* ── тост, диалог ── */
-#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);opacity:0;pointer-events:none;transition:.32s cubic-bezier(.3,.8,.3,1);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center;max-width:92vw;z-index:99;box-shadow:0 12px 34px rgba(0,0,0,.3);font-size:14px;font-weight:600}
+#toast{position:fixed;left:50%;bottom:80px;transform:translate(-50%,20px);opacity:0;pointer-events:none;transition:.32s cubic-bezier(.3,.8,.3,1);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center;max-width:92vw;z-index:99;box-shadow:0 12px 34px rgba(0,0,0,.3);font-size:14px;font-weight:600}
 #toast.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
 #toast button{border:0;background:transparent;color:var(--accent);font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 dialog{border:0;border-radius:var(--rl);background:var(--panel);color:var(--ink);box-shadow:0 24px 70px rgba(0,0,0,.35);padding:0;width:min(400px,92vw);max-width:92vw}
@@ -189,9 +189,63 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 .gbtn{border:1.5px solid var(--line);background:transparent;border-radius:12px;padding:10px 16px;font-weight:600;cursor:pointer;transition:.18s}
 .gbtn:hover{background:var(--panel2)}
 
+/* ══════════════════════════════════════
+   🕌 ИБАДАТ — стили
+   ══════════════════════════════════════ */
+.ibadat-section{display:none;flex-direction:column;gap:18px;margin-top:4px}
+.ibadat-section.active{display:flex}
+.ibadat-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--rl);padding:20px;box-shadow:var(--shadow)}
+.ibadat-card h2{font-family:var(--fd);font-weight:700;font-size:18px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.ibadat-card h2 span{font-size:22px}
+
+/* Сетка намазов */
+.salah-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.salah-item{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 8px;border-radius:var(--rm);border:1.5px solid var(--line);background:var(--panel2);cursor:pointer;transition:.2s;user-select:none}
+.salah-item:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.salah-item.checked{background:color-mix(in srgb,var(--accent) 14%,transparent);border-color:var(--accent)}
+.salah-icon{font-size:24px;line-height:1}
+.salah-name{font-size:12px;font-weight:700;text-align:center;color:var(--muted)}
+.salah-item.checked .salah-name{color:var(--accent)}
+.salah-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;transition:.25s}
+.salah-item.checked .salah-check{background:var(--accent);border-color:var(--accent)}
+.salah-check svg{width:12px;height:12px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .3s .05s}
+.salah-item.checked .salah-check svg{stroke-dashoffset:0}
+
+/* Чтение Корана */
+.quran-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.quran-input{flex:1;min-width:120px;border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);padding:10px 14px;font:600 15px var(--fb);color:var(--ink);outline:none}
+.quran-input:focus{border-color:var(--accent)}
+.quran-unit{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+.quran-total{margin-top:12px;font-size:14px;font-weight:600;color:var(--muted)}
+.quran-total b{color:var(--accent);font-family:var(--fd)}
+
+/* Недельная сетка */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px}
+.week-day{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:var(--rs);border:1px solid var(--line);background:var(--panel2)}
+.week-day.today{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.week-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.week-day.today .week-label{color:var(--accent)}
+.week-dots{display:flex;flex-direction:column;gap:3px;align-items:center}
+.week-dot{width:10px;height:10px;border-radius:50%;background:var(--line);transition:.2s}
+.week-dot.filled{background:var(--accent)}
+.week-score{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px}
+.week-day.today .week-score{color:var(--accent)}
+
+/* Серия ибадата */
+.ibadat-stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.ibadat-stat{display:inline-flex;gap:7px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;box-shadow:var(--shadow)}
+
+/* ── нижняя навигация (мобильная) ── */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:90;background:var(--panel);border-top:1px solid var(--line);padding:6px 8px env(safe-area-inset-bottom,8px);
+  justify-content:space-around;align-items:center;box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+.bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 12px;border-radius:12px;border:0;background:transparent;color:var(--muted);cursor:pointer;transition:.2s;font-size:10px;font-weight:600;letter-spacing:.5px}
+.bnav-item span{font-size:20px;line-height:1}
+.bnav-item.on{color:var(--accent)}
+.bnav-item:hover{background:var(--panel2)}
+
 @media(hover:none){.t-actions{opacity:1}.cat-del{opacity:.7}}
 @media(max-width:960px){
-  .app{grid-template-columns:1fr;gap:14px;padding:16px 14px 48px}
+  .app{grid-template-columns:1fr;gap:14px;padding:16px 14px 90px}
   .sidebar{display:none}
   .m-bar{display:flex}
   .m-cats{display:flex}
@@ -205,6 +259,12 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
   .search{flex-basis:100%;max-width:none;margin-left:0;min-width:0}
   .tabs{width:100%}
   .tab{flex:1;justify-content:center}
+  .bottom-nav{display:flex}
+  .salah-grid{grid-template-columns:repeat(3,1fr)}
+  .week-grid{gap:4px}
+  .week-day{padding:8px 2px}
+  .week-label{font-size:9px}
+  .week-dot{width:8px;height:8px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
@@ -217,7 +277,12 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
   <aside class="sidebar">
     <div class="brand"><span class="brand-star">✦</span><span class="brand-name">Баракат</span></div>
     <div class="brand-sub">трекер задач</div>
-    <div class="nav-label">Категории</div>
+    <div class="nav-label">Разделы</div>
+    <nav class="nav" id="sectionNav">
+      <div class="cat-row on" data-section="tasks" style="--c:#2E7D5B"><span class="cat-emoji">📋</span><span class="cat-name">Задачи</span></div>
+      <div class="cat-row" data-section="ibadat" style="--c:#2BB3A5"><span class="cat-emoji">🕌</span><span class="cat-name">Ибадат</span></div>
+    </nav>
+    <div class="nav-label" id="catNavLabel">Категории</div>
     <nav class="nav" id="catNav"></nav>
     <button class="add-cat" id="addCatBtn">＋ Новая категория</button>
     <div class="side-foot">
@@ -244,7 +309,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
         <h1 class="greet" id="greet" title="Нажми, чтобы изменить имя"></h1>
         <p class="quote" id="quote"></p>
       </div>
-      <div class="head-right">
+      <div class="head-right" id="headRight">
         <div class="ring-card">
           <div class="ring-wrap">
             <svg viewBox="0 0 76 76"><circle class="ring-bg" cx="38" cy="38" r="32"/><circle class="ring-fg" id="ringFg" cx="38" cy="38" r="32"/></svg>
@@ -259,38 +324,73 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
       </div>
     </header>
 
-    <!-- КОМПОЗЕР -->
-    <section class="composer" id="composer">
-      <input id="newText" placeholder="Что нужно сделать?" maxlength="140" autocomplete="off">
-      <div class="composer-row">
-        <div class="chips" id="catPicker"></div>
-        <div class="prio-pick" id="prioPick" title="Приоритет">
-          <button class="prio" data-p="low" title="Низкий"><svg viewBox="0 0 24 24"><path d="M6 3v18M6 4h10l-2.5 3.5L16 11H6"/></svg></button>
-          <button class="prio" data-p="mid" title="Средний"><svg viewBox="0 0 24 24"><path d="M6 3v18M6 4h10l-2.5 3.5L16 11H6"/></svg></button>
-          <button class="prio" data-p="high" title="Высокий"><svg viewBox="0 0 24 24"><path d="M6 3v18M6 4h10l-2.5 3.5L16 11H6"/></svg></button>
+    <!-- ═══ РАЗДЕЛ: ЗАДАЧИ ═══ -->
+    <div id="sectionTasks">
+      <section class="composer" id="composer">
+        <input id="newText" placeholder="Что нужно сделать?" maxlength="140" autocomplete="off">
+        <div class="composer-row">
+          <div class="chips" id="catPicker"></div>
+          <div class="prio-pick" id="prioPick" title="Приоритет">
+            <button class="prio" data-p="low" title="Низкий"><svg viewBox="0 0 24 24"><path d="M6 3v18M6 4h10l-2.5 3.5L16 11H6"/></svg></button>
+            <button class="prio" data-p="mid" title="Средний"><svg viewBox="0 0 24 24"><path d="M6 3v18M6 4h10l-2.5 3.5L16 11H6"/></svg></button>
+            <button class="prio" data-p="high" title="Высокий"><svg viewBox="0 0 24 24"><path d="M6 3v18M6 4h10l-2.5 3.5L16 11H6"/></svg></button>
+          </div>
+          <input type="date" class="datein" id="newDue" title="Срок">
+          <button class="btn-add" id="addBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Добавить</button>
         </div>
-        <input type="date" class="datein" id="newDue" title="Срок">
-        <button class="btn-add" id="addBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Добавить</button>
+      </section>
+      <div class="board-bar">
+        <div class="tabs">
+          <button class="tab on" data-tab="active">Активные <span class="cnt" id="cntA">0</span></button>
+          <button class="tab" data-tab="done">Выполненные <span class="cnt" id="cntD">0</span></button>
+        </div>
+        <button id="clearDone" style="display:none">Очистить выполненные</button>
+        <div class="search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="search" placeholder="Поиск…  ( / )">
+        </div>
       </div>
-    </section>
+      <ul class="tasks" id="list"></ul>
+    </div>
 
-    <!-- ВКЛАДКИ -->
-    <div class="board-bar">
-      <div class="tabs">
-        <button class="tab on" data-tab="active">Активные <span class="cnt" id="cntA">0</span></button>
-        <button class="tab" data-tab="done">Выполненные <span class="cnt" id="cntD">0</span></button>
+    <!-- ═══ РАЗДЕЛ: ИБАДАТ ═══ -->
+    <div id="sectionIbadat" class="ibadat-section">
+      <!-- Намазы сегодня -->
+      <div class="ibadat-card">
+        <h2><span>🕌</span> Намазы сегодня</h2>
+        <div class="salah-grid" id="salahGrid"></div>
       </div>
-      <button id="clearDone" style="display:none">Очистить выполненные</button>
-      <div class="search">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-        <input id="search" placeholder="Поиск…  ( / )">
+      <!-- Чтение Корана -->
+      <div class="ibadat-card">
+        <h2><span>📖</span> Чтение Корана</h2>
+        <div class="quran-row">
+          <input type="number" class="quran-input" id="quranInput" placeholder="Количество страниц" min="0" step="1">
+          <span class="quran-unit">страниц сегодня</span>
+          <button class="btn-add" id="quranAdd" style="padding:10px 16px">＋</button>
+        </div>
+        <div class="quran-total">Всего прочитано: <b id="quranTotal">0</b> страниц</div>
+      </div>
+      <!-- Недельная сетка -->
+      <div class="ibadat-card">
+        <h2><span>📅</span> Эта неделя</h2>
+        <div class="week-grid" id="weekGrid"></div>
+      </div>
+      <!-- Статистика ибадата -->
+      <div class="ibadat-stats">
+        <span class="ibadat-stat">🔥 серия намазов: <b id="ibadatStreak">0</b></span>
+        <span class="ibadat-stat">✅ полных дней: <b id="ibadatFullDays">0</b></span>
       </div>
     </div>
 
-    <ul class="tasks" id="list"></ul>
     <footer>✦ Баракат — пусть каждый день будет благословенным</footer>
   </main>
 </div>
+
+<!-- Нижняя навигация (мобильная) -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bnav-item on" data-section="tasks"><span>📋</span>Задачи</button>
+  <button class="bnav-item" data-section="ibadat"><span>🕌</span>Ибадат</button>
+</nav>
 
 <!-- ДИАЛОГ КАТЕГОРИИ -->
 <dialog id="dlg">
@@ -312,6 +412,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const KEY='barakat.v1';
+const IBADAT_KEY='barakat.ibadat.v1';
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const plural=(n,f)=>{n=Math.abs(n)%100;const d=n%10;if(n>10&&n<20)return f[2];if(d>1&&d<5)return f[1];if(d===1)return f[0];return f[2]};
@@ -329,9 +430,18 @@ const QUOTES=[
  '«Спланируй вечер — и утро скажет тебе спасибо»',
  '«Доводи начатое до конца — в этом и есть мастерство»'];
 
-/* ── состояние ── */
+const SALAH_LIST=[
+ {id:'fajr',name:'Фаджр',icon:'🌅'},
+ {id:'dhuhr',name:'Зухр',icon:'☀️'},
+ {id:'asr',name:'Аср',icon:'🌤️'},
+ {id:'maghrib',name:'Магриб',icon:'🌇'},
+ {id:'isha',name:'Иша',icon:'🌙'}];
+
+/* ══════════════════════════════════════
+   СОСТОЯНИЕ ЗАДАЧ
+   ══════════════════════════════════════ */
 function defaults(){return{
- v:1, filter:'all', tab:'active', search:'', newCat:'general', newPrio:null,
+ v:1, filter:'all', tab:'active', search:'', newCat:'general', newPrio:null, section:'tasks',
  settings:{theme:null,sound:true,name:''},
  cats:[
   {id:'general',name:'Общие',emoji:'✨',color:'#9AA7B2',fixed:true},
@@ -356,9 +466,19 @@ function load(){try{const r=localStorage.getItem(KEY);if(!r){seed();return}
  const d=JSON.parse(r);state={...state,...d,settings:{...state.settings,...(d.settings||{})},search:''};
  if(!state.cats.find(c=>c.id==='general'))state.cats.unshift({id:'general',name:'Общие',emoji:'✨',color:'#9AA7B2',fixed:true});
  state.tasks.forEach(t=>{if(!catById(t.catId))t.catId='general'});
+ if(!state.section)state.section='tasks';
 }catch(e){seed()}}
 const catById=id=>state.cats.find(c=>c.id===id)||state.cats[0];
 const byId=id=>state.tasks.find(t=>t.id===id);
+
+/* ══════════════════════════════════════
+   СОСТОЯНИЕ ИБАДАТА
+   ══════════════════════════════════════ */
+let ibadat={days:{}};
+function loadIbadat(){try{const r=localStorage.getItem(IBADAT_KEY);if(r)ibadat=JSON.parse(r)}catch(e){}}
+function saveIbadat(){try{localStorage.setItem(IBADAT_KEY,JSON.stringify(ibadat))}catch(e){}}
+function getDay(dateStr){if(!ibadat.days[dateStr])ibadat.days[dateStr]={salah:{fajr:false,dhuhr:false,asr:false,maghrib:false,isha:false},quran:0};return ibadat.days[dateStr]}
+function todayStr(){return ymd(new Date())}
 
 /* ── звук ── */
 let AC=null;
@@ -399,7 +519,120 @@ const matchF=t=>state.filter==='all'||t.catId===state.filter;
 const matchS=t=>!state.search||t.text.toLowerCase().includes(state.search);
 const scoped=()=>state.tasks.filter(matchF);
 
-/* ── рендер: категории ── */
+/* ══════════════════════════════════════
+   ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ
+   ══════════════════════════════════════ */
+function switchSection(sec){
+ state.section=sec;save();
+ $('#sectionTasks').style.display=sec==='tasks'?'':'none';
+ $('#sectionIbadat').classList.toggle('active',sec==='ibadat');
+ // Сайдбар: подсветка раздела
+ $$('#sectionNav .cat-row').forEach(r=>r.classList.toggle('on',r.dataset.section===sec));
+ // Сайдбар: показ/скрытие категорий
+ const isTasks=sec==='tasks';
+ $('#catNavLabel').style.display=isTasks?'':'none';
+ $('#catNav').style.display=isTasks?'':'none';
+ $('#addCatBtn').style.display=isTasks?'':'none';
+ // Мобильные категории
+ $('#catNavM').style.display=isTasks?'':'none';
+ // Шапка: кольцо прогресса только для задач
+ $('#headRight').style.display=isTasks?'':'none';
+ // Нижняя навигация
+ $$('.bnav-item').forEach(b=>b.classList.toggle('on',b.dataset.section===sec));
+ // Рендер
+ if(sec==='tasks'){renderAll()}else{renderIbadat()}}
+
+$('#sectionNav').addEventListener('click',e=>{const r=e.target.closest('[data-section]');if(r)switchSection(r.dataset.section)});
+$('#bottomNav').addEventListener('click',e=>{const b=e.target.closest('[data-section]');if(b)switchSection(b.dataset.section)});
+
+/* ══════════════════════════════════════
+   РЕНДЕР: ИБАДАТ
+   ══════════════════════════════════════ */
+function renderIbadat(){
+ const today=todayStr();
+ const day=getDay(today);
+ // Намазы
+ $('#salahGrid').innerHTML=SALAH_LIST.map(s=>{
+  const checked=day.salah[s.id];
+  return `<div class="salah-item ${checked?'checked':''}" data-salah="${s.id}">
+   <span class="salah-icon">${s.icon}</span>
+   <span class="salah-name">${s.name}</span>
+   <div class="salah-check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5.2 5L20 6.8"/></svg></div>
+  </div>`}).join('');
+ // Коран
+ $('#quranTotal').textContent=day.quran;
+ // Недельная сетка
+ renderWeekGrid();
+ // Статистика
+ renderIbadatStats();}
+
+$('#salahGrid').addEventListener('click',e=>{
+ const item=e.target.closest('.salah-item');if(!item)return;
+ const salahId=item.dataset.salah;
+ const day=getDay(todayStr());
+ day.salah[salahId]=!day.salah[salahId];
+ saveIbadat();renderIbadat();
+ if(day.salah[salahId]){
+  sndPop();
+  const r=item.getBoundingClientRect();
+  burst(r.left+r.width/2,r.top+r.height/2,['#2BB3A5','#F2C14E','#fff'],18,1);
+  // Проверка: все 5 намазов?
+  if(SALAH_LIST.every(s=>day.salah[s.id])){
+   setTimeout(()=>{burst(innerWidth/2,innerHeight*.35,FXC,60,1.5);sndFanfare();toast('МашаАлла! Все намазы выполнены 🤲')},200)}}});
+
+$('#quranAdd').onclick=()=>{
+ const inp=$('#quranInput');
+ const val=parseInt(inp.value)||0;if(val<=0)return;
+ const day=getDay(todayStr());
+ day.quran+=val;saveIbadat();renderIbadat();
+ inp.value='';sndTick();
+ toast(`+${val} ${plural(val,['страница','страницы','страниц'])} Корана 📖`)};
+$('#quranInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('#quranAdd').click()});
+
+function renderWeekGrid(){
+ const today=new Date();
+ const dayOfWeek=today.getDay(); // 0=Sun
+ const mondayOffset=dayOfWeek===0?-6:1-dayOfWeek;
+ const monday=new Date(today);monday.setDate(today.getDate()+mondayOffset);
+ const dayNames=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+ let html='';
+ for(let i=0;i<7;i++){
+  const d=new Date(monday);d.setDate(monday.getDate()+i);
+  const ds=ymd(d);
+  const isToday=ds===todayStr();
+  const dayData=ibadat.days[ds];
+  const doneCount=dayData?SALAH_LIST.filter(s=>dayData.salah[s.id]).length:0;
+  const dots=SALAH_LIST.map(s=>{
+   const filled=dayData&&dayData.salah[s.id];
+   return `<div class="week-dot ${filled?'filled':''}"></div>`}).join('');
+  html+=`<div class="week-day ${isToday?'today':''}">
+   <span class="week-label">${dayNames[i]}</span>
+   <div class="week-dots">${dots}</div>
+   <span class="week-score">${doneCount}/5</span>
+  </div>`}
+ $('#weekGrid').innerHTML=html;}
+
+function renderIbadatStats(){
+ // Серия полных дней (все 5 намазов)
+ const days=ibadat.days;
+ let streak=0,cur=new Date();
+ // Проверяем сегодня сначала
+ const todayKey=todayStr();
+ const todayData=days[todayKey];
+ const todayFull=todayData&&SALAH_LIST.every(s=>todayData.salah[s.id]);
+ if(!todayFull){cur.setDate(cur.getDate()-1)}
+ while(true){
+  const k=ymd(cur);const d=days[k];
+  if(d&&SALAH_LIST.every(s=>d.salah[s.id])){streak++;cur.setDate(cur.getDate()-1)}else break}
+ $('#ibadatStreak').textContent=streak+' '+plural(streak,['день','дня','дней']);
+ // Всего полных дней
+ let fullDays=0;
+ Object.values(days).forEach(d=>{if(SALAH_LIST.every(s=>d.salah[s.id]))fullDays++});
+ $('#ibadatFullDays').textContent=fullDays;}
+
+/* ══════════════════════════════════════
+   РЕНДЕР: ЗАДАЧИ (без изменений)
+   ══════════════════════════════════════ */
 function renderNav(){
  const act=state.tasks.filter(t=>!t.done);
  const row=(id,emoji,name,color,count,fixed)=>`
@@ -416,15 +649,12 @@ function renderNav(){
 function renderPicker(){
  $('#catPicker').innerHTML=state.cats.map(c=>
   `<button class="chip ${state.newCat===c.id?'on':''}" data-pick="${c.id}" style="--c:${c.color}">${c.emoji} ${esc(c.name)}</button>`).join('');}
-
-/* ── рендер: вкладки и список ── */
 function renderTabs(){
  const s=scoped();
  $('#cntA').textContent=s.filter(t=>!t.done).length;
  $('#cntD').textContent=s.filter(t=>t.done).length;
  $$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===state.tab));
  $('#clearDone').style.display=(state.tab==='done'&&s.some(t=>t.done))?'':'none';}
-
 const PRIO={low:['Низкий','#8FA0AE'],mid:['Средний','#E8A23B'],high:['Высокий','#E5484D']};
 function dueChip(t){if(!t.due)return'';
  const today=ymd(new Date()),d=t.due;
@@ -440,9 +670,7 @@ function itemHTML(t,i){
  return `<li class="task ${t.done?'done':''} enter" data-id="${t.id}" style="--c:${c.color};animation-delay:${Math.min(i,10)*.035}s" ${draggable?'draggable="true"':''}>
   <button class="check" title="${t.done?'Вернуть в работу':'Отметить выполненной'}"><svg viewBox="0 0 24 24"><path d="M4 12.5l5.2 5L20 6.8"/></svg></button>
   <div class="t-main">
-    ${editing
-      ?`<input class="t-edit" value="${esc(t.text)}" maxlength="140">`
-      :`<span class="t-text">${esc(t.text)}</span>`}
+    ${editing?`<input class="t-edit" value="${esc(t.text)}" maxlength="140">`:`<span class="t-text">${esc(t.text)}</span>`}
     <div class="t-meta">
       <span class="mchip" style="--cc:${c.color}">${c.emoji} ${esc(c.name)}</span>
       ${t.prio?`<span class="mchip" style="--cc:${PRIO[t.prio][1]}">⚑ ${PRIO[t.prio][0]}</span>`:''}
@@ -463,8 +691,6 @@ function renderList(){
  if(state.tab==='done')list.sort((a,b)=>(b.completedAt||0)-(a.completedAt||0));
  $('#list').innerHTML=list.length?list.map(itemHTML).join(''):emptyHTML();
  if(state.editing){const inp=$('#list .t-edit');if(inp){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length)}}}
-
-/* ── рендер: статистика ── */
 function renderStats(){
  const s=scoped(),done=s.filter(t=>t.done).length,total=s.length;
  const pct=total?Math.round(done/total*100):0;
@@ -479,7 +705,7 @@ function renderStats(){
  $('#totalN').textContent=state.tasks.filter(t=>t.done).length;}
 function renderAll(){renderNav();renderTabs();renderList();renderStats();}
 
-/* ── действия ── */
+/* ── действия задач ── */
 function addTask(){
  const inp=$('#newText'),text=inp.value.trim();
  if(!text){$('#composer').classList.remove('shake');void $('#composer').offsetWidth;$('#composer').classList.add('shake');inp.focus();return}
@@ -488,14 +714,11 @@ function addTask(){
  inp.value='';$('#newDue').value='';save();renderAll();sndTick();inp.focus();}
 $('#addBtn').onclick=addTask;
 $('#newText').addEventListener('keydown',e=>{if(e.key==='Enter')addTask()});
-
 $('#catPicker').addEventListener('click',e=>{const b=e.target.closest('[data-pick]');if(!b)return;state.newCat=b.dataset.pick;save();renderPicker()});
 $('#prioPick').addEventListener('click',e=>{const b=e.target.closest('.prio');if(!b)return;
  state.newPrio=state.newPrio===b.dataset.p?null:b.dataset.p;
  $$('#prioPick .prio').forEach(x=>x.classList.toggle('on',x.dataset.p===state.newPrio));});
-
 $('#newDue').min=ymd(new Date());
-
 function toggleDone(id,li){
  const t=byId(id);if(!t)return;
  if(!t.done){
@@ -506,12 +729,10 @@ function toggleDone(id,li){
   setTimeout(()=>{t.done=true;t.completedAt=Date.now();save();renderAll();
    if(wasAll){setTimeout(()=>{burst(innerWidth/2,innerHeight*.32,FXC,70,1.7);burst(innerWidth*.2,innerHeight*.4,FXC,30,1.3);burst(innerWidth*.8,innerHeight*.4,FXC,30,1.3);sndFanfare();toast('МашаАлла! Все задачи выполнены 🎉')},150)}},520);
  }else{t.done=false;t.completedAt=null;state.tab='active';save();renderAll();sndTick();}}
-
 function removeTask(id,li){
  li.classList.add('removing');
  setTimeout(()=>{const snap=[...state.tasks];state.tasks=state.tasks.filter(t=>t.id!==id);save();renderAll();
   toast('Задача удалена',()=>{state.tasks=snap;save();renderAll()})},200);}
-
 $('#list').addEventListener('click',e=>{
  const li=e.target.closest('.task');if(!li)return;const id=li.dataset.id;
  if(e.target.closest('.check'))return toggleDone(id,li);
@@ -527,8 +748,6 @@ $('#list').addEventListener('focusout',e=>{
 function commitEdit(li){if(!li||!state.editing)return;const t=byId(li.dataset.id);
  const v=li.querySelector('.t-edit').value.trim();if(v)t.text=v;
  state.editing=null;save();renderAll();}
-
-/* drag & drop порядка */
 let dragEl=null;
 $('#list').addEventListener('dragstart',e=>{const li=e.target.closest('.task');if(!li)return;
  dragEl=li;requestAnimationFrame(()=>li.classList.add('dragging'))});
@@ -541,15 +760,11 @@ $('#list').addEventListener('dragend',()=>{if(!dragEl)return;dragEl.classList.re
  const ids=[...$('#list').querySelectorAll('.task')].map(l=>l.dataset.id);
  const ordered=ids.map(byId).filter(Boolean);
  state.tasks=[...ordered,...state.tasks.filter(t=>t.done)];save();dragEl=null});
-
-/* вкладки, поиск, очистка */
 $$('.tab').forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;save();renderTabs();renderList()});
 $('#search').addEventListener('input',e=>{state.search=e.target.value.trim().toLowerCase();renderList()});
 $('#clearDone').onclick=()=>{const snap=[...state.tasks];
  state.tasks=state.tasks.filter(t=>!(t.done&&matchF(t)));save();renderAll();
  toast('Выполненные очищены',()=>{state.tasks=snap;save();renderAll()})};
-
-/* навигация по категориям */
 function navClick(e){
  const del=e.target.closest('[data-del]');
  if(del){e.stopPropagation();return deleteCat(del.dataset.del)}
@@ -604,7 +819,7 @@ function editName(){
  inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape'){finished=true;editingName=false;renderHello()}});
  inp.addEventListener('blur',done);}
 
-/* ── приветствие, дата, цитата ── */
+/* ── приветствие ── */
 function renderHello(){
  const now=new Date(),h=now.getHours();
  const [g,em]=h>=5&&h<11?['Доброе утро','☀️']:h>=11&&h<17?['Добрый день','🌤️']:h>=17&&h<23?['Добрый вечер','🌆']:['Доброй ночи','🌙'];
@@ -626,7 +841,8 @@ document.addEventListener('keydown',e=>{
  if(e.key==='Escape'&&state.editing){state.editing=null;renderList()}});
 
 /* ── старт ── */
-load();applyToggles();renderHello();renderAll();
+load();loadIbadat();applyToggles();renderHello();
+switchSection(state.section||'tasks');
 </script>
 </body>
 </html>
