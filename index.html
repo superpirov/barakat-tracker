@@ -30,7 +30,7 @@ html[data-theme="dark"]{
   --shadow:0 14px 34px rgba(0,0,0,.38);--danger:#FF6B6E;--warn:#F2A63B;color-scheme:dark;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{overflow-x:clip}
+html,body{overflow-x:hidden;max-width:100vw}
 body{background:var(--bg);color:var(--ink);font-family:var(--fb);min-height:100vh;transition:background .35s,color .35s;-webkit-tap-highlight-color:transparent}
 body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:radial-gradient(var(--dot) 1px,transparent 1px);background-size:22px 22px}
@@ -42,7 +42,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
 #fx{position:fixed;inset:0;z-index:98;pointer-events:none}
 
-.app{position:relative;z-index:1;display:grid;grid-template-columns:272px minmax(0,1fr);gap:28px;max-width:1180px;margin:0 auto;padding:26px 24px 80px}
+.app{position:relative;z-index:1;display:grid;grid-template-columns:272px minmax(0,1fr);gap:28px;max-width:1180px;margin:0 auto;padding:26px 24px 80px;width:100%;box-sizing:border-box}
 
 /* ── сайдбар ── */
 .sidebar{position:sticky;top:24px;align-self:start;display:flex;flex-direction:column;gap:6px;
@@ -111,7 +111,11 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .prio:hover{transform:translateY(-2px)}
 .prio.on[data-p="low"] svg{fill:#8FA0AE}.prio.on[data-p="mid"] svg{fill:#E8A23B}.prio.on[data-p="high"] svg{fill:#E5484D}
 .prio.on{border-color:currentColor;box-shadow:0 3px 10px rgba(0,0,0,.10)}
-.datein{border:1.5px solid var(--line);border-radius:var(--rs);padding:7px 10px;background:var(--panel2);color:var(--ink);font:500 13px var(--fb);cursor:pointer;max-width:100%}
+.datein-wrap{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);padding:7px 10px;cursor:pointer;transition:.18s;max-width:100%;flex:1;min-width:160px}
+.datein-wrap:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.datein-wrap svg{flex:none;width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.datein{border:0;background:transparent;color:var(--ink);font:500 13px var(--fb);cursor:pointer;padding:0;outline:none;width:100%;-webkit-appearance:none}
+.datein::-webkit-calendar-picker-indicator{opacity:0;position:absolute;width:100%;height:100%;cursor:pointer}
 .btn-add{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--accent-ink);border:0;padding:11px 19px;border-radius:13px;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 7px 18px color-mix(in srgb,var(--accent) 38%,transparent);transition:.18s}
 .btn-add:hover{transform:translateY(-2px)}
 .btn-add:active{transform:scale(.96)}
@@ -331,7 +335,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 
 @media(hover:none){.t-actions{opacity:1}.cat-del{opacity:.7}}
 @media(max-width:960px){
-  .app{grid-template-columns:1fr;gap:14px;padding:16px 14px 90px}
+  .app{grid-template-columns:1fr;gap:14px;padding:16px 14px 90px;width:100%;max-width:100vw;overflow-x:hidden}
   .sidebar{display:none}
   .m-bar{display:flex}
   .m-cats{display:flex}
@@ -340,6 +344,9 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
   .ring-card{width:100%}
   .composer{padding:14px}
   .composer-row{gap:8px}
+  .composer-row{flex-wrap:wrap;overflow:visible}
+  .datein-wrap{width:100%}
+  .prio-pick{order:-1}
   .btn-add{width:100%;justify-content:center}
   .board-bar{gap:10px}
   .search{flex-basis:100%;max-width:none;margin-left:0;min-width:0}
@@ -430,7 +437,10 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
             <button class="prio" data-p="mid" title="Средний"><svg viewBox="0 0 24 24"><path d="M6 3v18M6 4h10l-2.5 3.5L16 11H6"/></svg></button>
             <button class="prio" data-p="high" title="Высокий"><svg viewBox="0 0 24 24"><path d="M6 3v18M6 4h10l-2.5 3.5L16 11H6"/></svg></button>
           </div>
-          <input type="date" class="datein" id="newDue" title="Срок">
+                    <div class="datein-wrap" onclick="this.querySelector('input').showPicker?.()">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+            <input type="datetime-local" class="datein" id="newDue" title="Дата и время">
+          </div>
           <button class="btn-add" id="addBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Добавить</button>
         </div>
       </section>
@@ -1306,9 +1316,31 @@ function renderAll(){renderNav();renderTabs();renderList();renderStats();}
 function addTask(){
  const inp=$('#newText'),text=inp.value.trim();
  if(!text){$('#composer').classList.remove('shake');void $('#composer').offsetWidth;$('#composer').classList.add('shake');inp.focus();return}
- state.tasks.unshift({id:uid(),text,catId:state.newCat,prio:state.newPrio,due:$('#newDue').value||null,done:false,createdAt:Date.now()});
+  const dueVal=$('#newDue').value||null;
+ state.tasks.unshift({id:uid(),text,catId:state.newCat,prio:state.newPrio,due:dueVal,done:false,createdAt:Date.now()});
+ if(dueVal){scheduleNotification(state.tasks[0])}
  if(state.tab!=='active')state.tab='active';
  inp.value='';$('#newDue').value='';save();renderAll();sndTick();inp.focus();}
+/* ══════════════════════════════════════
+   🔔 УВЕДОМЛЕНИЯ О СРОКАХ ЗАДАЧ
+   ══════════════════════════════════════ */
+let notifTimers={};
+function requestNotifPermission(){if('Notification' in window && Notification.permission==='default'){Notification.requestPermission()}}
+function scheduleNotification(task){
+ if(!task.due||task.done)return;
+ clearTimeout(notifTimers[task.id]);
+ const dueTime=new Date(task.due).getTime();const now=Date.now();const delay=dueTime-now;
+ if(delay<=0){return}
+ notifTimers[task.id]=setTimeout(()=>{
+  if(task.done)return;
+  if('Notification' in window && Notification.permission==='granted'){
+   new Notification('⏰ Баракат — срок задачи!',{body:task.text,icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">✦</text></svg>'})}
+  else{toast(`⏰ Срок: ${task.text}`)}
+  sndPop()},delay)}
+function rescheduleAllNotifications(){
+ Object.values(notifTimers).forEach(clearTimeout);notifTimers={};
+ state.tasks.forEach(t=>{if(!t.done&&t.due)scheduleNotification(t)})}
+requestNotifPermission();
 $('#addBtn').onclick=addTask;
 $('#newText').addEventListener('keydown',e=>{if(e.key==='Enter')addTask()});
 
@@ -1327,6 +1359,7 @@ function toggleDone(id,li){
   burst(r.left+13,r.top+13,[catById(t.catId).color,'#F2C14E','#fff'],22,1);sndPop();
   const wasAll=state.tasks.length>0&&state.tasks.every(x=>x.done||x.id===id);
   setTimeout(()=>{t.done=true;t.completedAt=Date.now();save();renderAll();
+clearTimeout(notifTimers[t.id]);delete notifTimers[t.id];
    if(wasAll){setTimeout(()=>{burst(innerWidth/2,innerHeight*.32,FXC,70,1.7);burst(innerWidth*.2,innerHeight*.4,FXC,30,1.3);burst(innerWidth*.8,innerHeight*.4,FXC,30,1.3);sndFanfare();toast('МашаАлла! Все задачи выполнены 🎉')},150)}},520);
  }else{t.done=false;t.completedAt=null;state.tab='active';save();renderAll();sndTick();}}
 
@@ -1449,6 +1482,6 @@ document.addEventListener('keydown',e=>{
  if(e.key==='Escape'&&state.editing){state.editing=null;renderList()}});
 
 /* ── старт ── */
-load();loadIbadat();loadFinance();loadGratitude();loadFocus();applyToggles();renderHello();switchSection(state.section||'tasks');</script>
+load();loadIbadat();loadFinance();loadGratitude();loadFocus();applyToggles();renderHello();rescheduleAllNotifications();switchSection(state.section||'tasks');</script>
 </body>
 </html>
