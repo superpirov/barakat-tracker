@@ -44,6 +44,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 
 .app{position:relative;z-index:1;display:grid;grid-template-columns:272px minmax(0,1fr);gap:28px;max-width:1180px;margin:0 auto;padding:26px 24px 80px}
 
+/* ── сайдбар ── */
 .sidebar{position:sticky;top:24px;align-self:start;display:flex;flex-direction:column;gap:6px;
   background:var(--panel);border:1px solid var(--line);border-radius:var(--rl);padding:18px 14px;box-shadow:var(--shadow)}
 .brand{display:flex;align-items:center;gap:10px;padding:4px 8px 2px}
@@ -69,6 +70,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .ibtn:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
 .side-hint{margin-left:auto;font-size:10.5px;color:var(--muted);text-align:right;line-height:1.4}
 
+/* ── шапка дня ── */
 .top{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:22px}
 .dateline{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted)}
 .dateline b{color:var(--accent);font-weight:700}
@@ -88,9 +90,11 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .pills{display:flex;gap:8px;flex-wrap:wrap}
 .pill{display:inline-flex;gap:7px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;box-shadow:var(--shadow)}
 
+/* ── мобильная шапка ── */
 .m-bar{display:none;align-items:center;gap:10px;margin-bottom:6px}
 .m-cats{display:none;gap:8px;flex-wrap:wrap;padding:6px 2px 10px}
 
+/* ── композер ── */
 .composer{background:var(--panel);border:1px solid var(--line);border-radius:var(--rl);padding:16px 18px;box-shadow:var(--shadow)}
 .composer.shake{animation:shake .4s}
 @keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
@@ -112,6 +116,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .btn-add:hover{transform:translateY(-2px)}
 .btn-add:active{transform:scale(.96)}
 
+/* ── вкладки и поиск ── */
 .board-bar{display:flex;align-items:center;gap:12px;margin-top:26px;flex-wrap:wrap}
 .tabs{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:4px}
 .tab{border:0;background:transparent;padding:8px 16px;border-radius:999px;font-weight:600;font-size:13.5px;color:var(--muted);cursor:pointer;transition:.2s;display:flex;gap:7px;align-items:center}
@@ -124,6 +129,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 #clearDone{border:1.5px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;transition:.18s}
 #clearDone:hover{color:var(--danger);border-color:var(--danger)}
 
+/* ── задачи ── */
 .tasks{list-style:none;margin-top:16px;display:flex;flex-direction:column;gap:10px}
 .task{position:relative;display:flex;gap:13px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:var(--rm);padding:14px 14px 14px 20px;transition:transform .18s,box-shadow .18s,border-color .18s,opacity .3s}
 .task::before{content:'';position:absolute;left:0;top:13px;bottom:13px;width:4px;border-radius:4px;background:var(--c)}
@@ -160,6 +166,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .empty p{font-size:13.5px}
 footer{margin-top:44px;text-align:center;font-size:12px;color:var(--muted)}
 
+/* ── тост, диалог ── */
 #toast{position:fixed;left:50%;bottom:80px;transform:translate(-50%,20px);opacity:0;pointer-events:none;transition:.32s cubic-bezier(.3,.8,.3,1);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center;max-width:92vw;z-index:99;box-shadow:0 12px 34px rgba(0,0,0,.3);font-size:14px;font-weight:600}
 #toast.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
 #toast button{border:0;background:transparent;color:var(--accent);font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
@@ -242,6 +249,15 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 .zakat-type-tab{padding:7px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--panel2);font-size:12.5px;font-weight:600;cursor:pointer;transition:.18s;white-space:nowrap}
 .zakat-type-tab:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
 .zakat-type-tab.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+/* ── Валютный селектор ── */
+.currency-bar{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;padding:14px 16px;background:var(--panel2);border-radius:var(--rm);border:1px solid var(--line)}
+.currency-bar .cb-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:140px}
+.currency-bar .cb-field label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.currency-bar .cb-field select,.currency-bar .cb-field input{border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel);padding:9px 12px;font:600 14px var(--fb);color:var(--ink);outline:none;width:100%}
+.currency-bar .cb-field select:focus,.currency-bar .cb-field input:focus{border-color:var(--accent)}
+.currency-bar .cb-hint{font-size:11px;color:var(--muted);align-self:flex-end;padding-bottom:10px;white-space:nowrap}
+
 .expense-section{margin-top:8px}
 .expense-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
 .expense-row input,.expense-row select{border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);padding:9px 12px;font:500 14px var(--fb);color:var(--ink);outline:none}
@@ -256,6 +272,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 .expense-sum{display:inline-flex;gap:7px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;box-shadow:var(--shadow)}
 .expense-sum b{font-family:var(--fd);color:var(--accent)}
 
+/* ── нижняя навигация (мобильная) ── */
 .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:90;background:var(--panel);border-top:1px solid var(--line);padding:6px 8px env(safe-area-inset-bottom,8px);
   justify-content:space-around;align-items:center;box-shadow:0 -4px 20px rgba(0,0,0,.08)}
 .bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px;border-radius:12px;border:0;background:transparent;color:var(--muted);cursor:pointer;transition:.2s;font-size:9px;font-weight:600;letter-spacing:.3px}
@@ -288,6 +305,8 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
   .zakat-row{grid-template-columns:1fr}
   .bnav-item{padding:6px 6px;font-size:8px}
   .bnav-item span{font-size:16px}
+  .currency-bar{flex-direction:column;align-items:stretch}
+  .currency-bar .cb-hint{align-self:flex-start;padding-bottom:0}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
@@ -296,6 +315,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 <canvas id="fx"></canvas>
 
 <div class="app">
+  <!-- САЙДБАР -->
   <aside class="sidebar">
     <div class="brand"><span class="brand-star">✦</span><span class="brand-name">Баракат</span></div>
     <div class="brand-sub">трекер задач</div>
@@ -316,6 +336,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
   </aside>
 
   <main>
+    <!-- мобильная шапка -->
     <div class="m-bar">
       <div class="brand"><span class="brand-star">✦</span><span class="brand-name">Баракат</span></div>
       <span style="flex:1"></span>
@@ -324,6 +345,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
     </div>
     <div class="m-cats" id="catNavM"></div>
 
+    <!-- ШАПКА ДНЯ -->
     <header class="top">
       <div>
         <div class="dateline" id="dateline"></div>
@@ -345,7 +367,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
       </div>
     </header>
 
-    <!-- ═══ ЗАДАЧИ ═══ -->
+    <!-- ═══ РАЗДЕЛ: ЗАДАЧИ ═══ -->
     <div id="sectionTasks">
       <section class="composer" id="composer">
         <input id="newText" placeholder="Что нужно сделать?" maxlength="140" autocomplete="off">
@@ -374,12 +396,14 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
       <ul class="tasks" id="list"></ul>
     </div>
 
-    <!-- ═══ ИБАДАТ ═══ -->
+    <!-- ═══ РАЗДЕЛ: ИБАДАТ ═══ -->
     <div id="sectionIbadat" class="ibadat-section">
+      <!-- Намазы сегодня -->
       <div class="ibadat-card">
         <h2><span>🕌</span> Намазы сегодня</h2>
         <div class="salah-grid" id="salahGrid"></div>
       </div>
+      <!-- Чтение Корана -->
       <div class="ibadat-card">
         <h2><span>📖</span> Чтение Корана</h2>
         <div class="quran-row">
@@ -389,23 +413,37 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
         </div>
         <div class="quran-total">Всего прочитано: <b id="quranTotal">0</b> страниц</div>
       </div>
+      <!-- Недельная сетка -->
       <div class="ibadat-card">
         <h2><span>📅</span> Эта неделя</h2>
         <div class="week-grid" id="weekGrid"></div>
       </div>
+      <!-- Статистика ибадата -->
       <div class="ibadat-stats">
         <span class="ibadat-stat">🔥 серия намазов: <b id="ibadatStreak">0</b></span>
         <span class="ibadat-stat">✅ полных дней: <b id="ibadatFullDays">0</b></span>
       </div>
     </div>
 
-    <!-- ═══ ФИНАНСЫ / ЗАКЯТ ═══ -->
+    <!-- ═══ РАЗДЕЛ: ФИНАНСЫ / ЗАКЯТ ═══ -->
     <div id="sectionFinance" class="finance-section">
       <!-- Калькулятор закята -->
       <div class="zakat-card">
         <h2><span>🤲</span> Калькулятор закята</h2>
         <div class="zakat-intro">
-          Закят обязателен при достижении нисаба и прохождении хаула (лунного года). Расчёт по ханафитскому мазхабу (нисаб по серебру). Проконсультируйтесь с учёным для сложных случаев.
+          Закят обязателен при достижении нисаба и прохождении хаула (лунного года). Расчёт по ханафитскому мазхабу (нисаб по серебру). Выберите свою валюту и укажите актуальный курс к доллару США. Проконсультируйтесь с учёным для сложных случаев.
+        </div>
+        <!-- ВАЛЮТНЫЙ СЕЛЕКТОР -->
+        <div class="currency-bar">
+          <div class="cb-field">
+            <label>Валюта</label>
+            <select id="curSelect"></select>
+          </div>
+          <div class="cb-field">
+            <label>Курс к $ (за 1 $)</label>
+            <input type="number" id="curRate" min="0.0001" step="any" placeholder="Напр. 80.5">
+          </div>
+          <div class="cb-hint" id="curHint"></div>
         </div>
         <div class="zakat-type-tabs" id="zakatTabs"></div>
         <div id="zakatFormContainer"></div>
@@ -440,12 +478,14 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
   </main>
 </div>
 
+<!-- Нижняя навигация (мобильная) -->
 <nav class="bottom-nav" id="bottomNav">
   <button class="bnav-item on" data-section="tasks"><span>📋</span>Задачи</button>
   <button class="bnav-item" data-section="ibadat"><span>🕌</span>Ибадат</button>
   <button class="bnav-item" data-section="finance"><span>💰</span>Финансы</button>
 </nav>
 
+<!-- ДИАЛОГ КАТЕГОРИИ -->
 <dialog id="dlg">
   <form class="dlg-card" id="catForm">
     <h3>Новая категория</h3>
@@ -464,11 +504,14 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 <script>
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const KEY='barakat.v1',IBADAT_KEY='barakat.ibadat.v1',FINANCE_KEY='barakat.finance.v1';
+const KEY='barakat.v1';
+const IBADAT_KEY='barakat.ibadat.v1';
+const FINANCE_KEY='barakat.finance.v1';
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const plural=(n,f)=>{n=Math.abs(n)%100;const d=n%10;if(n>10&&n<20)return f[2];if(d>1&&d<5)return f[1];if(d===1)return f[0];return f[2]};
 const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
 const PALETTE=['#9AA7B2','#F0645C','#E86FB0','#E8A23B','#D97B29','#7BC142','#34B87E','#2BB3A5','#4A8DF7','#9A6FE0'];
 const EMOJIS=['✨','🌙','🕌','📚','💪','🧺','🎯','🎨','🧠','🍎','💰','🌿','🤲','🎁','🌟','📞','🚗','✈️','🧹','💡'];
 const QUOTES=[
@@ -480,6 +523,7 @@ const QUOTES=[
  '«Дисциплина — это мост между целью и результатом»',
  '«Спланируй вечер — и утро скажет тебе спасибо»',
  '«Доводи начатое до конца — в этом и есть мастерство»'];
+
 const SALAH_LIST=[
  {id:'fajr',name:'Фаджр',icon:'🌅'},
  {id:'dhuhr',name:'Зухр',icon:'☀️'},
@@ -487,9 +531,54 @@ const SALAH_LIST=[
  {id:'maghrib',name:'Магриб',icon:'🌇'},
  {id:'isha',name:'Иша',icon:'🌙'}];
 
-/* ═══ ЗАДАЧИ: состояние ═══ */
+/* ══════════════════════════════════════
+   ВАЛЮТЫ БЫВШЕГО СССР + USD/EUR
+   ══════════════════════════════════════ */
+const CURRENCIES=[
+ {code:'USD',sym:'$',name:'Доллар США',rate:1},
+ {code:'EUR',sym:'€',name:'Евро',rate:0.92},
+ {code:'RUB',sym:'₽',name:'Российский рубль',rate:80.5},
+ {code:'UAH',sym:'₴',name:'Украинская гривна',rate:41.5},
+ {code:'BYN',sym:'Br',name:'Белорусский рубль',rate:3.25},
+ {code:'KZT',sym:'₸',name:'Казахстанский тенге',rate:485},
+ {code:'UZS',sym:'сўм',name:'Узбекский сум',rate:12700},
+ {code:'KGS',sym:'сом',name:'Кыргызский сом',rate:87.5},
+ {code:'TJS',sym:'сом.',name:'Таджикский сомони',rate:10.6},
+ {code:'TMT',sym:'ман.',name:'Туркменский манат',rate:3.5},
+ {code:'AZN',sym:'₼',name:'Азербайджанский манат',rate:1.7},
+ {code:'GEL',sym:'₾',name:'Грузинский лари',rate:2.7},
+ {code:'AMD',sym:'֏',name:'Армянский драм',rate:385},
+ {code:'MDL',sym:'lei',name:'Молдавский лей',rate:17.8},
+ {code:'EEK',sym:'€',name:'Эстония (EUR)',rate:0.92},
+ {code:'LVL',sym:'€',name:'Латвия (EUR)',rate:0.92},
+ {code:'LTL',sym:'€',name:'Литва (EUR)',rate:0.92}];
+
+function getCur(){
+ return CURRENCIES.find(c=>c.code===finance.currency)||CURRENCIES[0];}
+
+function toUSD(amount){
+ const rate=parseFloat(finance.exchangeRate)||getCur().rate;
+ return amount/rate;}
+
+function fromUSD(amount){
+ const rate=parseFloat(finance.exchangeRate)||getCur().rate;
+ return amount*rate;}
+
+function fmtCur(usdAmount){
+ const cur=getCur();
+ const local=fromUSD(usdAmount);
+ if(cur.code==='USD') return '$'+usdAmount.toFixed(2);
+ return '$'+usdAmount.toFixed(2)+' / '+local.toLocaleString('ru-RU',{maximumFractionDigits:2})+' '+cur.sym;}
+
+function fmtLocal(amount){
+ const cur=getCur();
+ return amount.toLocaleString('ru-RU',{maximumFractionDigits:2})+' '+cur.sym;}
+
+/* ══════════════════════════════════════
+   СОСТОЯНИЕ ЗАДАЧ
+   ══════════════════════════════════════ */
 function defaults(){return{
- v:1,filter:'all',tab:'active',search:'',newCat:'general',newPrio:null,section:'tasks',
+ v:1, filter:'all', tab:'active', search:'', newCat:'general', newPrio:null, section:'tasks',
  settings:{theme:null,sound:true,name:''},
  cats:[
   {id:'general',name:'Общие',emoji:'✨',color:'#9AA7B2',fixed:true},
@@ -501,6 +590,7 @@ function defaults(){return{
   {id:'c-stdy',name:'Учёба',emoji:'📚',color:'#9A6FE0'},
   {id:'c-home',name:'Дом',emoji:'🏡',color:'#E86FB0'}],
  tasks:[]}}
+
 let state=defaults();
 function seed(){const n=Date.now();state.tasks=[
  {id:uid(),text:'Составить список целей на неделю',catId:'general',prio:null,due:null,done:true,createdAt:n-9e5,completedAt:n-6e5},
@@ -518,15 +608,19 @@ function load(){try{const r=localStorage.getItem(KEY);if(!r){seed();return}
 const catById=id=>state.cats.find(c=>c.id===id)||state.cats[0];
 const byId=id=>state.tasks.find(t=>t.id===id);
 
-/* ═══ ИБАДАТ: состояние ═══ */
+/* ══════════════════════════════════════
+   СОСТОЯНИЕ ИБАДАТА
+   ══════════════════════════════════════ */
 let ibadat={days:{}};
 function loadIbadat(){try{const r=localStorage.getItem(IBADAT_KEY);if(r)ibadat=JSON.parse(r)}catch(e){}}
 function saveIbadat(){try{localStorage.setItem(IBADAT_KEY,JSON.stringify(ibadat))}catch(e){}}
 function getDay(dateStr){if(!ibadat.days[dateStr])ibadat.days[dateStr]={salah:{fajr:false,dhuhr:false,asr:false,maghrib:false,isha:false},quran:0};return ibadat.days[dateStr]}
 function todayStr(){return ymd(new Date())}
 
-/* ═══ ФИНАНСЫ: состояние ═══ */
-let finance={expenses:[],zakatType:'money',zakatData:{}};
+/* ══════════════════════════════════════
+   СОСТОЯНИЕ ФИНАНСОВ
+   ══════════════════════════════════════ */
+let finance={expenses:[],zakatType:'money',zakatData:{},currency:'RUB',exchangeRate:80.5};
 function loadFinance(){try{const r=localStorage.getItem(FINANCE_KEY);if(r){const d=JSON.parse(r);finance={...finance,...d}}}catch(e){}}
 function saveFinance(){try{localStorage.setItem(FINANCE_KEY,JSON.stringify(finance))}catch(e){}}
 
@@ -564,32 +658,40 @@ function toast(msg,undo){const el=$('#toast');
  el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(hideToast,4200);}
 const hideToast=()=>$('#toast').classList.remove('show');
 
+/* ── фильтрация ── */
 const matchF=t=>state.filter==='all'||t.catId===state.filter;
 const matchS=t=>!state.search||t.text.toLowerCase().includes(state.search);
 const scoped=()=>state.tasks.filter(matchF);
 
-/* ═══ ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ ═══ */
+/* ══════════════════════════════════════
+   ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ
+   ══════════════════════════════════════ */
 function switchSection(sec){
  state.section=sec;save();
  $('#sectionTasks').style.display=sec==='tasks'?'':'none';
  $('#sectionIbadat').classList.toggle('active',sec==='ibadat');
  $('#sectionFinance').classList.toggle('active',sec==='finance');
+ // Сайдбар: подсветка раздела
  $$('#sectionNav .cat-row').forEach(r=>r.classList.toggle('on',r.dataset.section===sec));
+ // Сайдбар: показ/скрытие категорий
  const isTasks=sec==='tasks';
  $('#catNavLabel').style.display=isTasks?'':'none';
  $('#catNav').style.display=isTasks?'':'none';
  $('#addCatBtn').style.display=isTasks?'':'none';
+ // Мобильные категории
  $('#catNavM').style.display=isTasks?'':'none';
+ // Шапка: кольцо прогресса только для задач
  $('#headRight').style.display=isTasks?'':'none';
+ // Нижняя навигация
  $$('.bnav-item').forEach(b=>b.classList.toggle('on',b.dataset.section===sec));
- if(sec==='tasks')renderAll();
- else if(sec==='ibadat')renderIbadat();
- else if(sec==='finance')renderFinance();}
+ // Рендер
+ if(sec==='tasks'){renderAll()}else if(sec==='ibadat'){renderIbadat()}else if(sec==='finance'){renderFinance()}}
+
 $('#sectionNav').addEventListener('click',e=>{const r=e.target.closest('[data-section]');if(r)switchSection(r.dataset.section)});
 $('#bottomNav').addEventListener('click',e=>{const b=e.target.closest('[data-section]');if(b)switchSection(b.dataset.section)});
 
 /* ══════════════════════════════════════
-   🤲 ЗАКЯТ: КАЛЬКУЛЯТОР
+   🤲 ЗАКЯТ: КАЛЬКУЛЯТОР С МУЛЬТИВАЛЮТОЙ
    ══════════════════════════════════════ */
 const ZAKAT_TYPES=[
  {id:'money',name:'💰 Деньги',desc:'Наличные, счета, депозиты'},
@@ -602,68 +704,97 @@ const ZAKAT_TYPES=[
  {id:'crops',name:'🌾 Урожай',desc:'Зерновые, финики, виноград'},
  {id:'rikaz',name:'⛏️ Риказ (клад)',desc:'Найденные сокровища, недра'}];
 
-// Нисаб (приблизительные значения, пользователь может корректировать цены)
-const SILVER_PRICE_GR=1.10; // USD за грамм серебра
-const GOLD_PRICE_GR=85;     // USD за грамм золота
+// Нисаб (базовые значения в USD, пересчитываются через курс пользователя)
+const SILVER_PRICE_GR_USD=1.10;
+const GOLD_PRICE_GR_USD=85;
 const NISAB_SILVER_GR=612.36;
 const NISAB_GOLD_GR=87.48;
-const NISAB_SILVER_USD=NISAB_SILVER_GR*SILVER_PRICE_GR; // ~$673
-const NISAB_GOLD_USD=NISAB_GOLD_GR*GOLD_PRICE_GR;       // ~$7,436
-const WASQ_KG=130.6; // 1 васк ≈ 130.6 кг, 5 васков ≈ 653 кг
+const NISAB_SILVER_USD=NISAB_SILVER_GR*SILVER_PRICE_GR_USD; // ~$673
+const NISAB_GOLD_USD=NISAB_GOLD_GR*GOLD_PRICE_GR_USD;       // ~$7,436
+const WASQ_KG=130.6;
 const NISAB_CROPS_KG=5*WASQ_KG;
 
+/* ── Валютный селектор: рендер и события ── */
+function renderCurrencyBar(){
+ const sel=$('#curSelect');
+ sel.innerHTML=CURRENCIES.map(c=>
+  `<option value="${c.code}" ${finance.currency===c.code?'selected':''}>${c.sym} ${c.name}</option>`
+ ).join('');
+ $('#curRate').value=finance.exchangeRate||getCur().rate;
+ updateCurHint();}
+
+function updateCurHint(){
+ const cur=getCur();
+ const rate=parseFloat(finance.exchangeRate)||cur.rate;
+ const nisabSilverLocal=fromUSD(NISAB_SILVER_USD);
+ $('#curHint').textContent=`1 $ = ${rate} ${cur.sym} | Нисаб ≈ ${nisabSilverLocal.toLocaleString('ru-RU',{maximumFractionDigits:0})} ${cur.sym}`;}
+
+$('#curSelect').addEventListener('change',e=>{
+ finance.currency=e.target.value;
+ const cur=getCur();
+ finance.exchangeRate=cur.rate;
+ saveFinance();
+ renderCurrencyBar();
+ updateZakatResult();
+ renderExpenses();});
+
+$('#curRate').addEventListener('input',e=>{
+ finance.exchangeRate=parseFloat(e.target.value)||0;
+ saveFinance();
+ updateCurHint();
+ updateZakatResult();});
+
+/* ── Расчёт закята (все денежные суммы конвертируются в USD) ── */
 function calcZakat(type,data){
  const d=data||{};
- let result={zakat:0,belowNisab:false,detail:'',rate:0};
+ let result={zakatUSD:0,belowNisab:false,detail:'',rate:0};
  switch(type){
   case 'money':{
-   const cash=parseFloat(d.cash)||0;
-   const bank=parseFloat(d.bank)||0;
-   const debts=parseFloat(d.debts)||0;
+   const cash=toUSD(parseFloat(d.cash)||0);
+   const bank=toUSD(parseFloat(d.bank)||0);
+   const debts=toUSD(parseFloat(d.debts)||0);
    const net=cash+bank-debts;
    result.rate=2.5;
-   if(net<NISAB_SILVER_USD){result.belowNisab=true;result.detail=`Нетто: $${net.toFixed(2)} < нисаб $${NISAB_SILVER_USD.toFixed(0)} (612.36 г серебра)`;return result}
-   result.zakat=net*0.025;
-   result.detail=`Нетто: $${net.toFixed(2)} × 2.5% | Нисаб: $${NISAB_SILVER_USD.toFixed(0)}`;
+   if(net<NISAB_SILVER_USD){result.belowNisab=true;result.detail=`Нетто: ${fmtCur(net)} < нисаб ${fmtCur(NISAB_SILVER_USD)} (${NISAB_SILVER_GR} г серебра)`;return result}
+   result.zakatUSD=net*0.025;
+   result.detail=`Нетто: ${fmtCur(net)} × 2.5% | Нисаб: ${fmtCur(NISAB_SILVER_USD)}`;
    break}
   case 'gold':{
    const grams=parseFloat(d.grams)||0;
    result.rate=2.5;
    if(grams<NISAB_GOLD_GR){result.belowNisab=true;result.detail=`${grams} г < нисаб ${NISAB_GOLD_GR} г`;return result}
-   result.zakat=grams*0.025;
-   result.detail=`${grams} г × 2.5% = ${(grams*0.025).toFixed(2)} г золота | Нисаб: ${NISAB_GOLD_GR} г`;
+   result.zakatUSD=grams*0.025*GOLD_PRICE_GR_USD;
+   result.detail=`${grams} г × 2.5% = ${(grams*0.025).toFixed(2)} г золота (${fmtCur(grams*0.025*GOLD_PRICE_GR_USD)}) | Нисаб: ${NISAB_GOLD_GR} г`;
    break}
   case 'silver':{
    const grams=parseFloat(d.grams)||0;
    result.rate=2.5;
    if(grams<NISAB_SILVER_GR){result.belowNisab=true;result.detail=`${grams} г < нисаб ${NISAB_SILVER_GR} г`;return result}
-   result.zakat=grams*0.025;
-   result.detail=`${grams} г × 2.5% = ${(grams*0.025).toFixed(2)} г серебра | Нисаб: ${NISAB_SILVER_GR} г`;
+   result.zakatUSD=grams*0.025*SILVER_PRICE_GR_USD;
+   result.detail=`${grams} г × 2.5% = ${(grams*0.025).toFixed(2)} г серебра (${fmtCur(grams*0.025*SILVER_PRICE_GR_USD)}) | Нисаб: ${NISAB_SILVER_GR} г`;
    break}
   case 'trade':{
-   const value=parseFloat(d.value)||0;
-   const debts=parseFloat(d.debts)||0;
+   const value=toUSD(parseFloat(d.value)||0);
+   const debts=toUSD(parseFloat(d.debts)||0);
    const net=value-debts;
    result.rate=2.5;
-   if(net<NISAB_SILVER_USD){result.belowNisab=true;result.detail=`Стоимость: $${net.toFixed(2)} < нисаб $${NISAB_SILVER_USD.toFixed(0)}`;return result}
-   result.zakat=net*0.025;
-   result.detail=`Рыночная стоимость: $${net.toFixed(2)} × 2.5%`;
+   if(net<NISAB_SILVER_USD){result.belowNisab=true;result.detail=`Стоимость: ${fmtCur(net)} < нисаб ${fmtCur(NISAB_SILVER_USD)}`;return result}
+   result.zakatUSD=net*0.025;
+   result.detail=`Рыночная стоимость: ${fmtCur(net)} × 2.5%`;
    break}
   case 'sheep':{
    const n=parseInt(d.count)||0;
-   result.rate=0;
    if(n<40){result.belowNisab=true;result.detail=`${n} голов < нисаб 40 голов`;return result}
    let z=0;
    if(n>=40&&n<=120)z=1;
    else if(n>=121&&n<=200)z=2;
    else if(n>=201&&n<=399)z=3;
    else z=3+Math.floor((n-399)/100);
-   result.zakat=z;
+   result.zakatUSD=z;
    result.detail=`${n} голов → ${z} ${plural(z,['овца','овцы','овец'])} | Нисаб: 40 голов`;
    break}
   case 'cattle':{
    const n=parseInt(d.count)||0;
-   result.rate=0;
    if(n<30){result.belowNisab=true;result.detail=`${n} голов < нисаб 30 голов`;return result}
    let z=0,zDesc='';
    if(n>=30&&n<=39){z=1;zDesc='1 телёнок (таби\')'}
@@ -671,12 +802,11 @@ function calcZakat(type,data){
    else if(n>=60&&n<=69){z=2;zDesc='2 телёнка'}
    else if(n>=70&&n<=79){z=2;zDesc='1 телёнок + 1 двухлетка'}
    else{z=Math.floor(n/30)+Math.floor(n/40);zDesc=`по формуле: ${z} голов`}
-   result.zakat=z;
+   result.zakatUSD=z;
    result.detail=`${n} голов → ${zDesc} | Нисаб: 30 голов`;
    break}
   case 'camels':{
    const n=parseInt(d.count)||0;
-   result.rate=0;
    if(n<5){result.belowNisab=true;result.detail=`${n} голов < нисаб 5 голов`;return result}
    let z=0,zDesc='';
    if(n>=5&&n<=9){z=1;zDesc='1 овца'}
@@ -690,7 +820,7 @@ function calcZakat(type,data){
    else if(n>=76&&n<=90){z=2;zDesc='2 бинт лабун'}
    else if(n>=91&&n<=120){z=2;zDesc='2 хикка'}
    else{z=Math.floor(n/40)*2+Math.floor((n%40)/30);zDesc=`${z} голов (по формуле)`}
-   result.zakat=z;
+   result.zakatUSD=z;
    result.detail=`${n} голов → ${zDesc} | Нисаб: 5 голов`;
    break}
   case 'crops':{
@@ -699,15 +829,15 @@ function calcZakat(type,data){
    const ratePct=irrigated?5:10;
    result.rate=ratePct;
    if(kg<NISAB_CROPS_KG){result.belowNisab=true;result.detail=`${kg} кг < нисаб ${NISAB_CROPS_KG.toFixed(0)} кг (5 васков)`;return result}
-   result.zakat=kg*(ratePct/100);
-   result.detail=`${kg} кг × ${ratePct}% (${irrigated?'искусственный полив':'дождевой полив'}) = ${result.zakat.toFixed(1)} кг | Нисаб: ${NISAB_CROPS_KG.toFixed(0)} кг`;
+   result.zakatUSD=kg*(ratePct/100);
+   result.detail=`${kg} кг × ${ratePct}% (${irrigated?'искусственный полив':'дождевой полив'}) = ${result.zakatUSD.toFixed(1)} кг | Нисаб: ${NISAB_CROPS_KG.toFixed(0)} кг`;
    break}
   case 'rikaz':{
-   const value=parseFloat(d.value)||0;
+   const value=toUSD(parseFloat(d.value)||0);
    result.rate=20;
    if(value<=0){result.belowNisab=true;result.detail='Укажите стоимость найденного';return result}
-   result.zakat=value*0.20;
-   result.detail=`$${value.toFixed(2)} × 20% (нет нисаба, выплачивается немедленно)`;
+   result.zakatUSD=value*0.20;
+   result.detail=`${fmtCur(value)} × 20% (нет нисаба, выплачивается немедленно при находке. Включает древние клады и полезные ископаемые)`;
    break}}
  return result;}
 
@@ -718,51 +848,54 @@ function renderZakatTabs(){
 function renderZakatForm(){
  const type=finance.zakatType;
  const saved=finance.zakatData[type]||{};
+ const cur=getCur();
+ const sym=cur.sym;
  let html='<div class="zakat-form">';
  switch(type){
   case 'money':
    html+=`<div class="zakat-row">
-    <div class="zakat-field"><label>Наличные ($)</label><input type="number" data-zf="cash" value="${saved.cash||''}" min="0" step="0.01" placeholder="0"></div>
-    <div class="zakat-field"><label>Банковские счета ($)</label><input type="number" data-zf="bank" value="${saved.bank||''}" min="0" step="0.01" placeholder="0"></div>
+    <div class="zakat-field"><label>Наличные (${sym})</label><input type="number" data-zf="cash" value="${saved.cash||''}" min="0" step="0.01" placeholder="0"></div>
+    <div class="zakat-field"><label>Банковские счета (${sym})</label><input type="number" data-zf="bank" value="${saved.bank||''}" min="0" step="0.01" placeholder="0"></div>
    </div>
-   <div class="zakat-field"><label>Срочные долги ($)</label><input type="number" data-zf="debts" value="${saved.debts||''}" min="0" step="0.01" placeholder="0">
-    <span class="field-hint">Вычитаются из активов (ханафитский мазхаб: только срочные долги)</span></div>`;
+   <div class="zakat-field"><label>Срочные долги (${sym})</label><input type="number" data-zf="debts" value="${saved.debts||''}" min="0" step="0.01" placeholder="0">
+    <span class="field-hint">Вычитаются из активов перед расчётом. Ханафитский мазхаб: только срочные долги. Некоторые учёные допускают вычет всех долгов.</span></div>`;
    break;
   case 'gold':
    html+=`<div class="zakat-field"><label>Вес золота (граммы)</label><input type="number" data-zf="grams" value="${saved.grams||''}" min="0" step="0.01" placeholder="0">
-    <span class="field-hint">Нисаб: ${NISAB_GOLD_GR} г. Включая ювелирные украшения (ханафиты). Шафииты: украшения для ношения не облагаются.</span></div>`;
+    <span class="field-hint">Нисаб: ${NISAB_GOLD_GR} г. Включая ювелирные украшения для ношения (ханафиты). Шафииты: украшения для личного ношения не облагаются закятом.</span></div>`;
    break;
   case 'silver':
    html+=`<div class="zakat-field"><label>Вес серебра (граммы)</label><input type="number" data-zf="grams" value="${saved.grams||''}" min="0" step="0.01" placeholder="0">
-    <span class="field-hint">Нисаб: ${NISAB_SILVER_GR} г. Включая посуду и слитки.</span></div>`;
+    <span class="field-hint">Нисаб: ${NISAB_SILVER_GR} г. Включая посуду, слитки и монеты из серебра.</span></div>`;
    break;
   case 'trade':
-   html+=`<div class="zakat-field"><label>Рыночная стоимость товаров ($)</label><input type="number" data-zf="value" value="${saved.value||''}" min="0" step="0.01" placeholder="0">
-    <span class="field-hint">Оценивается по текущей закупочной цене ежегодно в дату хаула</span></div>
-   <div class="zakat-field"><label>Долги бизнеса ($)</label><input type="number" data-zf="debts" value="${saved.debts||''}" min="0" step="0.01" placeholder="0"></div>`;
+   html+=`<div class="zakat-field"><label>Рыночная стоимость товаров (${sym})</label><input type="number" data-zf="value" value="${saved.value||''}" min="0" step="0.01" placeholder="0">
+    <span class="field-hint">Оценивается по текущей закупочной (не розничной!) цене ежегодно в дату хаула. Товары для личного пользования не включаются.</span></div>
+   <div class="zakat-field"><label>Долги бизнеса (${sym})</label><input type="number" data-zf="debts" value="${saved.debts||''}" min="0" step="0.01" placeholder="0">
+    <span class="field-hint">Вычитаются из стоимости товаров.</span></div>`;
    break;
   case 'sheep':
    html+=`<div class="zakat-field"><label>Количество голов</label><input type="number" data-zf="count" value="${saved.count||''}" min="0" step="1" placeholder="0">
-    <span class="field-hint">Нисаб: 40 голов. Только саима (свободный выпас). Кормимый скот не облагается.</span></div>`;
+    <span class="field-hint">Нисаб: 40 голов. Только саима (свободный выпас большую часть года). Скот на кормлении (ма\`луфа) не облагается закятом.</span></div>`;
    break;
   case 'cattle':
    html+=`<div class="zakat-field"><label>Количество голов</label><input type="number" data-zf="count" value="${saved.count||''}" min="0" step="1" placeholder="0">
-    <span class="field-hint">Нисаб: 30 голов. Только саима (свободный выпас).</span></div>`;
+    <span class="field-hint">Нисаб: 30 голов. Только саима (свободный выпас). Включает коров и буйволов.</span></div>`;
    break;
   case 'camels':
    html+=`<div class="zakat-field"><label>Количество голов</label><input type="number" data-zf="count" value="${saved.count||''}" min="0" step="1" placeholder="0">
-    <span class="field-hint">Нисаб: 5 голов. Только саима. Шкала zakата сложная — результат приблизительный.</span></div>`;
+    <span class="field-hint">Нисаб: 5 голов. Только саима. Шкала закята сложная и зависит от точного количества — результат приблизительный, проконсультируйтесь с учёным.</span></div>`;
    break;
   case 'crops':
    html+=`<div class="zakat-field"><label>Вес урожая (кг)</label><input type="number" data-zf="kg" value="${saved.kg||''}" min="0" step="0.1" placeholder="0">
-    <span class="field-hint">Нисаб: ${NISAB_CROPS_KG.toFixed(0)} кг (5 васков). Зерновые, финики, виноград.</span></div>
+    <span class="field-hint">Нисаб: ${NISAB_CROPS_KG.toFixed(0)} кг (5 васков). Применяется к зерновым, финикам, винограду и аналогичным культурам.</span></div>
    <div class="zakat-field"><label>Тип полива</label>
     <select data-zf="irrigated"><option value="no" ${saved.irrigated!=='yes'?'selected':''}>🌧️ Дождевой / естественный (10%)</option><option value="yes" ${saved.irrigated==='yes'?'selected':''}>💧 Искусственный / орошение (5%)</option></select>
-    <span class="field-hint">Смешанный полив: большинство учёных — 7.5% (среднее)</span></div>`;
+    <span class="field-hint">Смешанный полив: большинство учёных рекомендуют среднюю ставку 7.5%. Закят с урожая выплачивается сразу после сбора, хаул не требуется.</span></div>`;
    break;
   case 'rikaz':
-   html+=`<div class="zakat-field"><label>Стоимость найденного ($)</label><input type="number" data-zf="value" value="${saved.value||''}" min="0" step="0.01" placeholder="0">
-    <span class="field-hint">Нет нисаба. Ставка 20%. Выплачивается немедленно при находке. Включает древние клады и полезные ископаемые.</span></div>`;
+   html+=`<div class="zakat-field"><label>Стоимость найденного (${sym})</label><input type="number" data-zf="value" value="${saved.value||''}" min="0" step="0.01" placeholder="0">
+    <span class="field-hint">Нет нисаба. Ставка 20% (хумс). Выплачивается немедленно при находке. Включает древние клады (рикяз) и полезные ископаемые (ма\`дин). Разногласие учёных: некоторые относят ма\`дин к 2.5%.</span></div>`;
    break;}
  html+='</div>';
  $('#zakatFormContainer').innerHTML=html;
@@ -784,9 +917,13 @@ function updateZakatResult(){
   $('#zrValue').textContent='Ниже нисаба';
   $('#zrDetail').textContent=res.detail;
  }else{
-  const unit=(type==='sheep'||type==='cattle'||type==='camels')?'голов':(type==='gold'||type==='silver')?'г':'$';
-  const fmt=unit==='$'?'$'+res.zakat.toFixed(2):res.zakat.toFixed(2)+' '+unit;
-  $('#zrValue').textContent=fmt;
+  const isHead=['sheep','cattle','camels'].includes(type);
+  const isKg=type==='crops';
+  let display;
+  if(isHead) display=res.zakatUSD+' '+plural(res.zakatUSD,['голова','головы','голов']);
+  else if(isKg) display=res.zakatUSD.toFixed(1)+' кг';
+  else display=fmtCur(res.zakatUSD);
+  $('#zrValue').textContent=display;
   $('#zrDetail').textContent=res.detail;
  }}
 
@@ -795,30 +932,30 @@ $('#zakatTabs').addEventListener('click',e=>{
  finance.zakatType=tab.dataset.zt;saveFinance();
  renderZakatTabs();renderZakatForm();sndTick()});
 
-/* ═══ РАСХОДЫ ═══ */
+/* ═══ РАСХОДЫ (в локальной валюте) ═══ */
 const EXP_CATS={food:'🍎 Еда',transport:'🚗 Транспорт',housing:'🏡 Жильё',health:'💧 Здоровье',sadaqah:'🤲 Садака',education:'📚 Учёба',other:'📦 Другое'};
 function currentMonthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
 function renderExpenses(){
  const mk=currentMonthKey();
+ const cur=getCur();
  const items=finance.expenses.filter(e=>e.month===mk);
  const total=items.reduce((s,e)=>s+e.amount,0);
  $('#expList').innerHTML=items.length?items.slice().reverse().map(e=>
   `<div class="expense-item">
    <span class="ei-cat">${EXP_CATS[e.cat]||e.cat}</span>
-   <span class="ei-desc">${esc(e.desc||'')}</span>
-   <span class="ei-amount">$${e.amount.toFixed(2)}</span>
+   <span class="ei-amount">${e.amount.toLocaleString('ru-RU',{maximumFractionDigits:2})} ${cur.sym}</span>
    <button class="ei-del" data-eid="${e.id}">✕</button>
   </div>`).join(''):'<div class="empty" style="padding:20px"><p>Нет расходов за этот месяц</p></div>';
  const byCat={};items.forEach(e=>{byCat[e.cat]=(byCat[e.cat]||0)+e.amount});
- $('#expSummary').innerHTML=`<span class="expense-sum">📊 Итого: <b>$${total.toFixed(2)}</b></span>`+
+ $('#expSummary').innerHTML=`<span class="expense-sum">📊 Итого: <b>${total.toLocaleString('ru-RU',{maximumFractionDigits:2})} ${cur.sym}</b></span>`+
   Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([c,v])=>
-   `<span class="expense-sum">${EXP_CATS[c]||c}: <b>$${v.toFixed(2)}</b></span>`).join('');}
+   `<span class="expense-sum">${EXP_CATS[c]||c}: <b>${v.toLocaleString('ru-RU',{maximumFractionDigits:2})} ${cur.sym}</b></span>`).join('');}
 $('#expAdd').onclick=()=>{
  const amt=parseFloat($('#expAmount').value);if(!amt||amt<=0)return;
  const cat=$('#expCat').value;
  finance.expenses.push({id:uid(),amount:amt,cat,month:currentMonthKey(),desc:''});
  saveFinance();renderExpenses();$('#expAmount').value='';sndTick();
- toast(`Расход $${amt.toFixed(2)} добавлен`)};
+ toast(`Расход ${amt} ${getCur().sym} добавлен`)};
 $('#expAmount').addEventListener('keydown',e=>{if(e.key==='Enter')$('#expAdd').click()});
 $('#expList').addEventListener('click',e=>{
  const btn=e.target.closest('[data-eid]');if(!btn)return;
@@ -828,154 +965,315 @@ $('#expList').addEventListener('click',e=>{
  saveFinance();renderExpenses();
  toast('Расход удалён',()=>{finance.expenses=snap;saveFinance();renderExpenses()})});
 
-function renderFinance(){renderZakatTabs();renderZakatForm();renderExpenses()}
+function renderFinance(){renderCurrencyBar();renderZakatTabs();renderZakatForm();renderExpenses()}
 
 /* ═══ ИБАДАТ: рендер ═══ */
 function renderIbadat(){
- const today=todayStr();const day=getDay(today);
+ const today=todayStr();
+ const day=getDay(today);
  $('#salahGrid').innerHTML=SALAH_LIST.map(s=>{
   const checked=day.salah[s.id];
   return `<div class="salah-item ${checked?'checked':''}" data-salah="${s.id}">
-   <span class="salah-icon">${s.icon}</span><span class="salah-name">${s.name}</span>
-   <div class="salah-check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5.2 5L20 6.8"/></svg></div></div>`}).join('');
+   <span class="salah-icon">${s.icon}</span>
+   <span class="salah-name">${s.name}</span>
+   <div class="salah-check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5.2 5L20 6.8"/></svg></div>
+  </div>`}).join('');
  $('#quranTotal').textContent=day.quran;
- renderWeekGrid();renderIbadatStats();}
+ renderWeekGrid();
+ renderIbadatStats();}
+
 $('#salahGrid').addEventListener('click',e=>{
  const item=e.target.closest('.salah-item');if(!item)return;
- const salahId=item.dataset.salah;const day=getDay(todayStr());
- day.salah[salahId]=!day.salah[salahId];saveIbadat();renderIbadat();
- if(day.salah[salahId]){sndPop();const r=item.getBoundingClientRect();
+ const salahId=item.dataset.salah;
+ const day=getDay(todayStr());
+ day.salah[salahId]=!day.salah[salahId];
+ saveIbadat();renderIbadat();
+ if(day.salah[salahId]){
+  sndPop();
+  const r=item.getBoundingClientRect();
   burst(r.left+r.width/2,r.top+r.height/2,['#2BB3A5','#F2C14E','#fff'],18,1);
-  if(SALAH_LIST.every(s=>day.salah[s.id])){setTimeout(()=>{burst(innerWidth/2,innerHeight*.35,FXC,60,1.5);sndFanfare();toast('МашаАлла! Все намазы выполнены 🤲')},200)}}});
-$('#quranAdd').onclick=()=>{const inp=$('#quranInput');const val=parseInt(inp.value)||0;if(val<=0)return;
- const day=getDay(todayStr());day.quran+=val;saveIbadat();renderIbadat();inp.value='';sndTick();
+  // Проверка: все 5 намазов?
+  if(SALAH_LIST.every(s=>day.salah[s.id])){
+   setTimeout(()=>{burst(innerWidth/2,innerHeight*.35,FXC,60,1.5);sndFanfare();toast('МашаАлла! Все намазы выполнены 🤲')},200)}}});
+
+$('#quranAdd').onclick=()=>{
+ const inp=$('#quranInput');
+ const val=parseInt(inp.value)||0;if(val<=0)return;
+ const day=getDay(todayStr());
+ day.quran+=val;saveIbadat();renderIbadat();
+ inp.value='';sndTick();
  toast(`+${val} ${plural(val,['страница','страницы','страниц'])} Корана 📖`)};
 $('#quranInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('#quranAdd').click()});
-function renderWeekGrid(){
- const today=new Date();const dow=today.getDay();const mo=dow===0?-6:1-dow;
- const mon=new Date(today);mon.setDate(today.getDate()+mo);
- const dn=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];let html='';
- for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);const ds=ymd(d);
-  const isT=ds===todayStr();const dd=ibadat.days[ds];
-  const dc=dd?SALAH_LIST.filter(s=>dd.salah[s.id]).length:0;
-  const dots=SALAH_LIST.map(s=>`<div class="week-dot ${dd&&dd.salah[s.id]?'filled':''}"></div>`).join('');
-  html+=`<div class="week-day ${isT?'today':''}"><span class="week-label">${dn[i]}</span><div class="week-dots">${dots}</div><span class="week-score">${dc}/5</span></div>`}
- $('#weekGrid').innerHTML=html;}
-function renderIbadatStats(){
- const days=ibadat.days;let streak=0,cur=new Date();
- const tk=todayStr();const td=days[tk];const tf=td&&SALAH_LIST.every(s=>td.salah[s.id]);
- if(!tf)cur.setDate(cur.getDate()-1);
- while(true){const k=ymd(cur);const d=days[k];if(d&&SALAH_LIST.every(s=>d.salah[s.id])){streak++;cur.setDate(cur.getDate()-1)}else break}
- $('#ibadatStreak').textContent=streak+' '+plural(streak,['день','дня','дней']);
- let fd=0;Object.values(days).forEach(d=>{if(SALAH_LIST.every(s=>d.salah[s.id]))fd++});
- $('#ibadatFullDays').textContent=fd;}
 
-/* ═══ ЗАДАЧИ: рендер ═══ */
+function renderWeekGrid(){
+ const today=new Date();
+ const dayOfWeek=today.getDay(); // 0=Sun
+ const mondayOffset=dayOfWeek===0?-6:1-dayOfWeek;
+ const monday=new Date(today);monday.setDate(today.getDate()+mondayOffset);
+ const dayNames=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+ let html='';
+ for(let i=0;i<7;i++){
+  const d=new Date(monday);d.setDate(monday.getDate()+i);
+  const ds=ymd(d);
+  const isToday=ds===todayStr();
+  const dayData=ibadat.days[ds];
+  const doneCount=dayData?SALAH_LIST.filter(s=>dayData.salah[s.id]).length:0;
+  const dots=SALAH_LIST.map(s=>{
+   const filled=dayData&&dayData.salah[s.id];
+   return `<div class="week-dot ${filled?'filled':''}"></div>`}).join('');
+  html+=`<div class="week-day ${isToday?'today':''}">
+   <span class="week-label">${dayNames[i]}</span>
+   <div class="week-dots">${dots}</div>
+   <span class="week-score">${doneCount}/5</span>
+  </div>`}
+ $('#weekGrid').innerHTML=html;}
+
+function renderIbadatStats(){
+ // Серия полных дней (все 5 намазов)
+ const days=ibadat.days;
+ let streak=0,cur=new Date();
+ // Проверяем сегодня сначала
+ const todayKey=todayStr();
+ const todayData=days[todayKey];
+ const todayFull=todayData&&SALAH_LIST.every(s=>todayData.salah[s.id]);
+ if(!todayFull){cur.setDate(cur.getDate()-1)}
+ while(true){
+  const k=ymd(cur);const d=days[k];
+  if(d&&SALAH_LIST.every(s=>d.salah[s.id])){streak++;cur.setDate(cur.getDate()-1)}else break}
+ $('#ibadatStreak').textContent=streak+' '+plural(streak,['день','дня','дней']);
+ // Всего полных дней
+ let fullDays=0;
+ Object.values(days).forEach(d=>{if(SALAH_LIST.every(s=>d.salah[s.id]))fullDays++});
+ $('#ibadatFullDays').textContent=fullDays;}
+
+/* ══════════════════════════════════════
+   РЕНДЕР: ЗАДАЧИ
+   ══════════════════════════════════════ */
 function renderNav(){
  const act=state.tasks.filter(t=>!t.done);
  const row=(id,emoji,name,color,count,fixed)=>`
   <div class="cat-row ${state.filter===id?'on':''}" data-f="${id}" style="--c:${color}">
-   <span class="cat-emoji">${emoji}</span><span class="cat-name">${esc(name)}</span><span class="cnt">${count}</span>
-   ${fixed?'':`<button class="cat-del" data-del="${id}" title="Удалить"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/></svg></button>`}</div>`;
- $('#catNav').innerHTML=row('all','🗂️','Все задачи','#8A9AA8',act.length,true)+state.cats.map(c=>row(c.id,c.emoji,c.name,c.color,act.filter(t=>t.catId===c.id).length,c.fixed)).join('');
- $('#catNavM').innerHTML=`<button class="chip ${state.filter==='all'?'on':''}" data-f="all" style="--c:#8A9AA8">🗂️ Все</button>`+state.cats.map(c=>`<button class="chip ${state.filter===c.id?'on':''}" data-f="${c.id}" style="--c:${c.color}">${c.emoji} ${esc(c.name)}</button>`).join('');
+   <span class="cat-emoji">${emoji}</span><span class="cat-name">${esc(name)}</span>
+   <span class="cnt">${count}</span>
+   ${fixed?'':`<button class="cat-del" data-del="${id}" title="Удалить категорию"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/></svg></button>`}
+  </div>`;
+ $('#catNav').innerHTML=row('all','🗂️','Все задачи','#8A9AA8',act.length,true)
+  +state.cats.map(c=>row(c.id,c.emoji,c.name,c.color,act.filter(t=>t.catId===c.id).length,c.fixed)).join('');
+ $('#catNavM').innerHTML=`<button class="chip ${state.filter==='all'?'on':''}" data-f="all" style="--c:#8A9AA8">🗂️ Все</button>`
+  +state.cats.map(c=>`<button class="chip ${state.filter===c.id?'on':''}" data-f="${c.id}" style="--c:${c.color}">${c.emoji} ${esc(c.name)}</button>`).join('');
  renderPicker();}
-function renderPicker(){$('#catPicker').innerHTML=state.cats.map(c=>`<button class="chip ${state.newCat===c.id?'on':''}" data-pick="${c.id}" style="--c:${c.color}">${c.emoji} ${esc(c.name)}</button>`).join('')}
-function renderTabs(){const s=scoped();$('#cntA').textContent=s.filter(t=>!t.done).length;$('#cntD').textContent=s.filter(t=>t.done).length;
- $$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===state.tab));$('#clearDone').style.display=(state.tab==='done'&&s.some(t=>t.done))?'':'none'}
+function renderPicker(){
+ $('#catPicker').innerHTML=state.cats.map(c=>
+  `<button class="chip ${state.newCat===c.id?'on':''}" data-pick="${c.id}" style="--c:${c.color}">${c.emoji} ${esc(c.name)}</button>`).join('');}
+function renderTabs(){
+ const s=scoped();
+ $('#cntA').textContent=s.filter(t=>!t.done).length;
+ $('#cntD').textContent=s.filter(t=>t.done).length;
+ $$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===state.tab));
+ $('#clearDone').style.display=(state.tab==='done'&&s.some(t=>t.done))?'':'none';}
 const PRIO={low:['Низкий','#8FA0AE'],mid:['Средний','#E8A23B'],high:['Высокий','#E5484D']};
-function dueChip(t){if(!t.due)return'';const today=ymd(new Date()),d=t.due;let cls='',label='📅 '+new Date(d+'T00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
- if(d<today){cls='due-over';label='⏰ Просрочено'}else if(d===today){cls='due-today';label='📅 Сегодня'}else{if(Math.round((new Date(d)-new Date(today))/864e5)===1)label='📅 Завтра'}
- return `<span class="mchip ${cls}">${label}</span>`}
-function itemHTML(t,i){const c=catById(t.catId);const draggable=state.tab==='active'&&!state.search&&state.filter==='all'&&!t.done;const editing=state.editing===t.id;
+function dueChip(t){if(!t.due)return'';
+ const today=ymd(new Date()),d=t.due;
+ let cls='',label='📅 '+new Date(d+'T00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+ if(d<today){cls='due-over';label='⏰ Просрочено'}
+ else if(d===today){cls='due-today';label='📅 Сегодня'}
+ else{const diff=Math.round((new Date(d)-new Date(today))/864e5);if(diff===1)label='📅 Завтра'}
+ return `<span class="mchip ${cls}">${label}</span>`;}
+function itemHTML(t,i){
+ const c=catById(t.catId);
+ const draggable=state.tab==='active'&&!state.search&&state.filter==='all'&&!t.done;
+ const editing=state.editing===t.id;
  return `<li class="task ${t.done?'done':''} enter" data-id="${t.id}" style="--c:${c.color};animation-delay:${Math.min(i,10)*.035}s" ${draggable?'draggable="true"':''}>
-  <button class="check" title="${t.done?'Вернуть':'Выполнить'}"><svg viewBox="0 0 24 24"><path d="M4 12.5l5.2 5L20 6.8"/></svg></button>
-  <div class="t-main">${editing?`<input class="t-edit" value="${esc(t.text)}" maxlength="140">`:`<span class="t-text">${esc(t.text)}</span>`}
-   <div class="t-meta"><span class="mchip" style="--cc:${c.color}">${c.emoji} ${esc(c.name)}</span>${t.prio?`<span class="mchip" style="--cc:${PRIO[t.prio][1]}">⚑ ${PRIO[t.prio][0]}</span>`:''}${dueChip(t)}</div></div>
-  <div class="t-actions">${!t.done&&!editing?`<button class="icon-btn" data-act="edit"><svg viewBox="0 0 24 24"><path d="M4 20l4.5-1L20 7.5 16.5 4 5 15.5 4 20z"/></svg></button>`:''}<button class="icon-btn del" data-act="del"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/></svg></button></div></li>`}
-function emptyHTML(){if(state.search)return'<div class="empty"><b>Ничего не найдено</b><p>Попробуйте другой запрос</p></div>';
- return state.tab==='active'?'<div class="empty"><svg width="110" height="86" viewBox="0 0 110 86"><circle cx="44" cy="44" r="26"/><path d="M34 44l7 7 14-15"/><path d="M84 14l3 8 8 3-8 3-3 8-3-8-8-3 8-3z"/></svg><b>Здесь пока пусто</b><p>Добавьте первую задачу ✨</p></div>'
-  :'<div class="empty"><svg width="110" height="86" viewBox="0 0 110 86"><rect x="20" y="18" width="70" height="52" rx="10"/><path d="M38 38l6 6 12-13"/><path d="M36 56h38"/></svg><b>Пока ничего не выполнено</b><p>Отметьте задачу галочкой</p></div>'}
-function renderList(){let list=state.tasks.filter(t=>state.tab==='done'?t.done:!t.done).filter(matchF).filter(matchS);
+  <button class="check" title="${t.done?'Вернуть в работу':'Отметить выполненной'}"><svg viewBox="0 0 24 24"><path d="M4 12.5l5.2 5L20 6.8"/></svg></button>
+  <div class="t-main">
+    ${editing
+      ?`<input class="t-edit" value="${esc(t.text)}" maxlength="140">`
+      :`<span class="t-text">${esc(t.text)}</span>`}
+    <div class="t-meta">
+      <span class="mchip" style="--cc:${c.color}">${c.emoji} ${esc(c.name)}</span>
+      ${t.prio?`<span class="mchip" style="--cc:${PRIO[t.prio][1]}">⚑ ${PRIO[t.prio][0]}</span>`:''}
+      ${dueChip(t)}
+    </div>
+  </div>
+  <div class="t-actions">
+    ${!t.done&&!editing?`<button class="icon-btn" data-act="edit" title="Редактировать"><svg viewBox="0 0 24 24"><path d="M4 20l4.5-1L20 7.5 16.5 4 5 15.5 4 20z"/></svg></button>`:''}
+    <button class="icon-btn del" data-act="del" title="Удалить"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/></svg></button>
+  </div></li>`;}
+function emptyHTML(){
+ if(state.search)return `<div class="empty"><b>Ничего не найдено</b><p>Попробуйте другой запрос</p></div>`;
+ return state.tab==='active'
+  ?`<div class="empty"><svg width="110" height="86" viewBox="0 0 110 86"><circle cx="44" cy="44" r="26"/><path d="M34 44l7 7 14-15"/><path d="M84 14l3 8 8 3-8 3-3 8-3-8-8-3 8-3z"/></svg><b>Здесь пока пусто</b><p>Добавьте первую задачу — начните с малого ✨</p></div>`
+  :`<div class="empty"><svg width="110" height="86" viewBox="0 0 110 86"><rect x="20" y="18" width="70" height="52" rx="10"/><path d="M38 38l6 6 12-13"/><path d="M36 56h38"/></svg><b>Пока ничего не выполнено</b><p>Отметьте задачу галочкой — она переедет сюда</p></div>`;}
+function renderList(){
+ let list=state.tasks.filter(t=>state.tab==='done'?t.done:!t.done).filter(matchF).filter(matchS);
  if(state.tab==='done')list.sort((a,b)=>(b.completedAt||0)-(a.completedAt||0));
  $('#list').innerHTML=list.length?list.map(itemHTML).join(''):emptyHTML();
  if(state.editing){const inp=$('#list .t-edit');if(inp){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length)}}}
-function renderStats(){const s=scoped(),done=s.filter(t=>t.done).length,total=s.length;const pct=total?Math.round(done/total*100):0;
- $('#ringFg').style.strokeDashoffset=201-(201*pct/100);$('#ringPct').textContent=pct+'%';$('#ringDone').textContent=done;$('#ringTotal').textContent=total;
- const days=new Set(state.tasks.filter(t=>t.completedAt).map(t=>ymd(new Date(t.completedAt))));let streak=0,cur=new Date();
- if(!days.has(ymd(cur)))cur.setDate(cur.getDate()-1);while(days.has(ymd(cur))){streak++;cur.setDate(cur.getDate()-1)}
- $('#streakN').textContent=streak+' '+plural(streak,['день','дня','дней']);$('#totalN').textContent=state.tasks.filter(t=>t.done).length}
-function renderAll(){renderNav();renderTabs();renderList();renderStats()}
-function addTask(){const inp=$('#newText'),text=inp.value.trim();
+
+/* ── рендер: статистика ── */
+function renderStats(){
+ const s=scoped(),done=s.filter(t=>t.done).length,total=s.length;
+ const pct=total?Math.round(done/total*100):0;
+ $('#ringFg').style.strokeDashoffset=201-(201*pct/100);
+ $('#ringPct').textContent=pct+'%';
+ $('#ringDone').textContent=done;$('#ringTotal').textContent=total;
+ const days=new Set(state.tasks.filter(t=>t.completedAt).map(t=>ymd(new Date(t.completedAt))));
+ let streak=0,cur=new Date();
+ if(!days.has(ymd(cur)))cur.setDate(cur.getDate()-1);
+ while(days.has(ymd(cur))){streak++;cur.setDate(cur.getDate()-1)}
+ $('#streakN').textContent=streak+' '+plural(streak,['день','дня','дней']);
+ $('#totalN').textContent=state.tasks.filter(t=>t.done).length;}
+function renderAll(){renderNav();renderTabs();renderList();renderStats();}
+
+/* ── действия ── */
+function addTask(){
+ const inp=$('#newText'),text=inp.value.trim();
  if(!text){$('#composer').classList.remove('shake');void $('#composer').offsetWidth;$('#composer').classList.add('shake');inp.focus();return}
  state.tasks.unshift({id:uid(),text,catId:state.newCat,prio:state.newPrio,due:$('#newDue').value||null,done:false,createdAt:Date.now()});
- if(state.tab!=='active')state.tab='active';inp.value='';$('#newDue').value='';save();renderAll();sndTick();inp.focus()}
-$('#addBtn').onclick=addTask;$('#newText').addEventListener('keydown',e=>{if(e.key==='Enter')addTask()});
+ if(state.tab!=='active')state.tab='active';
+ inp.value='';$('#newDue').value='';save();renderAll();sndTick();inp.focus();}
+$('#addBtn').onclick=addTask;
+$('#newText').addEventListener('keydown',e=>{if(e.key==='Enter')addTask()});
+
 $('#catPicker').addEventListener('click',e=>{const b=e.target.closest('[data-pick]');if(!b)return;state.newCat=b.dataset.pick;save();renderPicker()});
-$('#prioPick').addEventListener('click',e=>{const b=e.target.closest('.prio');if(!b)return;state.newPrio=state.newPrio===b.dataset.p?null:b.dataset.p;$$('#prioPick .prio').forEach(x=>x.classList.toggle('on',x.dataset.p===state.newPrio))});
+$('#prioPick').addEventListener('click',e=>{const b=e.target.closest('.prio');if(!b)return;
+ state.newPrio=state.newPrio===b.dataset.p?null:b.dataset.p;
+ $$('#prioPick .prio').forEach(x=>x.classList.toggle('on',x.dataset.p===state.newPrio));});
+
 $('#newDue').min=ymd(new Date());
-function toggleDone(id,li){const t=byId(id);if(!t)return;
- if(!t.done){if(li.dataset.busy)return;li.dataset.busy='1';li.classList.add('finishing');const r=li.querySelector('.check').getBoundingClientRect();
+
+function toggleDone(id,li){
+ const t=byId(id);if(!t)return;
+ if(!t.done){
+  if(li.dataset.busy)return;li.dataset.busy='1';li.classList.add('finishing');
+  const r=li.querySelector('.check').getBoundingClientRect();
   burst(r.left+13,r.top+13,[catById(t.catId).color,'#F2C14E','#fff'],22,1);sndPop();
   const wasAll=state.tasks.length>0&&state.tasks.every(x=>x.done||x.id===id);
-  setTimeout(()=>{t.done=true;t.completedAt=Date.now();save();renderAll();if(wasAll)setTimeout(()=>{burst(innerWidth/2,innerHeight*.32,FXC,70,1.7);sndFanfare();toast('МашаАлла! Все задачи выполнены 🎉')},150)},520)}
- else{t.done=false;t.completedAt=null;state.tab='active';save();renderAll();sndTick()}}
-function removeTask(id,li){li.classList.add('removing');setTimeout(()=>{const snap=[...state.tasks];state.tasks=state.tasks.filter(t=>t.id!==id);save();renderAll();toast('Задача удалена',()=>{state.tasks=snap;save();renderAll()})},200)}
-$('#list').addEventListener('click',e=>{const li=e.target.closest('.task');if(!li)return;const id=li.dataset.id;
- if(e.target.closest('.check'))return toggleDone(id,li);const act=e.target.closest('[data-act]');if(!act)return;
- if(act.dataset.act==='del')return removeTask(id,li);if(act.dataset.act==='edit'){state.editing=id;renderList()}});
-$('#list').addEventListener('keydown',e=>{if(!e.target.classList.contains('t-edit'))return;if(e.key==='Enter')commitEdit(e.target.closest('.task'));if(e.key==='Escape'){state.editing=null;renderList()}});
-$('#list').addEventListener('focusout',e=>{if(e.target.classList.contains('t-edit'))commitEdit(e.target.closest('.task'))});
-function commitEdit(li){if(!li||!state.editing)return;const t=byId(li.dataset.id);const v=li.querySelector('.t-edit').value.trim();if(v)t.text=v;state.editing=null;save();renderAll()}
+  setTimeout(()=>{t.done=true;t.completedAt=Date.now();save();renderAll();
+   if(wasAll){setTimeout(()=>{burst(innerWidth/2,innerHeight*.32,FXC,70,1.7);burst(innerWidth*.2,innerHeight*.4,FXC,30,1.3);burst(innerWidth*.8,innerHeight*.4,FXC,30,1.3);sndFanfare();toast('МашаАлла! Все задачи выполнены 🎉')},150)}},520);
+ }else{t.done=false;t.completedAt=null;state.tab='active';save();renderAll();sndTick();}}
+
+function removeTask(id,li){
+ li.classList.add('removing');
+ setTimeout(()=>{const snap=[...state.tasks];state.tasks=state.tasks.filter(t=>t.id!==id);save();renderAll();
+  toast('Задача удалена',()=>{state.tasks=snap;save();renderAll()})},200);}
+
+$('#list').addEventListener('click',e=>{
+ const li=e.target.closest('.task');if(!li)return;const id=li.dataset.id;
+ if(e.target.closest('.check'))return toggleDone(id,li);
+ const act=e.target.closest('[data-act]');if(!act)return;
+ if(act.dataset.act==='del')return removeTask(id,li);
+ if(act.dataset.act==='edit'){state.editing=id;renderList();}});
+$('#list').addEventListener('keydown',e=>{
+ if(!e.target.classList.contains('t-edit'))return;const li=e.target.closest('.task');
+ if(e.key==='Enter'){commitEdit(li)}
+ if(e.key==='Escape'){state.editing=null;renderList()}});
+$('#list').addEventListener('focusout',e=>{
+ if(e.target.classList.contains('t-edit'))commitEdit(e.target.closest('.task'))});
+function commitEdit(li){if(!li||!state.editing)return;const t=byId(li.dataset.id);
+ const v=li.querySelector('.t-edit').value.trim();if(v)t.text=v;
+ state.editing=null;save();renderAll();}
+
+/* drag & drop порядка */
 let dragEl=null;
-$('#list').addEventListener('dragstart',e=>{const li=e.target.closest('.task');if(!li)return;dragEl=li;requestAnimationFrame(()=>li.classList.add('dragging'))});
-$('#list').addEventListener('dragover',e=>{e.preventDefault();if(!dragEl)return;const els=[...$('#list').querySelectorAll('.task:not(.dragging)')];
- const after=els.reduce((best,el)=>{const r=el.getBoundingClientRect(),off=e.clientY-r.top-r.height/2;return off<0&&off>best.off?{off,el}:best},{off:-Infinity,el:null}).el;
+$('#list').addEventListener('dragstart',e=>{const li=e.target.closest('.task');if(!li)return;
+ dragEl=li;requestAnimationFrame(()=>li.classList.add('dragging'))});
+$('#list').addEventListener('dragover',e=>{e.preventDefault();if(!dragEl)return;
+ const els=[...$('#list').querySelectorAll('.task:not(.dragging)')];
+ const after=els.reduce((best,el)=>{const r=el.getBoundingClientRect(),off=e.clientY-r.top-r.height/2;
+  return off<0&&off>best.off?{off,el}:best},{off:-Infinity,el:null}).el;
  after?$('#list').insertBefore(dragEl,after):$('#list').appendChild(dragEl)});
-$('#list').addEventListener('dragend',()=>{if(!dragEl)return;dragEl.classList.remove('dragging');const ids=[...$('#list').querySelectorAll('.task')].map(l=>l.dataset.id);
- state.tasks=[...ids.map(byId).filter(Boolean),...state.tasks.filter(t=>t.done)];save();dragEl=null});
+$('#list').addEventListener('dragend',()=>{if(!dragEl)return;dragEl.classList.remove('dragging');
+ const ids=[...$('#list').querySelectorAll('.task')].map(l=>l.dataset.id);
+ const ordered=ids.map(byId).filter(Boolean);
+ state.tasks=[...ordered,...state.tasks.filter(t=>t.done)];save();dragEl=null});
+
+/* вкладки, поиск, очистка */
 $$('.tab').forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;save();renderTabs();renderList()});
 $('#search').addEventListener('input',e=>{state.search=e.target.value.trim().toLowerCase();renderList()});
-$('#clearDone').onclick=()=>{const snap=[...state.tasks];state.tasks=state.tasks.filter(t=>!(t.done&&matchF(t)));save();renderAll();toast('Выполненные очищены',()=>{state.tasks=snap;save();renderAll()})};
-function navClick(e){const del=e.target.closest('[data-del]');if(del){e.stopPropagation();return deleteCat(del.dataset.del)}
- const row=e.target.closest('[data-f]');if(!row)return;state.filter=row.dataset.f;save();renderNav();renderTabs();renderList();renderStats()}
-$('#catNav').addEventListener('click',navClick);$('#catNavM').addEventListener('click',navClick);
-function deleteCat(id){const c=catById(id);if(c.fixed)return;const snap=[...state.tasks],snapCats=[...state.cats];
- state.tasks.forEach(t=>{if(t.catId===id)t.catId='general'});state.cats=state.cats.filter(x=>x.id!==id);
- if(state.filter===id)state.filter='all';if(state.newCat===id)state.newCat='general';save();renderAll();
- toast(`Категория «${c.name}» удалена`,()=>{state.tasks=snap;state.cats=snapCats;save();renderAll()})}
+$('#clearDone').onclick=()=>{const snap=[...state.tasks];
+ state.tasks=state.tasks.filter(t=>!(t.done&&matchF(t)));save();renderAll();
+ toast('Выполненные очищены',()=>{state.tasks=snap;save();renderAll()})};
+
+/* навигация по категориям */
+function navClick(e){
+ const del=e.target.closest('[data-del]');
+ if(del){e.stopPropagation();return deleteCat(del.dataset.del)}
+ const row=e.target.closest('[data-f]');if(!row)return;
+ state.filter=row.dataset.f;save();renderNav();renderTabs();renderList();renderStats();}
+$('#catNav').addEventListener('click',navClick);
+$('#catNavM').addEventListener('click',navClick);
+function deleteCat(id){
+ const c=catById(id);if(c.fixed)return;
+ const snap=[...state.tasks],snapCats=[...state.cats];
+ state.tasks.forEach(t=>{if(t.catId===id)t.catId='general'});
+ state.cats=state.cats.filter(x=>x.id!==id);
+ if(state.filter===id)state.filter='all';
+ if(state.newCat===id)state.newCat='general';
+ save();renderAll();
+ toast(`Категория «${c.name}» удалена`,()=>{state.tasks=snap;state.cats=snapCats;save();renderAll()});}
+
+/* ── диалог категории ── */
 const dlg=$('#dlg');let dlgEmoji='✨',dlgColor='#4A8DF7';
 $('#egrid').innerHTML=EMOJIS.map(e=>`<button type="button" data-e="${e}">${e}</button>`).join('');
 $('#cgrid').innerHTML=PALETTE.map(c=>`<button type="button" data-c="${c}" style="background:${c}"></button>`).join('');
-function markDlg(){$$('#egrid button').forEach(b=>b.classList.toggle('on',b.dataset.e===dlgEmoji));$$('#cgrid button').forEach(b=>b.classList.toggle('on',b.dataset.c===dlgColor))}
+function markDlg(){$$('#egrid button').forEach(b=>b.classList.toggle('on',b.dataset.e===dlgEmoji));
+ $$('#cgrid button').forEach(b=>b.classList.toggle('on',b.dataset.c===dlgColor))}
 $('#egrid').onclick=e=>{const b=e.target.closest('button');if(b){dlgEmoji=b.dataset.e;markDlg()}};
 $('#cgrid').onclick=e=>{const b=e.target.closest('button');if(b){dlgColor=b.dataset.c;markDlg()}};
 $('#addCatBtn').onclick=()=>{$('#catName').value='';dlgEmoji='✨';dlgColor=PALETTE[Math.floor(Math.random()*PALETTE.length)];markDlg();dlg.showModal();setTimeout(()=>$('#catName').focus(),50)};
 $('#dlgCancel').onclick=()=>dlg.close();
-$('#catForm').addEventListener('submit',e=>{e.preventDefault();const name=$('#catName').value.trim();if(!name)return;
- const cat={id:uid(),name,emoji:dlgEmoji,color:dlgColor};state.cats.push(cat);state.newCat=cat.id;state.filter=cat.id;save();renderAll();dlg.close();
- burst(innerWidth/2,innerHeight/2,[dlgColor,'#fff'],30,1.2);toast(`Категория «${name}» создана ${dlgEmoji}`)});
+$('#catForm').addEventListener('submit',e=>{e.preventDefault();
+ const name=$('#catName').value.trim();if(!name)return;
+ const cat={id:uid(),name,emoji:dlgEmoji,color:dlgColor};
+ state.cats.push(cat);state.newCat=cat.id;state.filter=cat.id;save();renderAll();dlg.close();
+ burst(innerWidth/2,innerHeight/2,[dlgColor,'#fff'],30,1.2);
+ toast(`Категория «${name}» создана ${dlgEmoji}`);});
+
+/* ── тема и звук ── */
 function effTheme(){return state.settings.theme||((new Date().getHours()>=19||new Date().getHours()<7)?'dark':'light')}
-function applyToggles(){document.documentElement.dataset.theme=effTheme();$$('.theme-btn').forEach(b=>b.textContent=effTheme()==='dark'?'☀️':'🌙');$$('.sound-btn').forEach(b=>b.textContent=state.settings.sound?'🔊':'🔇')}
+function applyToggles(){
+ document.documentElement.dataset.theme=effTheme();
+ $$('.theme-btn').forEach(b=>b.textContent=effTheme()==='dark'?'☀️':'🌙');
+ $$('.sound-btn').forEach(b=>b.textContent=state.settings.sound?'🔊':'🔇');}
 $$('.theme-btn').forEach(b=>b.onclick=()=>{state.settings.theme=effTheme()==='dark'?'light':'dark';save();applyToggles()});
 $$('.sound-btn').forEach(b=>b.onclick=()=>{state.settings.sound=!state.settings.sound;save();applyToggles();if(state.settings.sound)sndTick()});
+
+/* ── имя пользователя ── */
 let editingName=false;
-function editName(){if(editingName)return;editingName=true;
+function editName(){
+ if(editingName)return;editingName=true;
  $('#greet').innerHTML=`<input class="name-edit" value="${esc(state.settings.name||'')}" placeholder="Твоё имя" maxlength="20">`;
- const inp=$('#greet .name-edit');inp.focus();let finished=false;
+ const inp=$('#greet .name-edit');inp.focus();
+ let finished=false;
  const done=()=>{if(finished)return;finished=true;state.settings.name=inp.value.trim();editingName=false;save();renderHello()};
- inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape'){finished=true;editingName=false;renderHello()}});inp.addEventListener('blur',done)}
-function renderHello(){const now=new Date(),h=now.getHours();const[g,em]=h>=5&&h<11?['Доброе утро','☀️']:h>=11&&h<17?['Добрый день','🌤️']:h>=17&&h<23?['Добрый вечер','🌆']:['Доброй ночи','🌙'];
- const nm=(state.settings.name||'').trim();$('#greet').innerHTML=nm?`${g}, ${esc(nm)} ${em}`:`${g}! ${em}<span class="name-hint">нажми — впиши своё имя</span>`;
- $('#greet').onclick=editName;let d=now.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
- $('#dateline').innerHTML=`${d[0].toUpperCase()+d.slice(1)} · <b id="clock"></b>`;$('#quote').textContent=QUOTES[Math.floor(Date.now()/864e5)%QUOTES.length];tickClock()}
-function tickClock(){const c=$('#clock');if(c){const n=new Date();c.textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`}}
+ inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape'){finished=true;editingName=false;renderHello()}});
+ inp.addEventListener('blur',done);}
+
+/* ── приветствие, дата, цитата ── */
+function renderHello(){
+ const now=new Date(),h=now.getHours();
+ const [g,em]=h>=5&&h<11?['Доброе утро','☀️']:h>=11&&h<17?['Добрый день','🌤️']:h>=17&&h<23?['Добрый вечер','🌆']:['Доброй ночи','🌙'];
+ const nm=(state.settings.name||'').trim();
+ $('#greet').innerHTML=nm?`${g}, ${esc(nm)} ${em}`:`${g}! ${em}<span class="name-hint">нажми — впиши своё имя</span>`;
+ $('#greet').onclick=editName;
+ let d=now.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+ $('#dateline').innerHTML=`${d[0].toUpperCase()+d.slice(1)} · <b id="clock"></b>`;
+ $('#quote').textContent=QUOTES[Math.floor(Date.now()/864e5)%QUOTES.length];
+ tickClock();}
+function tickClock(){const c=$('#clock');if(c){const n=new Date();
+ c.textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`}}
 setInterval(tickClock,20000);
-document.addEventListener('keydown',e=>{const typing=/INPUT|TEXTAREA/.test(document.activeElement.tagName)||dlg.open;
- if(e.key==='/'&&!typing){e.preventDefault();$('#search').focus()}if(e.key==='Escape'&&state.editing){state.editing=null;renderList()}});
+
+/* ── хоткеи ── */
+document.addEventListener('keydown',e=>{
+ const typing=/INPUT|TEXTAREA/.test(document.activeElement.tagName)||dlg.open;
+ if(e.key==='/'&&!typing){e.preventDefault();$('#search').focus()}
+ if(e.key==='Escape'&&state.editing){state.editing=null;renderList()}});
 
 /* ── старт ── */
-load();loadIbadat();loadFinance();applyToggles();renderHello();switchSection(state.section||'tasks');
+load();loadIbadat();loadFinance();applyToggles();renderHello();
+switchSection(state.section||'tasks');
 </script>
 </body>
 </html>
