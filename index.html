@@ -249,15 +249,6 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 .zakat-type-tab{padding:7px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--panel2);font-size:12.5px;font-weight:600;cursor:pointer;transition:.18s;white-space:nowrap}
 .zakat-type-tab:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
 .zakat-type-tab.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-
-/* ── Валютный селектор ── */
-.currency-bar{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;padding:14px 16px;background:var(--panel2);border-radius:var(--rm);border:1px solid var(--line)}
-.currency-bar .cb-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:140px}
-.currency-bar .cb-field label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
-.currency-bar .cb-field select,.currency-bar .cb-field input{border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel);padding:9px 12px;font:600 14px var(--fb);color:var(--ink);outline:none;width:100%}
-.currency-bar .cb-field select:focus,.currency-bar .cb-field input:focus{border-color:var(--accent)}
-.currency-bar .cb-hint{font-size:11px;color:var(--muted);align-self:flex-end;padding-bottom:10px;white-space:nowrap}
-
 .expense-section{margin-top:8px}
 .expense-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
 .expense-row input,.expense-row select{border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);padding:9px 12px;font:500 14px var(--fb);color:var(--ink);outline:none}
@@ -305,8 +296,6 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
   .zakat-row{grid-template-columns:1fr}
   .bnav-item{padding:6px 6px;font-size:8px}
   .bnav-item span{font-size:16px}
-  .currency-bar{flex-direction:column;align-items:stretch}
-  .currency-bar .cb-hint{align-self:flex-start;padding-bottom:0}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
@@ -431,19 +420,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
       <div class="zakat-card">
         <h2><span>🤲</span> Калькулятор закята</h2>
         <div class="zakat-intro">
-          Закят обязателен при достижении нисаба и прохождении хаула (лунного года). Расчёт по ханафитскому мазхабу (нисаб по серебру). Выберите свою валюту и укажите актуальный курс к доллару США. Проконсультируйтесь с учёным для сложных случаев.
-        </div>
-        <!-- ВАЛЮТНЫЙ СЕЛЕКТОР -->
-        <div class="currency-bar">
-          <div class="cb-field">
-            <label>Валюта</label>
-            <select id="curSelect"></select>
-          </div>
-          <div class="cb-field">
-            <label>Курс к $ (за 1 $)</label>
-            <input type="number" id="curRate" min="0.0001" step="any" placeholder="Напр. 80.5">
-          </div>
-          <div class="cb-hint" id="curHint"></div>
+          Расчёт по позиции постояннного комитета по фетвам Саудовской Аравии (Аль-Ляджна ад-Даима). Нисаб определяется по серебру (612.36 г). Денежные виды имущества объединяются для проверки нисаба. Проконсультируйтесь с учёным для сложных случаев.
         </div>
         <div class="zakat-type-tabs" id="zakatTabs"></div>
         <div id="zakatFormContainer"></div>
@@ -532,49 +509,6 @@ const SALAH_LIST=[
  {id:'isha',name:'Иша',icon:'🌙'}];
 
 /* ══════════════════════════════════════
-   ВАЛЮТЫ БЫВШЕГО СССР + USD/EUR
-   ══════════════════════════════════════ */
-const CURRENCIES=[
- {code:'USD',sym:'$',name:'Доллар США',rate:1},
- {code:'EUR',sym:'€',name:'Евро',rate:0.92},
- {code:'RUB',sym:'₽',name:'Российский рубль',rate:80.5},
- {code:'UAH',sym:'₴',name:'Украинская гривна',rate:41.5},
- {code:'BYN',sym:'Br',name:'Белорусский рубль',rate:3.25},
- {code:'KZT',sym:'₸',name:'Казахстанский тенге',rate:485},
- {code:'UZS',sym:'сўм',name:'Узбекский сум',rate:12700},
- {code:'KGS',sym:'сом',name:'Кыргызский сом',rate:87.5},
- {code:'TJS',sym:'сом.',name:'Таджикский сомони',rate:10.6},
- {code:'TMT',sym:'ман.',name:'Туркменский манат',rate:3.5},
- {code:'AZN',sym:'₼',name:'Азербайджанский манат',rate:1.7},
- {code:'GEL',sym:'₾',name:'Грузинский лари',rate:2.7},
- {code:'AMD',sym:'֏',name:'Армянский драм',rate:385},
- {code:'MDL',sym:'lei',name:'Молдавский лей',rate:17.8},
- {code:'EEK',sym:'€',name:'Эстония (EUR)',rate:0.92},
- {code:'LVL',sym:'€',name:'Латвия (EUR)',rate:0.92},
- {code:'LTL',sym:'€',name:'Литва (EUR)',rate:0.92}];
-
-function getCur(){
- return CURRENCIES.find(c=>c.code===finance.currency)||CURRENCIES[0];}
-
-function toUSD(amount){
- const rate=parseFloat(finance.exchangeRate)||getCur().rate;
- return amount/rate;}
-
-function fromUSD(amount){
- const rate=parseFloat(finance.exchangeRate)||getCur().rate;
- return amount*rate;}
-
-function fmtCur(usdAmount){
- const cur=getCur();
- const local=fromUSD(usdAmount);
- if(cur.code==='USD') return '$'+usdAmount.toFixed(2);
- return '$'+usdAmount.toFixed(2)+' / '+local.toLocaleString('ru-RU',{maximumFractionDigits:2})+' '+cur.sym;}
-
-function fmtLocal(amount){
- const cur=getCur();
- return amount.toLocaleString('ru-RU',{maximumFractionDigits:2})+' '+cur.sym;}
-
-/* ══════════════════════════════════════
    СОСТОЯНИЕ ЗАДАЧ
    ══════════════════════════════════════ */
 function defaults(){return{
@@ -620,7 +554,7 @@ function todayStr(){return ymd(new Date())}
 /* ══════════════════════════════════════
    СОСТОЯНИЕ ФИНАНСОВ
    ══════════════════════════════════════ */
-let finance={expenses:[],zakatType:'money',zakatData:{},currency:'RUB',exchangeRate:80.5};
+let finance={expenses:[],zakatType:'total',zakatData:{}};
 function loadFinance(){try{const r=localStorage.getItem(FINANCE_KEY);if(r){const d=JSON.parse(r);finance={...finance,...d}}}catch(e){}}
 function saveFinance(){try{localStorage.setItem(FINANCE_KEY,JSON.stringify(finance))}catch(e){}}
 
@@ -691,11 +625,13 @@ $('#sectionNav').addEventListener('click',e=>{const r=e.target.closest('[data-se
 $('#bottomNav').addEventListener('click',e=>{const b=e.target.closest('[data-section]');if(b)switchSection(b.dataset.section)});
 
 /* ══════════════════════════════════════
-   🤲 ЗАКЯТ: КАЛЬКУЛЯТОР С МУЛЬТИВАЛЮТОЙ
+   🤲 ЗАКЯТ: КАЛЬКУЛЯТОР
+   По позиции Аль-Ляджна ад-Даима (Саудовская Аравия)
    ══════════════════════════════════════ */
 const ZAKAT_TYPES=[
- {id:'money',name:'💰 Деньги',desc:'Наличные, счета, депозиты'},
- {id:'gold',name:'🥇 Золото',desc:'Слитки, монеты, украшения (ханафиты)'},
+ {id:'total',name:'💰 Общий расчёт',desc:'Деньги + золото + серебро + товары'},
+ {id:'money',name:'💵 Деньги',desc:'Наличные, счета, депозиты'},
+ {id:'gold',name:'🥇 Золото',desc:'Слитки, монеты, инвестиционные украшения'},
  {id:'silver',name:'🥈 Серебро',desc:'Слитки, монеты, посуда'},
  {id:'trade',name:'🏢 Торговые товары',desc:'Товары для перепродажи'},
  {id:'sheep',name:'🐑 Овцы / козы',desc:'Свободный выпас (саима)'},
@@ -704,97 +640,93 @@ const ZAKAT_TYPES=[
  {id:'crops',name:'🌾 Урожай',desc:'Зерновые, финики, виноград'},
  {id:'rikaz',name:'⛏️ Риказ (клад)',desc:'Найденные сокровища, недра'}];
 
-// Нисаб (базовые значения в USD, пересчитываются через курс пользователя)
-const SILVER_PRICE_GR_USD=1.10;
-const GOLD_PRICE_GR_USD=85;
+// Нисаб (приблизительные значения, пользователь может корректировать цены)
+const SILVER_PRICE_GR=1.10; // USD за грамм серебра
+const GOLD_PRICE_GR=85;     // USD за грамм золота
 const NISAB_SILVER_GR=612.36;
 const NISAB_GOLD_GR=87.48;
-const NISAB_SILVER_USD=NISAB_SILVER_GR*SILVER_PRICE_GR_USD; // ~$673
-const NISAB_GOLD_USD=NISAB_GOLD_GR*GOLD_PRICE_GR_USD;       // ~$7,436
-const WASQ_KG=130.6;
+const NISAB_SILVER_USD=NISAB_SILVER_GR*SILVER_PRICE_GR; // ~$673
+const NISAB_GOLD_USD=NISAB_GOLD_GR*GOLD_PRICE_GR;       // ~$7,436
+const WASQ_KG=130.6; // 1 васк ≈ 130.6 кг, 5 васков ≈ 653 кг
 const NISAB_CROPS_KG=5*WASQ_KG;
 
-/* ── Валютный селектор: рендер и события ── */
-function renderCurrencyBar(){
- const sel=$('#curSelect');
- sel.innerHTML=CURRENCIES.map(c=>
-  `<option value="${c.code}" ${finance.currency===c.code?'selected':''}>${c.sym} ${c.name}</option>`
- ).join('');
- $('#curRate').value=finance.exchangeRate||getCur().rate;
- updateCurHint();}
-
-function updateCurHint(){
- const cur=getCur();
- const rate=parseFloat(finance.exchangeRate)||cur.rate;
- const nisabSilverLocal=fromUSD(NISAB_SILVER_USD);
- $('#curHint').textContent=`1 $ = ${rate} ${cur.sym} | Нисаб ≈ ${nisabSilverLocal.toLocaleString('ru-RU',{maximumFractionDigits:0})} ${cur.sym}`;}
-
-$('#curSelect').addEventListener('change',e=>{
- finance.currency=e.target.value;
- const cur=getCur();
- finance.exchangeRate=cur.rate;
- saveFinance();
- renderCurrencyBar();
- updateZakatResult();
- renderExpenses();});
-
-$('#curRate').addEventListener('input',e=>{
- finance.exchangeRate=parseFloat(e.target.value)||0;
- saveFinance();
- updateCurHint();
- updateZakatResult();});
-
-/* ── Расчёт закята (все денежные суммы конвертируются в USD) ── */
 function calcZakat(type,data){
  const d=data||{};
- let result={zakatUSD:0,belowNisab:false,detail:'',rate:0};
+ let result={zakat:0,belowNisab:false,detail:'',rate:0};
  switch(type){
+
+  /* ── ОБЩИЙ РАСЧЁТ (позиция Аль-Ляджна ад-Даима) ── */
+  case 'total':{
+   const cash=parseFloat(d.cash)||0;
+   const bank=parseFloat(d.bank)||0;
+   const goldGr=parseFloat(d.goldGr)||0;
+   const silverGr=parseFloat(d.silverGr)||0;
+   const tradeVal=parseFloat(d.tradeVal)||0;
+   const debts=parseFloat(d.debts)||0;
+   // Перевод золота и серебра в USD
+   const goldUSD=goldGr*GOLD_PRICE_GR;
+   const silverUSD=silverGr*SILVER_PRICE_GR;
+   // Совокупность всех денежных видов
+   const totalAssets=cash+bank+goldUSD+silverUSD+tradeVal;
+   const net=totalAssets-debts;
+   result.rate=2.5;
+   // Нисаб проверяется по серебру (позиция саляфитских учёных)
+   if(net<NISAB_SILVER_USD){
+    result.belowNisab=true;
+    result.detail=`Совокупность активов: $${net.toFixed(2)} < нисаб $${NISAB_SILVER_USD.toFixed(0)} (${NISAB_SILVER_GR} г серебра). Закят не обязателен.`;
+    return result;}
+   result.zakat=net*0.025;
+   result.detail=`Наличные: $${cash.toFixed(2)} | Счета: $${bank.toFixed(2)} | Золото: ${goldGr} г ($${goldUSD.toFixed(2)}) | Серебро: ${silverGr} г ($${silverUSD.toFixed(2)}) | Товары: $${tradeVal.toFixed(2)} | Долги: −$${debts.toFixed(2)} | Нетто: $${net.toFixed(2)} × 2.5%`;
+   break}
+
   case 'money':{
-   const cash=toUSD(parseFloat(d.cash)||0);
-   const bank=toUSD(parseFloat(d.bank)||0);
-   const debts=toUSD(parseFloat(d.debts)||0);
+   const cash=parseFloat(d.cash)||0;
+   const bank=parseFloat(d.bank)||0;
+   const debts=parseFloat(d.debts)||0;
    const net=cash+bank-debts;
    result.rate=2.5;
-   if(net<NISAB_SILVER_USD){result.belowNisab=true;result.detail=`Нетто: ${fmtCur(net)} < нисаб ${fmtCur(NISAB_SILVER_USD)} (${NISAB_SILVER_GR} г серебра)`;return result}
-   result.zakatUSD=net*0.025;
-   result.detail=`Нетто: ${fmtCur(net)} × 2.5% | Нисаб: ${fmtCur(NISAB_SILVER_USD)}`;
+   if(net<NISAB_SILVER_USD){result.belowNisab=true;result.detail=`Нетто: $${net.toFixed(2)} < нисаб $${NISAB_SILVER_USD.toFixed(0)} (${NISAB_SILVER_GR} г серебра)`;return result}
+   result.zakat=net*0.025;
+   result.detail=`Нетто: $${net.toFixed(2)} × 2.5% | Нисаб: $${NISAB_SILVER_USD.toFixed(0)}`;
    break}
   case 'gold':{
    const grams=parseFloat(d.grams)||0;
    result.rate=2.5;
-   if(grams<NISAB_GOLD_GR){result.belowNisab=true;result.detail=`${grams} г < нисаб ${NISAB_GOLD_GR} г`;return result}
-   result.zakatUSD=grams*0.025*GOLD_PRICE_GR_USD;
-   result.detail=`${grams} г × 2.5% = ${(grams*0.025).toFixed(2)} г золота (${fmtCur(grams*0.025*GOLD_PRICE_GR_USD)}) | Нисаб: ${NISAB_GOLD_GR} г`;
+   if(grams<NISAB_GOLD_GR){result.belowNisab=true;result.detail=`${grams} г < нисаб ${NISAB_GOLD_GR} г. Но помните: денежные виды объединяются для проверки нисаба (вкладка «Общий расчёт»).`;return result}
+   result.zakat=grams*0.025;
+   result.detail=`${grams} г × 2.5% = ${(grams*0.025).toFixed(2)} г золота | Нисаб: ${NISAB_GOLD_GR} г`;
    break}
   case 'silver':{
    const grams=parseFloat(d.grams)||0;
    result.rate=2.5;
-   if(grams<NISAB_SILVER_GR){result.belowNisab=true;result.detail=`${grams} г < нисаб ${NISAB_SILVER_GR} г`;return result}
-   result.zakatUSD=grams*0.025*SILVER_PRICE_GR_USD;
-   result.detail=`${grams} г × 2.5% = ${(grams*0.025).toFixed(2)} г серебра (${fmtCur(grams*0.025*SILVER_PRICE_GR_USD)}) | Нисаб: ${NISAB_SILVER_GR} г`;
+   if(grams<NISAB_SILVER_GR){result.belowNisab=true;result.detail=`${grams} г < нисаб ${NISAB_SILVER_GR} г. Но помните: денежные виды объединяются для проверки нисаба (вкладка «Общий расчёт»).`;return result}
+   result.zakat=grams*0.025;
+   result.detail=`${grams} г × 2.5% = ${(grams*0.025).toFixed(2)} г серебра | Нисаб: ${NISAB_SILVER_GR} г`;
    break}
   case 'trade':{
-   const value=toUSD(parseFloat(d.value)||0);
-   const debts=toUSD(parseFloat(d.debts)||0);
+   const value=parseFloat(d.value)||0;
+   const debts=parseFloat(d.debts)||0;
    const net=value-debts;
    result.rate=2.5;
-   if(net<NISAB_SILVER_USD){result.belowNisab=true;result.detail=`Стоимость: ${fmtCur(net)} < нисаб ${fmtCur(NISAB_SILVER_USD)}`;return result}
-   result.zakatUSD=net*0.025;
-   result.detail=`Рыночная стоимость: ${fmtCur(net)} × 2.5%`;
+   if(net<NISAB_SILVER_USD){result.belowNisab=true;result.detail=`Стоимость: $${net.toFixed(2)} < нисаб $${NISAB_SILVER_USD.toFixed(0)}`;return result}
+   result.zakat=net*0.025;
+   result.detail=`Рыночная стоимость: $${net.toFixed(2)} × 2.5%`;
    break}
   case 'sheep':{
    const n=parseInt(d.count)||0;
+   result.rate=0;
    if(n<40){result.belowNisab=true;result.detail=`${n} голов < нисаб 40 голов`;return result}
    let z=0;
    if(n>=40&&n<=120)z=1;
    else if(n>=121&&n<=200)z=2;
    else if(n>=201&&n<=399)z=3;
    else z=3+Math.floor((n-399)/100);
-   result.zakatUSD=z;
+   result.zakat=z;
    result.detail=`${n} голов → ${z} ${plural(z,['овца','овцы','овец'])} | Нисаб: 40 голов`;
    break}
   case 'cattle':{
    const n=parseInt(d.count)||0;
+   result.rate=0;
    if(n<30){result.belowNisab=true;result.detail=`${n} голов < нисаб 30 голов`;return result}
    let z=0,zDesc='';
    if(n>=30&&n<=39){z=1;zDesc='1 телёнок (таби\')'}
@@ -802,11 +734,12 @@ function calcZakat(type,data){
    else if(n>=60&&n<=69){z=2;zDesc='2 телёнка'}
    else if(n>=70&&n<=79){z=2;zDesc='1 телёнок + 1 двухлетка'}
    else{z=Math.floor(n/30)+Math.floor(n/40);zDesc=`по формуле: ${z} голов`}
-   result.zakatUSD=z;
+   result.zakat=z;
    result.detail=`${n} голов → ${zDesc} | Нисаб: 30 голов`;
    break}
   case 'camels':{
    const n=parseInt(d.count)||0;
+   result.rate=0;
    if(n<5){result.belowNisab=true;result.detail=`${n} голов < нисаб 5 голов`;return result}
    let z=0,zDesc='';
    if(n>=5&&n<=9){z=1;zDesc='1 овца'}
@@ -820,7 +753,7 @@ function calcZakat(type,data){
    else if(n>=76&&n<=90){z=2;zDesc='2 бинт лабун'}
    else if(n>=91&&n<=120){z=2;zDesc='2 хикка'}
    else{z=Math.floor(n/40)*2+Math.floor((n%40)/30);zDesc=`${z} голов (по формуле)`}
-   result.zakatUSD=z;
+   result.zakat=z;
    result.detail=`${n} голов → ${zDesc} | Нисаб: 5 голов`;
    break}
   case 'crops':{
@@ -829,15 +762,15 @@ function calcZakat(type,data){
    const ratePct=irrigated?5:10;
    result.rate=ratePct;
    if(kg<NISAB_CROPS_KG){result.belowNisab=true;result.detail=`${kg} кг < нисаб ${NISAB_CROPS_KG.toFixed(0)} кг (5 васков)`;return result}
-   result.zakatUSD=kg*(ratePct/100);
-   result.detail=`${kg} кг × ${ratePct}% (${irrigated?'искусственный полив':'дождевой полив'}) = ${result.zakatUSD.toFixed(1)} кг | Нисаб: ${NISAB_CROPS_KG.toFixed(0)} кг`;
+   result.zakat=kg*(ratePct/100);
+   result.detail=`${kg} кг × ${ratePct}% (${irrigated?'искусственный полив':'дождевой полив'}) = ${result.zakat.toFixed(1)} кг | Нисаб: ${NISAB_CROPS_KG.toFixed(0)} кг`;
    break}
   case 'rikaz':{
-   const value=toUSD(parseFloat(d.value)||0);
+   const value=parseFloat(d.value)||0;
    result.rate=20;
    if(value<=0){result.belowNisab=true;result.detail='Укажите стоимость найденного';return result}
-   result.zakatUSD=value*0.20;
-   result.detail=`${fmtCur(value)} × 20% (нет нисаба, выплачивается немедленно при находке. Включает древние клады и полезные ископаемые)`;
+   result.zakat=value*0.20;
+   result.detail=`$${value.toFixed(2)} × 20% (нет нисаба, выплачивается немедленно)`;
    break}}
  return result;}
 
@@ -848,31 +781,47 @@ function renderZakatTabs(){
 function renderZakatForm(){
  const type=finance.zakatType;
  const saved=finance.zakatData[type]||{};
- const cur=getCur();
- const sym=cur.sym;
  let html='<div class="zakat-form">';
  switch(type){
+
+  /* ── ОБЩИЙ РАСЧЁТ ── */
+  case 'total':
+   html+=`<div class="zakat-row">
+    <div class="zakat-field"><label>Наличные ($)</label><input type="number" data-zf="cash" value="${saved.cash||''}" min="0" step="0.01" placeholder="0"></div>
+    <div class="zakat-field"><label>Банковские счета ($)</label><input type="number" data-zf="bank" value="${saved.bank||''}" min="0" step="0.01" placeholder="0"></div>
+   </div>
+   <div class="zakat-row">
+    <div class="zakat-field"><label>Золото (граммы)</label><input type="number" data-zf="goldGr" value="${saved.goldGr||''}" min="0" step="0.01" placeholder="0">
+     <span class="field-hint">Инвестиционное золото. Женские украшения для ношения НЕ включаются (позиция Аль-Ляджна ад-Даима).</span></div>
+    <div class="zakat-field"><label>Серебро (граммы)</label><input type="number" data-zf="silverGr" value="${saved.silverGr||''}" min="0" step="0.01" placeholder="0"></div>
+   </div>
+   <div class="zakat-field"><label>Торговые товары ($)</label><input type="number" data-zf="tradeVal" value="${saved.tradeVal||''}" min="0" step="0.01" placeholder="0">
+    <span class="field-hint">Рыночная стоимость товаров для перепродажи по закупочной цене.</span></div>
+   <div class="zakat-field"><label>Срочные долги ($)</label><input type="number" data-zf="debts" value="${saved.debts||''}" min="0" step="0.01" placeholder="0">
+    <span class="field-hint">Вычитаются только долги, подлежащие немедленному возврату. Долгосрочные (ипотека, рассрочка) не вычитаются полностью — только текущая годовая часть. (Позиция шейха Аль-Фаузана)</span></div>`;
+   break;
+
   case 'money':
    html+=`<div class="zakat-row">
-    <div class="zakat-field"><label>Наличные (${sym})</label><input type="number" data-zf="cash" value="${saved.cash||''}" min="0" step="0.01" placeholder="0"></div>
-    <div class="zakat-field"><label>Банковские счета (${sym})</label><input type="number" data-zf="bank" value="${saved.bank||''}" min="0" step="0.01" placeholder="0"></div>
+    <div class="zakat-field"><label>Наличные ($)</label><input type="number" data-zf="cash" value="${saved.cash||''}" min="0" step="0.01" placeholder="0"></div>
+    <div class="zakat-field"><label>Банковские счета ($)</label><input type="number" data-zf="bank" value="${saved.bank||''}" min="0" step="0.01" placeholder="0"></div>
    </div>
-   <div class="zakat-field"><label>Срочные долги (${sym})</label><input type="number" data-zf="debts" value="${saved.debts||''}" min="0" step="0.01" placeholder="0">
-    <span class="field-hint">Вычитаются из активов перед расчётом. Ханафитский мазхаб: только срочные долги. Некоторые учёные допускают вычет всех долгов.</span></div>`;
+   <div class="zakat-field"><label>Срочные долги ($)</label><input type="number" data-zf="debts" value="${saved.debts||''}" min="0" step="0.01" placeholder="0">
+    <span class="field-hint">Вычитаются только долги, подлежащие немедленному возврату. Долгосрочные (ипотека, рассрочка) не вычитаются полностью. (Аль-Ляджна ад-Даима)</span></div>`;
    break;
   case 'gold':
    html+=`<div class="zakat-field"><label>Вес золота (граммы)</label><input type="number" data-zf="grams" value="${saved.grams||''}" min="0" step="0.01" placeholder="0">
-    <span class="field-hint">Нисаб: ${NISAB_GOLD_GR} г. Включая ювелирные украшения для ношения (ханафиты). Шафииты: украшения для личного ношения не облагаются закятом.</span></div>`;
+    <span class="field-hint">Нисаб: ${NISAB_GOLD_GR} г. Только инвестиционное золото и слитки. Женские украшения для личного ношения НЕ облагаются закятом (фетва Аль-Ляджна ад-Даима №1048, шейх Ибн Баз). Украшения, хранимые как накопление / инвестиция — облагаются.</span></div>`;
    break;
   case 'silver':
    html+=`<div class="zakat-field"><label>Вес серебра (граммы)</label><input type="number" data-zf="grams" value="${saved.grams||''}" min="0" step="0.01" placeholder="0">
     <span class="field-hint">Нисаб: ${NISAB_SILVER_GR} г. Включая посуду, слитки и монеты из серебра.</span></div>`;
    break;
   case 'trade':
-   html+=`<div class="zakat-field"><label>Рыночная стоимость товаров (${sym})</label><input type="number" data-zf="value" value="${saved.value||''}" min="0" step="0.01" placeholder="0">
+   html+=`<div class="zakat-field"><label>Рыночная стоимость товаров ($)</label><input type="number" data-zf="value" value="${saved.value||''}" min="0" step="0.01" placeholder="0">
     <span class="field-hint">Оценивается по текущей закупочной (не розничной!) цене ежегодно в дату хаула. Товары для личного пользования не включаются.</span></div>
-   <div class="zakat-field"><label>Долги бизнеса (${sym})</label><input type="number" data-zf="debts" value="${saved.debts||''}" min="0" step="0.01" placeholder="0">
-    <span class="field-hint">Вычитаются из стоимости товаров.</span></div>`;
+   <div class="zakat-field"><label>Долги бизнеса ($)</label><input type="number" data-zf="debts" value="${saved.debts||''}" min="0" step="0.01" placeholder="0">
+    <span class="field-hint">Только срочные долги вычитаются.</span></div>`;
    break;
   case 'sheep':
    html+=`<div class="zakat-field"><label>Количество голов</label><input type="number" data-zf="count" value="${saved.count||''}" min="0" step="1" placeholder="0">
@@ -884,7 +833,7 @@ function renderZakatForm(){
    break;
   case 'camels':
    html+=`<div class="zakat-field"><label>Количество голов</label><input type="number" data-zf="count" value="${saved.count||''}" min="0" step="1" placeholder="0">
-    <span class="field-hint">Нисаб: 5 голов. Только саима. Шкала закята сложная и зависит от точного количества — результат приблизительный, проконсультируйтесь с учёным.</span></div>`;
+    <span class="field-hint">Нисаб: 5 голов. Только саима. Шкала закята сложная — результат приблизительный, проконсультируйтесь с учёным.</span></div>`;
    break;
   case 'crops':
    html+=`<div class="zakat-field"><label>Вес урожая (кг)</label><input type="number" data-zf="kg" value="${saved.kg||''}" min="0" step="0.1" placeholder="0">
@@ -894,8 +843,8 @@ function renderZakatForm(){
     <span class="field-hint">Смешанный полив: большинство учёных рекомендуют среднюю ставку 7.5%. Закят с урожая выплачивается сразу после сбора, хаул не требуется.</span></div>`;
    break;
   case 'rikaz':
-   html+=`<div class="zakat-field"><label>Стоимость найденного (${sym})</label><input type="number" data-zf="value" value="${saved.value||''}" min="0" step="0.01" placeholder="0">
-    <span class="field-hint">Нет нисаба. Ставка 20% (хумс). Выплачивается немедленно при находке. Включает древние клады (рикяз) и полезные ископаемые (ма\`дин). Разногласие учёных: некоторые относят ма\`дин к 2.5%.</span></div>`;
+   html+=`<div class="zakat-field"><label>Стоимость найденного ($)</label><input type="number" data-zf="value" value="${saved.value||''}" min="0" step="0.01" placeholder="0">
+    <span class="field-hint">Нет нисаба. Ставка 20% (хумс). Выплачивается немедленно при находке. Включает древние клады (рикяз) и полезные ископаемые (ма\`дин).</span></div>`;
    break;}
  html+='</div>';
  $('#zakatFormContainer').innerHTML=html;
@@ -917,13 +866,9 @@ function updateZakatResult(){
   $('#zrValue').textContent='Ниже нисаба';
   $('#zrDetail').textContent=res.detail;
  }else{
-  const isHead=['sheep','cattle','camels'].includes(type);
-  const isKg=type==='crops';
-  let display;
-  if(isHead) display=res.zakatUSD+' '+plural(res.zakatUSD,['голова','головы','голов']);
-  else if(isKg) display=res.zakatUSD.toFixed(1)+' кг';
-  else display=fmtCur(res.zakatUSD);
-  $('#zrValue').textContent=display;
+  const unit=(type==='sheep'||type==='cattle'||type==='camels')?'голов':(type==='gold'||type==='silver')?'г':'$';
+  const fmt=unit==='$'?'$'+res.zakat.toFixed(2):res.zakat.toFixed(2)+' '+unit;
+  $('#zrValue').textContent=fmt;
   $('#zrDetail').textContent=res.detail;
  }}
 
@@ -932,30 +877,30 @@ $('#zakatTabs').addEventListener('click',e=>{
  finance.zakatType=tab.dataset.zt;saveFinance();
  renderZakatTabs();renderZakatForm();sndTick()});
 
-/* ═══ РАСХОДЫ (в локальной валюте) ═══ */
+/* ═══ РАСХОДЫ ═══ */
 const EXP_CATS={food:'🍎 Еда',transport:'🚗 Транспорт',housing:'🏡 Жильё',health:'💧 Здоровье',sadaqah:'🤲 Садака',education:'📚 Учёба',other:'📦 Другое'};
 function currentMonthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
 function renderExpenses(){
  const mk=currentMonthKey();
- const cur=getCur();
  const items=finance.expenses.filter(e=>e.month===mk);
  const total=items.reduce((s,e)=>s+e.amount,0);
  $('#expList').innerHTML=items.length?items.slice().reverse().map(e=>
   `<div class="expense-item">
    <span class="ei-cat">${EXP_CATS[e.cat]||e.cat}</span>
-   <span class="ei-amount">${e.amount.toLocaleString('ru-RU',{maximumFractionDigits:2})} ${cur.sym}</span>
+   <span class="ei-desc">${esc(e.desc||'')}</span>
+   <span class="ei-amount">$${e.amount.toFixed(2)}</span>
    <button class="ei-del" data-eid="${e.id}">✕</button>
   </div>`).join(''):'<div class="empty" style="padding:20px"><p>Нет расходов за этот месяц</p></div>';
  const byCat={};items.forEach(e=>{byCat[e.cat]=(byCat[e.cat]||0)+e.amount});
- $('#expSummary').innerHTML=`<span class="expense-sum">📊 Итого: <b>${total.toLocaleString('ru-RU',{maximumFractionDigits:2})} ${cur.sym}</b></span>`+
+ $('#expSummary').innerHTML=`<span class="expense-sum">📊 Итого: <b>$${total.toFixed(2)}</b></span>`+
   Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([c,v])=>
-   `<span class="expense-sum">${EXP_CATS[c]||c}: <b>${v.toLocaleString('ru-RU',{maximumFractionDigits:2})} ${cur.sym}</b></span>`).join('');}
+   `<span class="expense-sum">${EXP_CATS[c]||c}: <b>$${v.toFixed(2)}</b></span>`).join('');}
 $('#expAdd').onclick=()=>{
  const amt=parseFloat($('#expAmount').value);if(!amt||amt<=0)return;
  const cat=$('#expCat').value;
  finance.expenses.push({id:uid(),amount:amt,cat,month:currentMonthKey(),desc:''});
  saveFinance();renderExpenses();$('#expAmount').value='';sndTick();
- toast(`Расход ${amt} ${getCur().sym} добавлен`)};
+ toast(`Расход $${amt.toFixed(2)} добавлен`)};
 $('#expAmount').addEventListener('keydown',e=>{if(e.key==='Enter')$('#expAdd').click()});
 $('#expList').addEventListener('click',e=>{
  const btn=e.target.closest('[data-eid]');if(!btn)return;
@@ -965,7 +910,7 @@ $('#expList').addEventListener('click',e=>{
  saveFinance();renderExpenses();
  toast('Расход удалён',()=>{finance.expenses=snap;saveFinance();renderExpenses()})});
 
-function renderFinance(){renderCurrencyBar();renderZakatTabs();renderZakatForm();renderExpenses()}
+function renderFinance(){renderZakatTabs();renderZakatForm();renderExpenses()}
 
 /* ═══ ИБАДАТ: рендер ═══ */
 function renderIbadat(){
