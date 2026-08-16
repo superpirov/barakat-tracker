@@ -491,6 +491,33 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
         </div>
         <div class="prayer-times-grid" id="prayerTimesGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px"></div>
       </div>
+      <!-- Компас киблы -->
+      <div class="ibadat-card">
+        <h2><span>🧭</span> Компас киблы</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Направление на Мекку (Каабу) относительно севера</p>
+        <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;justify-content:center">
+          <div class="qibla-compass" id="qiblaCompass" style="position:relative;width:220px;height:220px;border-radius:50%;background:var(--panel);border:3px solid var(--line);box-shadow:var(--shadow);display:none">
+            <!-- Внешнее кольцо с градусами -->
+            <div style="position:absolute;inset:0;border-radius:50%;border:2px dashed var(--line);opacity:.3"></div>
+            <!-- Маркеры сторон света -->
+            <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-weight:700;font-size:13px;color:var(--muted)">N</div>
+            <div style="position:absolute:bottom:8px;left:50%;transform:translateX(-50%);font-weight:700;font-size:13px;color:var(--muted)">S</div>
+            <div style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-weight:700;font-size:13px;color:var(--muted)">W</div>
+            <div style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-weight:700;font-size:13px;color:var(--muted)">E</div>
+            <!-- Стрелка киблы -->
+            <div id="qiblaArrow" style="position:absolute;top:50%;left:50%;width:4px;height:90px;background:linear-gradient(to top,var(--accent),transparent);transform-origin:bottom center;transform:translate(-50%,-100%) rotate(0deg);border-radius:4px 4px 0 0;transition:transform .3s ease-out">
+              <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid var(--accent)"></div>
+            </div>
+            <!-- Центральный маркер Каабы -->
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:16px;background:var(--accent);border-radius:50%;border:3px solid var(--panel);box-shadow:0 2px 8px rgba(0,0,0,.2)"></div>
+          </div>
+          <div style="text-align:center;min-width:180px">
+            <div id="qiblaDirection" style="font-family:var(--fd);font-weight:700;font-size:32px;color:var(--accent);margin-bottom:6px">—°</div>
+            <div id="qiblaStatus" style="font-size:13px;color:var(--muted)">Требуется геолокация</div>
+            <button class="gbtn" id="qiblaRefreshBtn" style="margin-top:12px;display:none;font-size:13px">🔄 Обновить компас</button>
+          </div>
+        </div>
+      </div>
       <!-- Намазы сегодня -->
       <div class="ibadat-card">
         <h2><span>🕌</span> Намазы сегодня</h2>
@@ -708,6 +735,8 @@ async function updatePrayerTimes(){
   savePrayerState();
   renderPrayerTimes(times);
   $('#locationName').textContent=times.city?`${times.city}, ${times.country}`:'';
+  // Обновить компас киблы
+  updateQiblaCompass(prayerState.lat,prayerState.lon);
  }
  $('#geoBtn').disabled=false;
  $('#geoBtn').innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>📍 Обновить`;
@@ -723,6 +752,54 @@ function renderPrayerTimes(times){
    <span class="prayer-time-val">${times[k]}</span>
   </div>
  `).join('');
+}
+
+/* ═══ КОМПАС КИБЛЫ ═══ */
+function calculateQibla(lat,lon){
+ // Координаты Каабы (Мекка)
+ const kaabaLat=21.422487;
+ const kaabaLon=39.826206;
+ // Перевод в радианы
+ const phi1=lat*Math.PI/180;
+ const phi2=kaabaLat*Math.PI/180;
+ const deltaLambda=(kaabaLon-lon)*Math.PI/180;
+ // Формула начального пеленга
+ const y=Math.sin(deltaLambda)*Math.cos(phi2);
+ const x=Math.cos(phi1)*Math.sin(phi2)-Math.sin(phi1)*Math.cos(phi2)*Math.cos(deltaLambda);
+ let theta=Math.atan2(y,x)*180/Math.PI;
+ // Нормализация до 0-360
+ return((theta+360)%360);
+}
+
+function updateQiblaCompass(lat,lon){
+ const qiblaAngle=calculateQibla(lat,lon);
+ const compass=$('#qiblaCompass');
+ const arrow=$('#qiblaArrow');
+ const directionDisplay=$('#qiblaDirection');
+ const statusDisplay=$('#qiblaStatus');
+ const refreshBtn=$('#qiblaRefreshBtn');
+ 
+ if(compass&&arrow&&directionDisplay){
+  compass.style.display='block';
+  refreshBtn.style.display='inline-flex';
+  arrow.style.transform=`translate(-50%,-100%) rotate(${qiblaAngle}deg)`;
+  directionDisplay.textContent=`${Math.round(qiblaAngle)}°`;
+  statusDisplay.textContent='Направление на Каабу';
+ }
+}
+
+$('#qiblaRefreshBtn').onclick=()=>{
+ if(prayerState.lat&&prayerState.lon){
+  updateQiblaCompass(prayerState.lat,prayerState.lon);
+  showToast('🧭 Компас обновлён');
+ }else{
+  showToast('📍 Сначала определите местоположение');
+ }
+};
+
+// Инициализация компаса при загрузке, если есть координаты
+if(prayerState.lat&&prayerState.lon){
+ updateQiblaCompass(prayerState.lat,prayerState.lon);
 }
 
 /* ══════════════════════════════════════
