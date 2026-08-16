@@ -93,6 +93,8 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 /* ── мобильная шапка ── */
 .m-bar{display:none;align-items:center;gap:10px;margin-bottom:6px}
 .m-cats{display:none;gap:8px;flex-wrap:wrap;padding:6px 2px 10px}
+.m-add-cat{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;border:1.5px dashed var(--line);background:var(--panel2);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:.18s;white-space:nowrap}
+.m-add-cat:hover{color:var(--accent);border-color:var(--accent);transform:translateY(-1px)}
 
 /* ── композер ── */
 .composer{background:var(--panel);border:1px solid var(--line);border-radius:var(--rl);padding:16px 18px;box-shadow:var(--shadow)}
@@ -228,6 +230,11 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 .week-day.today .week-score{color:var(--accent)}
 .ibadat-stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
 .ibadat-stat{display:inline-flex;gap:7px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;box-shadow:var(--shadow)}
+.prayer-time-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border-radius:var(--rm);border:1.5px solid var(--line);background:var(--panel2);transition:.2s}
+.prayer-time-item:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.prayer-time-icon{font-size:20px;line-height:1}
+.prayer-time-name{font-size:11px;font-weight:700;text-align:center;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.prayer-time-val{font-family:var(--fd);font-weight:700;font-size:15px;color:var(--ink)}
 
 /* ═══ ФОКУС-ТАЙМЕР ═══ */
 .focus-section{display:none;flex-direction:column;gap:18px;margin-top:4px}
@@ -358,6 +365,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
   .tab{flex:1;justify-content:center}
   .bottom-nav{display:flex}
   .salah-grid{grid-template-columns:repeat(3,1fr)}
+  .prayer-times-grid{grid-template-columns:repeat(3,1fr)!important}
   .week-grid{gap:4px}
   .week-day{padding:8px 2px}
   .week-label{font-size:9px}
@@ -467,6 +475,49 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 
     <!-- ═══ РАЗДЕЛ: ИБАДАТ ═══ -->
     <div id="sectionIbadat" class="ibadat-section">
+      <!-- Время намаза -->
+      <div class="ibadat-card">
+        <h2><span>🕋</span> Время намаза</h2>
+        <div class="prayer-times-row" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+          <button class="gbtn" id="geoBtn" style="display:inline-flex;gap:8px;align-items:center">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            📍 Определить местоположение
+          </button>
+          <select id="prayerMethod" class="gbtn" style="font-size:13px">
+            <option value="umm_al_qura">Umm al-Qura (Саудовская Аравия)</option>
+            <option value="mwl">MWL (Всемирная мусульманская лига)</option>
+          </select>
+          <span id="locationName" style="font-size:13px;color:var(--muted);margin-left:auto"></span>
+        </div>
+        <div class="prayer-times-grid" id="prayerTimesGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px"></div>
+      </div>
+      <!-- Компас киблы -->
+      <div class="ibadat-card">
+        <h2><span>🧭</span> Компас киблы</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Направление на Мекку (Каабу) относительно севера</p>
+        <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;justify-content:center">
+          <div class="qibla-compass" id="qiblaCompass" style="position:relative;width:220px;height:220px;border-radius:50%;background:var(--panel);border:3px solid var(--line);box-shadow:var(--shadow);display:none">
+            <!-- Внешнее кольцо с градусами -->
+            <div style="position:absolute;inset:0;border-radius:50%;border:2px dashed var(--line);opacity:.3"></div>
+            <!-- Маркеры сторон света -->
+            <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-weight:700;font-size:13px;color:var(--muted)">N</div>
+            <div style="position:absolute:bottom:8px;left:50%;transform:translateX(-50%);font-weight:700;font-size:13px;color:var(--muted)">S</div>
+            <div style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-weight:700;font-size:13px;color:var(--muted)">W</div>
+            <div style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-weight:700;font-size:13px;color:var(--muted)">E</div>
+            <!-- Стрелка киблы -->
+            <div id="qiblaArrow" style="position:absolute;top:50%;left:50%;width:4px;height:90px;background:linear-gradient(to top,var(--accent),transparent);transform-origin:bottom center;transform:translate(-50%,-100%) rotate(0deg);border-radius:4px 4px 0 0;transition:transform .3s ease-out">
+              <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid var(--accent)"></div>
+            </div>
+            <!-- Центральный маркер Каабы -->
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:16px;background:var(--accent);border-radius:50%;border:3px solid var(--panel);box-shadow:0 2px 8px rgba(0,0,0,.2)"></div>
+          </div>
+          <div style="text-align:center;min-width:180px">
+            <div id="qiblaDirection" style="font-family:var(--fd);font-weight:700;font-size:32px;color:var(--accent);margin-bottom:6px">—°</div>
+            <div id="qiblaStatus" style="font-size:13px;color:var(--muted)">Требуется геолокация</div>
+            <button class="gbtn" id="qiblaRefreshBtn" style="margin-top:12px;display:none;font-size:13px">🔄 Обновить компас</button>
+          </div>
+        </div>
+      </div>
       <!-- Намазы сегодня -->
       <div class="ibadat-card">
         <h2><span>🕌</span> Намазы сегодня</h2>
@@ -636,6 +687,120 @@ const SALAH_LIST=[
  {id:'asr',name:'Аср',icon:'🌤️'},
  {id:'maghrib',name:'Магриб',icon:'🌇'},
  {id:'isha',name:'Иша',icon:'🌙'}];
+
+/* ══════════════════════════════════════
+   ВРЕМЯ НАМАЗА: ГЕОЛОКАЦИЯ + API
+   ══════════════════════════════════════ */
+let prayerState={lat:null,lon:null,city:null,country:null,method:'umm_al_qura',times:{}};
+function loadPrayerState(){try{const r=localStorage.getItem('barakat.prayers');if(r)prayerState={...prayerState,...JSON.parse(r)}}catch(e){}}
+function savePrayerState(){try{localStorage.setItem('barakat.prayers',JSON.stringify(prayerState))}catch(e){}}
+
+async function fetchPrayerTimes(lat,lon,method,date=new Date()){
+ const methodParam=method==='mwl'?2:5;
+ const dateStr=date.toISOString().split('T')[0];
+ const url=`https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lon}&method=${methodParam}`;
+ try{
+  const res=await fetch(url);
+  if(!res.ok)throw new Error('API error');
+  const data=await res.json();
+  const t=data.data.timings;
+  return{
+   fajr:t.Fajr,
+   dhuhr:t.Dhuhr,
+   asr:t.Asr,
+   maghrib:t.Maghrib,
+   isha:t.Isha,
+   sunrise:t.Sunrise,
+   sunset:t.Sunset,
+   city:data.data.meta.timezone,
+   country:data.data.meta.country
+  };
+ }catch(e){
+  console.error('Ошибка получения времени намаза:',e);
+  return null;
+ }}
+
+async function updatePrayerTimes(){
+ if(prayerState.lat===null||prayerState.lon===null){
+  $('#prayerTimesGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px">Нажмите «Определить местоположение» для получения времени намаза</div>';
+  return;
+ }
+ $('#geoBtn').disabled=true;
+ $('#geoBtn').textContent='⏳ Загрузка...';
+ const times=await fetchPrayerTimes(prayerState.lat,prayerState.lon,prayerState.method);
+ if(times){
+  prayerState.times=times;
+  prayerState.city=times.city;
+  prayerState.country=times.country;
+  savePrayerState();
+  renderPrayerTimes(times);
+  $('#locationName').textContent=times.city?`${times.city}, ${times.country}`:'';
+  // Обновить компас киблы
+  updateQiblaCompass(prayerState.lat,prayerState.lon);
+ }
+ $('#geoBtn').disabled=false;
+ $('#geoBtn').innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>📍 Обновить`;
+}
+
+function renderPrayerTimes(times){
+ const icons={fajr:'🌅',dhuhr:'☀️',asr:'🌤️',maghrib:'🌇',isha:'🌙'};
+ const names={fajr:'Фаджр',dhuhr:'Зухр',asr:'Аср',maghrib:'Магриб',isha:'Иша'};
+ $('#prayerTimesGrid').innerHTML=['fajr','dhuhr','asr','maghrib','isha'].map(k=>`
+  <div class="prayer-time-item">
+   <span class="prayer-time-icon">${icons[k]}</span>
+   <span class="prayer-time-name">${names[k]}</span>
+   <span class="prayer-time-val">${times[k]}</span>
+  </div>
+ `).join('');
+}
+
+/* ═══ КОМПАС КИБЛЫ ═══ */
+function calculateQibla(lat,lon){
+ // Координаты Каабы (Мекка)
+ const kaabaLat=21.422487;
+ const kaabaLon=39.826206;
+ // Перевод в радианы
+ const phi1=lat*Math.PI/180;
+ const phi2=kaabaLat*Math.PI/180;
+ const deltaLambda=(kaabaLon-lon)*Math.PI/180;
+ // Формула начального пеленга
+ const y=Math.sin(deltaLambda)*Math.cos(phi2);
+ const x=Math.cos(phi1)*Math.sin(phi2)-Math.sin(phi1)*Math.cos(phi2)*Math.cos(deltaLambda);
+ let theta=Math.atan2(y,x)*180/Math.PI;
+ // Нормализация до 0-360
+ return((theta+360)%360);
+}
+
+function updateQiblaCompass(lat,lon){
+ const qiblaAngle=calculateQibla(lat,lon);
+ const compass=$('#qiblaCompass');
+ const arrow=$('#qiblaArrow');
+ const directionDisplay=$('#qiblaDirection');
+ const statusDisplay=$('#qiblaStatus');
+ const refreshBtn=$('#qiblaRefreshBtn');
+ 
+ if(compass&&arrow&&directionDisplay){
+  compass.style.display='block';
+  refreshBtn.style.display='inline-flex';
+  arrow.style.transform=`translate(-50%,-100%) rotate(${qiblaAngle}deg)`;
+  directionDisplay.textContent=`${Math.round(qiblaAngle)}°`;
+  statusDisplay.textContent='Направление на Каабу';
+ }
+}
+
+$('#qiblaRefreshBtn').onclick=()=>{
+ if(prayerState.lat&&prayerState.lon){
+  updateQiblaCompass(prayerState.lat,prayerState.lon);
+  showToast('🧭 Компас обновлён');
+ }else{
+  showToast('📍 Сначала определите местоположение');
+ }
+};
+
+// Инициализация компаса при загрузке, если есть координаты
+if(prayerState.lat&&prayerState.lon){
+ updateQiblaCompass(prayerState.lat,prayerState.lon);
+}
 
 /* ══════════════════════════════════════
    ВАЛЮТЫ БЫВШЕГО СССР + USD/EUR
@@ -1254,7 +1419,8 @@ function renderNav(){
  $('#catNav').innerHTML=row('all','🗂️','Все задачи','#8A9AA8',act.length,true)
   +state.cats.map(c=>row(c.id,c.emoji,c.name,c.color,act.filter(t=>t.catId===c.id).length,c.fixed)).join('');
  $('#catNavM').innerHTML=`<button class="chip ${state.filter==='all'?'on':''}" data-f="all" style="--c:#8A9AA8">🗂️ Все</button>`
-  +state.cats.map(c=>`<button class="chip ${state.filter===c.id?'on':''}" data-f="${c.id}" style="--c:${c.color}">${c.emoji} ${esc(c.name)}</button>`).join('');
+  +state.cats.map(c=>`<button class="chip ${state.filter===c.id?'on':''}" data-f="${c.id}" style="--c:${c.color}">${c.emoji} ${esc(c.name)}</button>`).join('')
+  +`<button class="m-add-cat" id="mAddCatBtn">＋ Категория</button>`;
  renderPicker();}
 function renderPicker(){
  $('#catPicker').innerHTML=state.cats.map(c=>
@@ -1438,7 +1604,9 @@ function markDlg(){$$('#egrid button').forEach(b=>b.classList.toggle('on',b.data
  $$('#cgrid button').forEach(b=>b.classList.toggle('on',b.dataset.c===dlgColor))}
 $('#egrid').onclick=e=>{const b=e.target.closest('button');if(b){dlgEmoji=b.dataset.e;markDlg()}};
 $('#cgrid').onclick=e=>{const b=e.target.closest('button');if(b){dlgColor=b.dataset.c;markDlg()}};
-$('#addCatBtn').onclick=()=>{$('#catName').value='';dlgEmoji='✨';dlgColor=PALETTE[Math.floor(Math.random()*PALETTE.length)];markDlg();dlg.showModal();setTimeout(()=>$('#catName').focus(),50)};
+const openCatDlg=()=>{$('#catName').value='';dlgEmoji='✨';dlgColor=PALETTE[Math.floor(Math.random()*PALETTE.length)];markDlg();dlg.showModal();setTimeout(()=>$('#catName').focus(),50)};
+$('#addCatBtn').onclick=openCatDlg;
+document.addEventListener('click',e=>{if(e.target.closest('#mAddCatBtn'))openCatDlg()});
 $('#dlgCancel').onclick=()=>dlg.close();
 $('#catForm').addEventListener('submit',e=>{e.preventDefault();
  const name=$('#catName').value.trim();if(!name)return;
@@ -1489,6 +1657,21 @@ document.addEventListener('keydown',e=>{
  if(e.key==='Escape'&&state.editing){state.editing=null;renderList()}});
 
 /* ── старт ── */
-load();loadIbadat();loadFinance();loadGratitude();loadFocus();applyToggles();renderHello();rescheduleAllNotifications();switchSection(state.section||'tasks');</script>
+load();loadIbadat();loadFinance();loadGratitude();loadFocus();loadPrayerState();applyToggles();renderHello();rescheduleAllNotifications();switchSection(state.section||'tasks');
+
+/* ═══ ИБАДАТ: обработчики времени намаза ═══ */
+$('#geoBtn').onclick=()=>{
+ if(!navigator.geolocation){alert('Геолокация не поддерживается вашим браузером');return;}
+ navigator.geolocation.getCurrentPosition(
+  pos=>{prayerState.lat=pos.coords.latitude;prayerState.lon=pos.coords.longitude;savePrayerState();updatePrayerTimes();},
+  err=>{console.error(err);alert('Не удалось получить местоположение. Проверьте разрешения.');},
+  {enableHighAccuracy:true,timeout:10000,maximumAge:300000});
+};
+
+$('#prayerMethod').value=prayerState.method;
+$('#prayerMethod').onchange=e=>{prayerState.method=e.target.value;savePrayerState();if(prayerState.lat&&prayerState.lon)updatePrayerTimes();};
+
+if(prayerState.lat&&prayerState.lon){updatePrayerTimes();}
+</script>
 </body>
 </html>
