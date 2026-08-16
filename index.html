@@ -93,6 +93,8 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 /* ── мобильная шапка ── */
 .m-bar{display:none;align-items:center;gap:10px;margin-bottom:6px}
 .m-cats{display:none;gap:8px;flex-wrap:wrap;padding:6px 2px 10px}
+.m-add-cat{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;border:1.5px dashed var(--line);background:var(--panel2);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:.18s;white-space:nowrap}
+.m-add-cat:hover{color:var(--accent);border-color:var(--accent);transform:translateY(-1px)}
 
 /* ── композер ── */
 .composer{background:var(--panel);border:1px solid var(--line);border-radius:var(--rl);padding:16px 18px;box-shadow:var(--shadow)}
@@ -1254,7 +1256,8 @@ function renderNav(){
  $('#catNav').innerHTML=row('all','🗂️','Все задачи','#8A9AA8',act.length,true)
   +state.cats.map(c=>row(c.id,c.emoji,c.name,c.color,act.filter(t=>t.catId===c.id).length,c.fixed)).join('');
  $('#catNavM').innerHTML=`<button class="chip ${state.filter==='all'?'on':''}" data-f="all" style="--c:#8A9AA8">🗂️ Все</button>`
-  +state.cats.map(c=>`<button class="chip ${state.filter===c.id?'on':''}" data-f="${c.id}" style="--c:${c.color}">${c.emoji} ${esc(c.name)}</button>`).join('');
+  +state.cats.map(c=>`<button class="chip ${state.filter===c.id?'on':''}" data-f="${c.id}" style="--c:${c.color}">${c.emoji} ${esc(c.name)}</button>`).join('')
+  +`<button class="m-add-cat" id="mAddCatBtn">＋ Категория</button>`;
  renderPicker();}
 function renderPicker(){
  $('#catPicker').innerHTML=state.cats.map(c=>
@@ -1438,7 +1441,9 @@ function markDlg(){$$('#egrid button').forEach(b=>b.classList.toggle('on',b.data
  $$('#cgrid button').forEach(b=>b.classList.toggle('on',b.dataset.c===dlgColor))}
 $('#egrid').onclick=e=>{const b=e.target.closest('button');if(b){dlgEmoji=b.dataset.e;markDlg()}};
 $('#cgrid').onclick=e=>{const b=e.target.closest('button');if(b){dlgColor=b.dataset.c;markDlg()}};
-$('#addCatBtn').onclick=()=>{$('#catName').value='';dlgEmoji='✨';dlgColor=PALETTE[Math.floor(Math.random()*PALETTE.length)];markDlg();dlg.showModal();setTimeout(()=>$('#catName').focus(),50)};
+const openCatDlg=()=>{$('#catName').value='';dlgEmoji='✨';dlgColor=PALETTE[Math.floor(Math.random()*PALETTE.length)];markDlg();dlg.showModal();setTimeout(()=>$('#catName').focus(),50)};
+$('#addCatBtn').onclick=openCatDlg;
+document.addEventListener('click',e=>{if(e.target.closest('#mAddCatBtn'))openCatDlg()});
 $('#dlgCancel').onclick=()=>dlg.close();
 $('#catForm').addEventListener('submit',e=>{e.preventDefault();
  const name=$('#catName').value.trim();if(!name)return;
