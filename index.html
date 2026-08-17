@@ -260,8 +260,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 .compass-west{left:14px;top:50%;transform:translateY(-50%)}
 .compass-ticks{position:absolute;inset:8px;border-radius:50%;border:2px dashed var(--line);opacity:.5}
 .compass-inner{position:absolute;inset:20px;border-radius:50%;background:conic-gradient(from 0deg,var(--panel2),var(--panel));border:2px solid var(--line);box-shadow:inset 0 0 20px rgba(0,0,0,.1);transition:transform .1s ease-out}
-.qibla-direction{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:4px;height:50%;background:linear-gradient(to bottom,var(--accent),transparent);border-radius:2px}
-.qibla-arrow{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:18px;color:var(--accent);filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+.qibla-arrow{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-size:24px;color:var(--accent);filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
 .compass-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:var(--accent);border:3px solid var(--panel);box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:2}
 .qibla-status{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--panel);border-radius:var(--rs);font-size:12px;font-weight:600;color:var(--muted)}
 .status-icon{font-size:16px}
@@ -519,17 +518,6 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
             <select id="prayerMethod" class="method-select">
               <option value="5">Umm al-Qura (Мекка)</option>
               <option value="1">Всемирная исламская лига</option>
-              <option value="2">Египет</option>
-              <option value="3">Исламский университет Карачи</option>
-              <option value="4">Духовное управление мусульман России</option>
-              <option value="7">Институт геофизики Ирана</option>
-              <option value="8">Америка</option>
-              <option value="9">Кувейт</option>
-              <option value="10">Тунис</option>
-              <option value="11">Марокко</option>
-              <option value="12">Сингапур</option>
-              <option value="13">Франция</option>
-              <option value="14">Турция</option>
             </select>
           </div>
           <div class="prayer-times-list" id="prayerTimesList"></div>
@@ -549,7 +537,6 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
               <div class="compass-ticks"></div>
             </div>
             <div class="compass-inner" id="compassInner">
-              <div class="qibla-direction"></div>
               <div class="qibla-arrow">☨</div>
             </div>
             <div class="compass-center"></div>
@@ -734,18 +721,7 @@ const SALAH_LIST=[
 // ════ МЕТОДЫ РАСЧЁТА ВРЕМЕНИ НАМАЗОВ ════
 const PRAYER_METHODS={
  1:{name:'Всемирная исламская лига',fajrAngle:18,ishaAngle:17},
- 2:{name:'Египет',fajrAngle:19.5,ishaAngle:17.5},
- 3:{name:'Исламский университет Карачи',fajrAngle:18,ishaAngle:18},
- 4:{name:'ДУМ России',fajrAngle:16,ishaAngle:15},
- 5:{name:'Umm al-Qura (Мекка)',fajrAngle:18.5,ishaAngle:0},
- 7:{name:'Институт геофизики Ирана',fajrAngle:17.7,ishaAngle:14},
- 8:{name:'Америка (ISNA)',fajrAngle:15,ishaAngle:15},
- 9:{name:'Кувейт',fajrAngle:18,ishaAngle:17.5},
- 10:{name:'Тунис',fajrAngle:18,ishaAngle:17},
- 11:{name:'Марокко',fajrAngle:19,ishaAngle:17},
- 12:{name:'Сингапур',fajrAngle:20,ishaAngle:18},
- 13:{name:'Франция (UOIF)',fajrAngle:12,ishaAngle:12},
- 14:{name:'Турция (Diyanet)',fajrAngle:18,ishaAngle:17}
+ 5:{name:'Umm al-Qura (Мекка)',fajrAngle:18.5,ishaAngle:0}
 };
 
 // ════ СОСТОЯНИЕ ДЛЯ ВРЕМЕНИ НАМАЗОВ И КИБЛЫ ════
@@ -1455,16 +1431,20 @@ function initCompass(){
  
  function handleOrientation(e){
   let h=0;
+  // iOS: webkitCompassHeading — это угол относительно магнитного севера
   if(e.webkitCompassHeading!==undefined){
    h=e.webkitCompassHeading;
   }else if(e.alpha!==null){
+   // Android: alpha — это угол поворота вокруг оси Z (0-360)
    h=360-e.alpha;
   }
   heading=h;
   
   if(prayerState.qiblaAngle!==null){
-   const relativeAngle=(prayerState.qiblaAngle-heading+360)%360;
-   $('#compassInner').style.transform=`rotate(${heading}deg)`;
+   // Поворачиваем внутренний круг компаса против направления поворота телефона
+   // чтобы стрелка киблы всегда указывала на Каабу
+   const rotation=-heading+prayerState.qiblaAngle;
+   $('#compassInner').style.transform=`rotate(${rotation}deg)`;
    $('#qiblaAngle').textContent=Math.round(prayerState.qiblaAngle)+'°';
    
    const statusEl=$('#qiblaStatus');
@@ -1496,6 +1476,10 @@ function initCompass(){
     $('#qiblaStatus').classList.add('error');
    }
   };
+ }else{
+  // Для устройств без запроса разрешений (Android, старые iOS)
+  $('#qiblaStatus').innerHTML='<span class="status-icon">🧭</span><span class="status-text">Компас активен</span>';
+  $('#qiblaStatus').classList.add('calibrated');
  }
 }
 
