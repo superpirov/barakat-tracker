@@ -449,7 +449,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
       <button class="ibtn sound-btn"></button>
     </div>
     <div class="m-cats" id="catNavM"></div>
-    <button class="add-cat-mob" id="addCatBtnMob" style="display:none">＋ Категория</button>
+    <button class="add-cat-mob" id="addCatBtnMob">＋ Категория</button>
 
     <!-- ШАПКА ДНЯ -->
     <header class="top">
@@ -543,12 +543,12 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
             </div>
             <div class="compass-inner" id="compassInner">
               <div class="qibla-arrow">
-                <svg width="24" height="40" viewBox="0 0 24 40" fill="none">
-                  <path d="M12 0L12 32" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
-                  <circle cx="12" cy="8" r="6" fill="var(--accent)"/>
-                  <path d="M12 32L6 20H18L12 32Z" fill="var(--accent)"/>
+                <svg width="28" height="48" viewBox="0 0 28 48" fill="none">
+                  <path d="M14 0L14 38" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/>
+                  <circle cx="14" cy="10" r="7" fill="var(--accent)"/>
+                  <path d="M14 38L8 26H20L14 38Z" fill="var(--accent)"/>
                 </svg>
-                <span style="font-size:18px;display:block;text-align:center;margin-top:4px">🕋</span>
+                <span style="font-size:22px;display:block;text-align:center;margin-top:6px">🕋</span>
               </div>
             </div>
             <div class="compass-center"></div>
@@ -733,7 +733,7 @@ const SALAH_LIST=[
 // ════ МЕТОДЫ РАСЧЁТА ВРЕМЕНИ НАМАЗОВ ════
 const PRAYER_METHODS={
  1:{name:'Всемирная исламская лига',fajrAngle:18,ishaAngle:17},
- 5:{name:'Umm al-Qura (Мекка)',fajrAngle:18.5,ishaAngle:0}
+ 5:{name:'Umm al-Qura (Мекка)',fajrAngle:18.5,ishaAngle:18}
 };
 
 // ════ СОСТОЯНИЕ ДЛЯ ВРЕМЕНИ НАМАЗОВ И КИБЛЫ ════
@@ -914,8 +914,9 @@ function switchSection(sec){
  $('#catNavLabel').style.display=isTasks?'':'none';
  $('#catNav').style.display=isTasks?'':'none';
  $('#addCatBtn').style.display=isTasks?'':'none';
- // Мобильные категории
+ // Мобильные категории и кнопка добавления
  $('#catNavM').style.display=isTasks?'':'none';
+ $('#addCatBtnMob').style.display=isTasks?'':'none';
  // Шапка: кольцо прогресса только для задач
  $('#headRight').style.display=isTasks?'':'none';
  // Нижняя навигация
@@ -1337,9 +1338,9 @@ function calculatePrayerTimes(lat,lon,method,date){
  const latRad=toRadians(lat);
  const asrAltitude=Math.atan(1/(asrFactor+Math.tan(Math.abs(latRad-declination))));
  
- // Фаджр и Иша по углам
- const fajrAngle=-toRadians(m.fajrAngle);
- const ishaAngle=m.ishaAngle>0?-toRadians(m.ishaAngle):null;
+ // Фаджр и Иша по углам солнца над горизонтом
+ const fajrAngle=toRadians(-m.fajrAngle);
+ const ishaAngle=m.ishaAngle>0?toRadians(-m.ishaAngle):null;
  
  // Расчёт времени для угла солнца
  function timeForAngle(angleRad){
