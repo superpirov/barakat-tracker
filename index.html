@@ -492,29 +492,51 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
         <div class="prayer-times-grid" id="prayerTimesGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px"></div>
       </div>
       <!-- Компас киблы -->
-      <div class="ibadat-card">
+       <div class="ibadat-card">
         <h2><span>🧭</span> Компас киблы</h2>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Направление на Мекку (Каабу) относительно севера</p>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Наведите телефон в сторону Каабы. Диск вращается, стрелка указывает на Мекку.</p>
+        
         <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;justify-content:center">
-          <div class="qibla-compass" id="qiblaCompass" style="position:relative;width:220px;height:220px;border-radius:50%;background:var(--panel);border:3px solid var(--line);box-shadow:var(--shadow);display:none">
-            <!-- Внешнее кольцо с градусами -->
-            <div style="position:absolute;inset:0;border-radius:50%;border:2px dashed var(--line);opacity:.3"></div>
-            <!-- Маркеры сторон света -->
-            <div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-weight:700;font-size:13px;color:var(--muted)">N</div>
-            <div style="position:absolute:bottom:8px;left:50%;transform:translateX(-50%);font-weight:700;font-size:13px;color:var(--muted)">S</div>
-            <div style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-weight:700;font-size:13px;color:var(--muted)">W</div>
-            <div style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-weight:700;font-size:13px;color:var(--muted)">E</div>
-            <!-- Стрелка киблы -->
-            <div id="qiblaArrow" style="position:absolute;top:50%;left:50%;width:4px;height:90px;background:linear-gradient(to top,var(--accent),transparent);transform-origin:bottom center;transform:translate(-50%,-100%) rotate(0deg);border-radius:4px 4px 0 0;transition:transform .3s ease-out">
-              <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid var(--accent)"></div>
+          <!-- Визуальный компас -->
+          <div id="qiblaCompassContainer" style="position:relative;width:240px;height:240px;display:none">
+            <!-- Внешний круг (корпус) -->
+            <div style="position:absolute;inset:0;border-radius:50%;background:linear-gradient(145deg,#1a1a1a,#2d2d2d);border:4px solid #444;box-shadow:0 10px 30px rgba(0,0,0,0.5),inset 0 2px 10px rgba(255,255,255,0.1)">
+              <!-- Маркеры сторон света (фиксированы на корпусе) -->
+              <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);color:#fff;font-weight:800;font-size:16px">N</div>
+              <div style="position:absolute:bottom:10px;left:50%;transform:translateX(-50%);color:#888;font-weight:700;font-size:14px">S</div>
+              <div style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#888;font-weight:700;font-size:14px">W</div>
+              <div style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#888;font-weight:700;font-size:14px">E</div>
+              
+              <!-- Градусная шкала (фиксирована) -->
+              <svg style="position:absolute;inset:0" viewBox="0 0 240 240">
+                <circle cx="120" cy="120" r="100" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="2,4"/>
+                <circle cx="120" cy="120" r="90" fill="none" stroke="#222" stroke-width="1"/>
+              </svg>
+              
+              <!-- Вращающийся диск с направлением на Каабу -->
+              <div id="qiblaDial" style="position:absolute;inset:15px;border-radius:50%;background:radial-gradient(circle,#2a2a2a,#1a1a1a);transition:transform 0.1s ease-out;transform:rotate(0deg)">
+                <!-- Стрелка киблы внутри диска -->
+                <div style="position:absolute;top:50%;left:50%;width:6px;height:100px;background:linear-gradient(to top,#27ae60,transparent);transform-origin:bottom center;transform:translate(-50%,-100%);border-radius:3px 3px 0 0">
+                  <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:18px solid #27ae60;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))"></div>
+                </div>
+                <!-- Надпись QIBLA -->
+                <div style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%) rotate(180deg);color:#27ae60;font-weight:800;font-size:12px;letter-spacing:2px">QIBLA</div>
+              </div>
+              
+              <!-- Центральная точка -->
+              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:14px;height:14px;background:#gold;border-radius:50%;border:3px solid #1a1a1a;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>
             </div>
-            <!-- Центральный маркер Каабы -->
-            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:16px;background:var(--accent);border-radius:50%;border:3px solid var(--panel);box-shadow:0 2px 8px rgba(0,0,0,.2)"></div>
           </div>
-          <div style="text-align:center;min-width:180px">
-            <div id="qiblaDirection" style="font-family:var(--fd);font-weight:700;font-size:32px;color:var(--accent);margin-bottom:6px">—°</div>
-            <div id="qiblaStatus" style="font-size:13px;color:var(--muted)">Требуется геолокация</div>
-            <button class="gbtn" id="qiblaRefreshBtn" style="margin-top:12px;display:none;font-size:13px">🔄 Обновить компас</button>
+          
+          <!-- Информация -->
+          <div style="text-align:center;min-width:160px">
+            <div id="qiblaDegrees" style="font-family:var(--fd);font-weight:700;font-size:36px;color:var(--accent);margin-bottom:4px">—°</div>
+            <div id="qiblaInfo" style="font-size:13px;color:var(--muted);margin-bottom:12px">Требуется геолокация</div>
+            <button id="qiblaStartBtn" class="gbtn" style="font-size:13px;display:inline-flex;gap:6px;align-items:center">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+              Запустить компас
+            </button>
+            <div id="qiblaPermissionMsg" style="font-size:11px;color:#e74c3c;margin-top:8px;display:none"></div>
           </div>
         </div>
       </div>
@@ -1672,6 +1694,112 @@ $('#prayerMethod').value=prayerState.method;
 $('#prayerMethod').onchange=e=>{prayerState.method=e.target.value;savePrayerState();if(prayerState.lat&&prayerState.lon)updatePrayerTimes();};
 
 if(prayerState.lat&&prayerState.lon){updatePrayerTimes();}
+</script>
+<script>
+let qiblaDirection = 0; // Угол киблы относительно истинного севера
+let currentHeading = 0; // Текущий курс телефона
+
+function toRadians(degrees) {
+    return degrees * Math.PI / 180;
+}
+
+function toDegrees(radians) {
+    return radians * 180 / Math.PI;
+}
+
+function calculateQibla(lat, lon) {
+    const meccaLat = 21.422487;
+    const meccaLon = 39.826206;
+    
+    const y = Math.sin(toRadians(meccaLon - lon));
+    const x = Math.cos(toRadians(lat)) * Math.tan(toRadians(meccaLat)) - 
+              Math.sin(toRadians(lat)) * Math.cos(toRadians(meccaLon - lon));
+    
+    let qibla = toDegrees(Math.atan2(y, x));
+    return (qibla + 360) % 360;
+}
+
+function startCompass() {
+    const statusEl = document.getElementById('qibla-status');
+    
+    if (!navigator.geolocation) {
+        statusEl.textContent = "Геолокация не поддерживается";
+        return;
+    }
+
+    statusEl.textContent = "Определение местоположения...";
+    
+    navigator.geolocation.getCurrentPosition((position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        
+        qiblaDirection = calculateQibla(lat, lon);
+        statusEl.textContent = `Кибла: ${qiblaDirection.toFixed(1)}° от Севера`;
+        document.getElementById('qibla-angle-display').textContent = `Угол: ${qiblaDirection.toFixed(1)}°`;
+        
+        // Запуск датчиков ориентации
+        initDeviceOrientation();
+    }, (error) => {
+        statusEl.textContent = "Ошибка геолокации: " + error.message;
+    });
+}
+
+function initDeviceOrientation() {
+    const statusEl = document.getElementById('qibla-status');
+    
+    // Обработчик для iOS 13+
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+            .then(permissionState => {
+                if (permissionState === 'granted') {
+                    window.addEventListener('deviceorientation', handleOrientation);
+                    statusEl.textContent = "Компас активен! Поворачивайте телефон.";
+                } else {
+                    statusEl.textContent = "Доступ к датчикам запрещен";
+                }
+            })
+            .catch(console.error);
+    } else {
+        // Для Android и старых iOS
+        window.addEventListener('deviceorientation', handleOrientation);
+        statusEl.textContent = "Компас активен! Поворачивайте телефон.";
+    }
+}
+
+function handleOrientation(event) {
+    let heading = 0;
+    
+    // webkitCompassHeading доступен только на iOS
+    if (event.webkitCompassHeading) {
+        heading = event.webkitCompassHeading;
+    } else if (event.alpha) {
+        // Для Android (может потребоваться калибровка телефона цифрой 8)
+        // alpha обычно отсчитывается против часовой стрелки, нужно инвертировать
+        heading = 360 - event.alpha;
+    }
+    
+    currentHeading = heading;
+    
+    // Вращаем диск компаса так, чтобы N (север) указывал на реальный север
+    // Если телефон повернут на 30 градусов вправо, диск должен повернуться на -30, чтобы N остался сверху?
+    // Нет, логика такая: 
+    // Мы держим телефон. Верх телефона смотрит на 30°.
+    // Мы хотим, чтобы буква N на экране указывала на реальный Север.
+    // Значит, нам нужно повернуть диск на -heading.
+    
+    const disk = document.getElementById('compass-disk');
+    const arrow = document.getElementById('qibla-arrow');
+    
+    // Вращаем весь диск против движения телефона, чтобы "Север" на экране всегда был Севером в реальности
+    disk.style.transform = `rotate(${-heading}deg)`;
+    
+    // Стрелка должна указывать на угол Киблы относительно Севера
+    // Так как диск уже повернут так, что его верх = Север, то стрелку просто поворачиваем на угол киблы
+    arrow.style.transform = `translate(-50%, -100%) rotate(${qiblaDirection}deg)`;
+}
+
+// Автозапуск при загрузке, если есть сохраненные координаты (опционально)
+// Но лучше по кнопке, как сделано выше.
 </script>
 </body>
 </html>
