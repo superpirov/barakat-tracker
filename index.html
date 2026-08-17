@@ -65,8 +65,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .cat-del:hover{color:var(--danger);background:color-mix(in srgb,var(--danger) 12%,transparent)}
 .add-cat{width:100%;margin-top:10px;padding:10px;border:1.5px dashed var(--line);border-radius:12px;background:transparent;color:var(--muted);font-weight:600;font-size:13.5px;cursor:pointer;transition:.2s}
 .add-cat:hover{color:var(--accent);border-color:var(--accent);transform:translateY(-1px)}
-.add-cat-mob{display:none;width:100%;margin:8px 0;padding:10px;border:1.5px dashed var(--line);border-radius:12px;background:var(--panel2);color:var(--muted);font-weight:600;font-size:13.5px;cursor:pointer;transition:.2s}
-.add-cat-mob:hover{color:var(--accent);border-color:var(--accent);transform:translateY(-1px)}
+.add-cat-mob{display:none}
 .side-foot{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center}
 .ibtn{width:36px;height:36px;border-radius:11px;border:1px solid var(--line);background:var(--panel2);display:grid;place-items:center;cursor:pointer;font-size:15px;transition:.18s}
 .ibtn:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
@@ -94,7 +93,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 
 /* ── мобильная шапка ── */
 .m-bar{display:none;align-items:center;gap:10px;margin-bottom:6px}
-.m-cats{display:none;gap:8px;flex-wrap:wrap;padding:6px 2px 10px}
+.m-cats{display:none;gap:8px;flex-wrap:wrap;padding:6px 2px 10px;align-items:center}
 
 /* ── композер ── */
 .composer{background:var(--panel);border:1px solid var(--line);border-radius:var(--rl);padding:16px 18px;box-shadow:var(--shadow)}
@@ -237,8 +236,9 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 .location-icon{font-size:18px}
 .method-selector{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .method-selector label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
-.method-select{flex:1;min-width:200px;padding:10px 14px;border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);font:600 13px var(--fb);color:var(--ink);outline:none;cursor:pointer}
-.method-select:focus{border-color:var(--accent)}
+.method-select{flex:1;min-width:200px;padding:10px 38px 10px 14px;border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);font:600 13px var(--fb);color:var(--ink);outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2369736C' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;transition:border-color .2s,box-shadow .2s}
+.method-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.method-select option{background:var(--panel);color:var(--ink);padding:10px}
 .prayer-times-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:8px}
 .prayer-time-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;background:var(--panel2);border:1.5px solid var(--line);border-radius:var(--rm);transition:.2s}
 .prayer-time-item:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
@@ -380,7 +380,6 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
   .sidebar{display:none}
   .m-bar{display:flex}
   .m-cats{display:flex}
-  .add-cat-mob{display:block}
   .top{flex-direction:column;align-items:flex-start;gap:16px;margin-bottom:16px}
   .head-right{width:100%;flex-direction:row;align-items:center;justify-content:flex-start;flex-wrap:wrap}
   .ring-card{width:100%}
@@ -449,7 +448,6 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
       <button class="ibtn sound-btn"></button>
     </div>
     <div class="m-cats" id="catNavM"></div>
-    <button class="add-cat-mob" id="addCatBtnMob">＋ Категория</button>
 
     <!-- ШАПКА ДНЯ -->
     <header class="top">
@@ -916,7 +914,6 @@ function switchSection(sec){
  $('#addCatBtn').style.display=isTasks?'':'none';
  // Мобильные категории и кнопка добавления
  $('#catNavM').style.display=isTasks?'':'none';
- $('#addCatBtnMob').style.display=isTasks?'':'none';
  // Шапка: кольцо прогресса только для задач
  $('#headRight').style.display=isTasks?'':'none';
  // Нижняя навигация
@@ -1614,8 +1611,15 @@ function renderNav(){
   </div>`;
  $('#catNav').innerHTML=row('all','🗂️','Все задачи','#8A9AA8',act.length,true)
   +state.cats.map(c=>row(c.id,c.emoji,c.name,c.color,act.filter(t=>t.catId===c.id).length,c.fixed)).join('');
- $('#catNavM').innerHTML=`<button class="chip ${state.filter==='all'?'on':''}" data-f="all" style="--c:#8A9AA8">🗂️ Все</button>`
+ $('#catNavM').innerHTML=`<button class=\"chip ${state.filter==='all'?'on':''}\" data-f=\"all\" style=\"--c:#8A9AA8\">🗂️ Все</button>`
   +state.cats.map(c=>`<button class="chip ${state.filter===c.id?'on':''}" data-f="${c.id}" style="--c:${c.color}">${c.emoji} ${esc(c.name)}</button>`).join('');
+ // Добавляем кнопку "+ Категория" в мобильную версию
+ const mobAddBtn = document.createElement('button');
+ mobAddBtn.className = 'chip';
+ mobAddBtn.textContent = '+ Категория';
+ mobAddBtn.style.cssText = '--c:#8A9AA8;border-style:dashed;opacity:0.85';
+ mobAddBtn.onclick = openCatDialog;
+ $('#catNavM').appendChild(mobAddBtn);
  renderPicker();}
 function renderPicker(){
  $('#catPicker').innerHTML=state.cats.map(c=>
@@ -1801,7 +1805,6 @@ $('#egrid').onclick=e=>{const b=e.target.closest('button');if(b){dlgEmoji=b.data
 $('#cgrid').onclick=e=>{const b=e.target.closest('button');if(b){dlgColor=b.dataset.c;markDlg()}};
 function openCatDialog(){$('#catName').value='';dlgEmoji='✨';dlgColor=PALETTE[Math.floor(Math.random()*PALETTE.length)];markDlg();dlg.showModal();setTimeout(()=>$('#catName').focus(),50)}
 $('#addCatBtn').onclick=openCatDialog;
-$('#addCatBtnMob').onclick=openCatDialog;
 $('#dlgCancel').onclick=()=>dlg.close();
 $('#catForm').addEventListener('submit',e=>{e.preventDefault();
  const name=$('#catName').value.trim();if(!name)return;
