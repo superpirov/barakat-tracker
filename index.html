@@ -65,6 +65,8 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .cat-del:hover{color:var(--danger);background:color-mix(in srgb,var(--danger) 12%,transparent)}
 .add-cat{width:100%;margin-top:10px;padding:10px;border:1.5px dashed var(--line);border-radius:12px;background:transparent;color:var(--muted);font-weight:600;font-size:13.5px;cursor:pointer;transition:.2s}
 .add-cat:hover{color:var(--accent);border-color:var(--accent);transform:translateY(-1px)}
+.add-cat-mob{display:none;width:100%;margin:8px 0;padding:10px;border:1.5px dashed var(--line);border-radius:12px;background:var(--panel2);color:var(--muted);font-weight:600;font-size:13.5px;cursor:pointer;transition:.2s}
+.add-cat-mob:hover{color:var(--accent);border-color:var(--accent);transform:translateY(-1px)}
 .side-foot{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center}
 .ibtn{width:36px;height:36px;border-radius:11px;border:1px solid var(--line);background:var(--panel2);display:grid;place-items:center;cursor:pointer;font-size:15px;transition:.18s}
 .ibtn:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
@@ -260,7 +262,8 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 .compass-west{left:14px;top:50%;transform:translateY(-50%)}
 .compass-ticks{position:absolute;inset:8px;border-radius:50%;border:2px dashed var(--line);opacity:.5}
 .compass-inner{position:absolute;inset:20px;border-radius:50%;background:conic-gradient(from 0deg,var(--panel2),var(--panel));border:2px solid var(--line);box-shadow:inset 0 0 20px rgba(0,0,0,.1);transition:transform .1s ease-out}
-.qibla-arrow{position:absolute;top:10px;left:50%;transform:translateX(-50%);font-size:24px;color:var(--accent);filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+.qibla-arrow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3}
+.qibla-arrow svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
 .compass-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:var(--accent);border:3px solid var(--panel);box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:2}
 .qibla-status{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--panel);border-radius:var(--rs);font-size:12px;font-weight:600;color:var(--muted)}
 .status-icon{font-size:16px}
@@ -377,6 +380,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
   .sidebar{display:none}
   .m-bar{display:flex}
   .m-cats{display:flex}
+  .add-cat-mob{display:block}
   .top{flex-direction:column;align-items:flex-start;gap:16px;margin-bottom:16px}
   .head-right{width:100%;flex-direction:row;align-items:center;justify-content:flex-start;flex-wrap:wrap}
   .ring-card{width:100%}
@@ -445,6 +449,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
       <button class="ibtn sound-btn"></button>
     </div>
     <div class="m-cats" id="catNavM"></div>
+    <button class="add-cat-mob" id="addCatBtnMob" style="display:none">＋ Категория</button>
 
     <!-- ШАПКА ДНЯ -->
     <header class="top">
@@ -537,7 +542,14 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
               <div class="compass-ticks"></div>
             </div>
             <div class="compass-inner" id="compassInner">
-              <div class="qibla-arrow">☨</div>
+              <div class="qibla-arrow">
+                <svg width="24" height="40" viewBox="0 0 24 40" fill="none">
+                  <path d="M12 0L12 32" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+                  <circle cx="12" cy="8" r="6" fill="var(--accent)"/>
+                  <path d="M12 32L6 20H18L12 32Z" fill="var(--accent)"/>
+                </svg>
+                <span style="font-size:18px;display:block;text-align:center;margin-top:4px">🕋</span>
+              </div>
             </div>
             <div class="compass-center"></div>
           </div>
@@ -1314,33 +1326,34 @@ function calculatePrayerTimes(lat,lon,method,date){
  const B=toRadians(360/365*(dayOfYear-81));
  const equationOfTime=9.87*Math.sin(2*B)-7.53*Math.cos(B)-1.5*Math.sin(B);
  
- // Время зухра
- const timezone=d.getTimezoneOffset()/60;
- const DST=0;
- const noonOffset=timezone-DST-lon/15;
- const dhuhrTime=12-equationOfTime/60+noonOffset;
+ // Время зухра - учитываем долготу для коррекции местного времени
+ const timezone=-d.getTimezoneOffset()/60; // Положительное значение для восточных долгот
+ const noonLocal=12 - equationOfTime/60; // Местный полдень без учёта часового пояса
+ const lonCorrection=lon/15; // Коррекция по долготе (часов)
+ const dhuhrTime=noonLocal + (timezone - lonCorrection); // Полуденное время в часах
  
  // Аср: когда тень объекта = высота объекта + тень от полудня
  const asrFactor=1; // стандартный мазхаб
- const asrAngle=Math.atan(1/(asrFactor+Math.tan(Math.abs(toRadians(lat)-declination))));
+ const latRad=toRadians(lat);
+ const asrAltitude=Math.atan(1/(asrFactor+Math.tan(Math.abs(latRad-declination))));
  
  // Фаджр и Иша по углам
- const fajrAngle=toRadians(m.fajrAngle);
- const ishaAngle=m.ishaAngle>0?toRadians(m.ishaAngle):null;
+ const fajrAngle=-toRadians(m.fajrAngle);
+ const ishaAngle=m.ishaAngle>0?-toRadians(m.ishaAngle):null;
  
- // Расчёт времени для угла
- function timeForAngle(angle){
-  const cosHourAngle=(Math.sin(angle)-Math.sin(toRadians(lat))*Math.sin(declination))/(Math.cos(toRadians(lat))*Math.cos(declination));
+ // Расчёт времени для угла солнца
+ function timeForAngle(angleRad){
+  const cosHourAngle=(Math.sin(angleRad)-Math.sin(latRad)*Math.sin(declination))/(Math.cos(latRad)*Math.cos(declination));
   if(cosHourAngle<-1||cosHourAngle>1)return null;
   const hourAngle=toDegrees(Math.acos(cosHourAngle))/15;
   return hourAngle;
  }
  
- const fajrHour=timeForAngle(-fajrAngle);
- const sunriseHour=timeForAngle(toRadians(-0.833));
- const asrHour=timeForAngle(asrAngle);
- const sunsetHour=timeForAngle(toRadians(-0.833));
- const ishaHour=ishaAngle?timeForAngle(-ishaAngle):null;
+ const fajrOffset=timeForAngle(fajrAngle);
+ const sunriseOffset=timeForAngle(toRadians(-0.833));
+ const asrOffset=timeForAngle(asrAltitude);
+ const sunsetOffset=timeForAngle(toRadians(-0.833));
+ const ishaOffset=ishaAngle!==null?timeForAngle(ishaAngle):null;
  
  function formatTime(hours){
   if(hours===null)return'--:--';
@@ -1353,12 +1366,12 @@ function calculatePrayerTimes(lat,lon,method,date){
  }
  
  return{
-  fajr:{time:formatTime(dhuhrTime-fajrHour),hours:dhuhrTime-fajrHour},
-  sunrise:{time:formatTime(dhuhrTime-sunriseHour),hours:dhuhrTime-sunriseHour},
+  fajr:{time:formatTime(dhuhrTime-fajrOffset),hours:dhuhrTime-fajrOffset},
+  sunrise:{time:formatTime(dhuhrTime-sunriseOffset),hours:dhuhrTime-sunriseOffset},
   dhuhr:{time:formatTime(dhuhrTime),hours:dhuhrTime},
-  asr:{time:formatTime(dhuhrTime+asrHour),hours:dhuhrTime+asrHour},
-  maghrib:{time:formatTime(dhuhrTime+sunsetHour),hours:dhuhrTime+sunsetHour},
-  isha:{time:ishaHour!==null?formatTime(dhuhrTime+ishaHour):'--:--',hours:ishaHour!==null?dhuhrTime+ishaHour:null}
+  asr:{time:formatTime(dhuhrTime+asrOffset),hours:dhuhrTime+asrOffset},
+  maghrib:{time:formatTime(dhuhrTime+sunsetOffset),hours:dhuhrTime+sunsetOffset},
+  isha:{time:ishaOffset!==null?formatTime(dhuhrTime+ishaOffset):'--:--',hours:ishaOffset!==null?dhuhrTime+ishaOffset:null}
  };
 }
 
@@ -1785,7 +1798,9 @@ function markDlg(){$$('#egrid button').forEach(b=>b.classList.toggle('on',b.data
  $$('#cgrid button').forEach(b=>b.classList.toggle('on',b.dataset.c===dlgColor))}
 $('#egrid').onclick=e=>{const b=e.target.closest('button');if(b){dlgEmoji=b.dataset.e;markDlg()}};
 $('#cgrid').onclick=e=>{const b=e.target.closest('button');if(b){dlgColor=b.dataset.c;markDlg()}};
-$('#addCatBtn').onclick=()=>{$('#catName').value='';dlgEmoji='✨';dlgColor=PALETTE[Math.floor(Math.random()*PALETTE.length)];markDlg();dlg.showModal();setTimeout(()=>$('#catName').focus(),50)};
+function openCatDialog(){$('#catName').value='';dlgEmoji='✨';dlgColor=PALETTE[Math.floor(Math.random()*PALETTE.length)];markDlg();dlg.showModal();setTimeout(()=>$('#catName').focus(),50)}
+$('#addCatBtn').onclick=openCatDialog;
+$('#addCatBtnMob').onclick=openCatDialog;
 $('#dlgCancel').onclick=()=>dlg.close();
 $('#catForm').addEventListener('submit',e=>{e.preventDefault();
  const name=$('#catName').value.trim();if(!name)return;
