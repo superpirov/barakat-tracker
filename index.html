@@ -270,6 +270,14 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 .qibla-status.calibrated{color:var(--accent)}
 .qibla-status.error{color:var(--danger)}
 
+/* ═══ АЯТ ДНЯ ═══ */
+.verse-of-day-container{display:flex;flex-direction:column;gap:14px;padding:16px;background:var(--panel2);border-radius:var(--rl);border:1.5px solid var(--line)}
+.verse-arabic{text-align:right;font-size:28px;line-height:2.2;font-family:'Amiri','Traditional Arabic',serif;color:var(--ink);padding:18px 14px;background:var(--panel);border-radius:var(--rm);border:1px solid var(--line);direction:rtl}
+.verse-translation{text-align:left;font-size:15px;line-height:1.7;color:var(--muted);padding:14px;background:var(--panel);border-radius:var(--rm);border-left:3px solid var(--accent)}
+.verse-reference{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);text-align:center;margin-top:6px}
+.verse-loading{text-align:center;padding:24px;color:var(--muted);font-size:14px}
+.verse-error{text-align:center;padding:20px;color:var(--danger);font-size:14px;background:color-mix(in srgb,var(--danger) 10%,transparent);border-radius:var(--rs)}
+
 /* ═══ ФОКУС-ТАЙМЕР ═══ */
 .focus-section{display:none;flex-direction:column;gap:18px;margin-top:4px}
 .focus-section.active{display:flex}
@@ -508,6 +516,13 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 
     <!-- ═══ РАЗДЕЛ: ИБАДАТ ═══ -->
     <div id="sectionIbadat" class="ibadat-section">
+      <!-- Аят дня -->
+      <div class="ibadat-card">
+        <h2><span>📜</span> Аят дня</h2>
+        <div class="verse-of-day-container" id="verseOfDayContainer">
+          <div class="verse-loading">Загрузка аята...</div>
+        </div>
+      </div>
       <!-- Время намаза и Кибла -->
       <div class="ibadat-card">
         <h2><span>🕋</span> Время намаза и Кибла</h2>
@@ -541,12 +556,12 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
             </div>
             <div class="compass-inner" id="compassInner">
               <div class="qibla-arrow">
-                <svg width="28" height="48" viewBox="0 0 28 48" fill="none">
-                  <path d="M14 0L14 38" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/>
-                  <circle cx="14" cy="10" r="7" fill="var(--accent)"/>
-                  <path d="M14 38L8 26H20L14 38Z" fill="var(--accent)"/>
+                <svg width="32" height="56" viewBox="0 0 32 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 4C16 4 16 42 16 42" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/>
+                  <circle cx="16" cy="12" r="8" fill="var(--accent)"/>
+                  <path d="M16 42L10 30H22L16 42Z" fill="var(--accent)"/>
                 </svg>
-                <span style="font-size:22px;display:block;text-align:center;margin-top:6px">🕋</span>
+                <span style="font-size:24px;display:block;text-align:center;margin-top:4px">🕋</span>
               </div>
             </div>
             <div class="compass-center"></div>
@@ -847,6 +862,63 @@ function savePrayerSettings(){
  try{
   localStorage.setItem(PRAYER_KEY,JSON.stringify({method:prayerState.method}));
  }catch(e){}
+}
+
+// ════ АЯТ ДНЯ ════
+let verseData={arabic:[],russian:[]};
+let verseInitialized=false;
+
+async function loadVerseFiles(){
+ if(verseInitialized)return;
+ try{
+  const [araRes,rusRes]=await Promise.all([
+   fetch('database/chapterverse/ara-quranacademy.txt'),
+   fetch('database/chapterverse/rus-elmirkuliev.txt')
+  ]);
+  if(!araRes.ok||!rusRes.ok)throw new Error('Файлы не найдены');
+  const [araText,rusText]=await Promise.all([araRes.text(),rusRes.text()]);
+  verseData.arabic=araText.trim().split('\n').slice(0,6236);
+  verseData.russian=rusText.trim().split('\n').slice(0,6236);
+  verseInitialized=true;
+ }catch(e){
+  console.error('Ошибка загрузки аятов:',e);
+  verseData.error=true;
+ }
+}
+
+function renderVerseOfDay(){
+ const container=$('#verseOfDayContainer');
+ if(!container)return;
+ 
+ // Определяем номер аята по дате
+ const today=new Date();
+ const start=new Date(today.getFullYear(),0,0);
+ const diff=today-start;
+ const oneDay=1000*60*60*24;
+ const dayOfYear=Math.floor(diff/oneDay);
+ const verseIndex=(dayOfYear-1)%6236; // 0-based индекс
+ 
+ if(verseData.error){
+  container.innerHTML='<div class="verse-error">Не удалось загрузить аяты</div>';
+  return;
+ }
+ 
+ if(!verseInitialized||verseData.arabic.length===0){
+  container.innerHTML='<div class="verse-loading">Загрузка аята...</div>';
+  loadVerseFiles().then(()=>renderVerseOfDay());
+  return;
+ }
+ 
+ const arabic=verseData.arabic[verseIndex]||'...';
+ const russian=verseData.russian[verseIndex]||'...';
+ const surahNum=Math.ceil((verseIndex+1)/50); // Примерный номер суры
+ const ayahNum=((verseIndex)%50)+1;
+ 
+ container.innerHTML=`
+  <div class="verse-arabic">${arabic}</div>
+  <div class="verse-translation">${russian}</div>
+  <div class="verse-reference">Сура ${surahNum}, Аят ${ayahNum}</div>
+ `;
 }
 
 /* ══════════════════════════════════════
@@ -1301,7 +1373,8 @@ function renderIbadat(){
  $('#quranTotal').textContent=day.quran;
  renderWeekGrid();
  renderIbadatStats();
- renderPrayerTimes();}
+ renderPrayerTimes();
+ renderVerseOfDay();}
 
 // ════ РАСЧЁТ ВРЕМЕНИ НАМАЗОВ ════
 function toRadians(deg){return deg*Math.PI/180}
@@ -1855,6 +1928,6 @@ document.addEventListener('keydown',e=>{
  if(e.key==='Escape'&&state.editing){state.editing=null;renderList()}});
 
 /* ── старт ── */
-load();loadIbadat();loadPrayerSettings();loadFinance();loadGratitude();loadFocus();applyToggles();renderHello();rescheduleAllNotifications();switchSection(state.section||'tasks');</script>
+load();loadIbadat();loadPrayerSettings();loadFinance();loadGratitude();loadFocus();applyToggles();renderHello();rescheduleAllNotifications();loadVerseFiles();switchSection(state.section||'tasks');</script>
 </body>
 </html>
