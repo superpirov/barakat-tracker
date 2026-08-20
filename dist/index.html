@@ -1,0 +1,1959 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Баракат — трекер задач</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+try{
+  var s = JSON.parse(localStorage.getItem('barakat.v1')||'{}');
+  var th = (s.settings&&s.settings.theme) || ((new Date().getHours()>=19||new Date().getHours()<7)?'dark':'light');
+  document.documentElement.dataset.theme = th;
+}catch(e){document.documentElement.dataset.theme='light'}
+</script>
+<style>
+:root{--fd:'Unbounded',sans-serif;--fb:'Golos Text',system-ui,sans-serif;--rl:20px;--rm:14px;--rs:10px}
+html[data-theme="light"]{
+  --bg:#F2F4EF;--panel:#FFFFFF;--panel2:#F5F7F2;--ink:#1B211D;--muted:#69736C;--line:#E2E6DD;
+  --dot:rgba(27,33,29,.10);--accent:#2E7D5B;--accent-ink:#fff;
+  --tint1:rgba(52,184,126,.15);--tint2:rgba(232,162,59,.13);
+  --shadow:0 10px 28px rgba(27,33,29,.07);--danger:#D8484E;--warn:#C97F12;color-scheme:light;
+}
+html[data-theme="dark"]{
+  --bg:#0F1411;--panel:#171E19;--panel2:#1D2620;--ink:#E9EFEA;--muted:#8FA094;--line:#28342B;
+  --dot:rgba(233,239,234,.07);--accent:#4CC38A;--accent-ink:#08130C;
+  --tint1:rgba(76,195,138,.12);--tint2:rgba(232,162,59,.09);
+  --shadow:0 14px 34px rgba(0,0,0,.38);--danger:#FF6B6E;--warn:#F2A63B;color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden;max-width:100vw}
+body{background:var(--bg);color:var(--ink);font-family:var(--fb);min-height:100vh;transition:background .35s,color .35s;-webkit-tap-highlight-color:transparent}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(var(--dot) 1px,transparent 1px);background-size:22px 22px}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:
+  radial-gradient(620px 420px at 6% -6%,var(--tint1),transparent 62%),
+  radial-gradient(720px 520px at 104% 108%,var(--tint2),transparent 62%)}
+::selection{background:color-mix(in srgb,var(--accent) 30%,transparent)}
+button{font:inherit;color:inherit;touch-action:manipulation}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+#fx{position:fixed;inset:0;z-index:98;pointer-events:none}
+
+.app{position:relative;z-index:1;display:grid;grid-template-columns:272px minmax(0,1fr);gap:28px;max-width:1180px;margin:0 auto;padding:26px 24px 80px;width:100%;box-sizing:border-box}
+
+/* ── сайдбар ── */
+.sidebar{position:sticky;top:24px;align-self:start;display:flex;flex-direction:column;gap:6px;
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--rl);padding:18px 14px;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 2px}
+.brand-star{color:var(--accent);font-size:22px;animation:twinkle 3.6s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.82) rotate(20deg)}}
+.brand-name{font-family:var(--fd);font-weight:800;font-size:19px;letter-spacing:.5px}
+.brand-sub{padding:0 8px 12px;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted)}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nav-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:12px 10px 6px}
+.cat-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;cursor:pointer;transition:background .18s,box-shadow .18s;border:1px solid transparent}
+.cat-row:hover{background:var(--panel2)}
+.cat-row.on{background:color-mix(in srgb,var(--c) 12%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c) 35%,transparent)}
+.cat-emoji{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:15px;background:color-mix(in srgb,var(--c) 18%,transparent)}
+.cat-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cnt{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--muted);background:var(--panel2);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+.cat-del{flex:none;width:26px;height:26px;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;display:grid;place-items:center;opacity:0;transition:.18s}
+.cat-row:hover .cat-del{opacity:1}
+.cat-del:hover{color:var(--danger);background:color-mix(in srgb,var(--danger) 12%,transparent)}
+.add-cat{width:100%;margin-top:10px;padding:10px;border:1.5px dashed var(--line);border-radius:12px;background:transparent;color:var(--muted);font-weight:600;font-size:13.5px;cursor:pointer;transition:.2s}
+.add-cat:hover{color:var(--accent);border-color:var(--accent);transform:translateY(-1px)}
+.add-cat-mob{display:none}
+.side-foot{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center}
+.ibtn{width:36px;height:36px;border-radius:11px;border:1px solid var(--line);background:var(--panel2);display:grid;place-items:center;cursor:pointer;font-size:15px;transition:.18s}
+.ibtn:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.side-hint{margin-left:auto;font-size:10.5px;color:var(--muted);text-align:right;line-height:1.4}
+
+/* ── шапка дня ── */
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:22px}
+.dateline{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted)}
+.dateline b{color:var(--accent);font-weight:700}
+.greet{font-family:var(--fd);font-weight:700;font-size:clamp(23px,4vw,38px);line-height:1.15;margin:8px 0 9px;cursor:pointer}
+.name-hint{display:inline-block;margin-left:10px;font:500 11px var(--fb);letter-spacing:.5px;color:var(--muted);border-bottom:1px dashed var(--muted);vertical-align:middle}
+.name-edit{font:700 .95em var(--fd);color:var(--ink);background:transparent;border:0;border-bottom:2px solid var(--accent);outline:none;max-width:200px;padding:2px}
+.quote{color:var(--muted);font-size:14px;max-width:540px;line-height:1.5}
+.head-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.ring-card{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px 18px;box-shadow:var(--shadow)}
+.ring-wrap{position:relative;width:70px;height:70px;flex:none}
+.ring-wrap svg{width:70px;height:70px;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:var(--panel2);stroke-width:7}
+.ring-fg{fill:none;stroke:var(--accent);stroke-width:7;stroke-linecap:round;stroke-dasharray:201;stroke-dashoffset:201;transition:stroke-dashoffset .9s cubic-bezier(.3,.8,.3,1)}
+.ring-pct{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--fd);font-weight:700;font-size:14px}
+.ring-info b{display:block;font-size:14px;margin-bottom:3px}
+.ring-info small{color:var(--muted);font-size:12.5px}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{display:inline-flex;gap:7px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;box-shadow:var(--shadow)}
+
+/* ── мобильная шапка ── */
+.m-bar{display:none;align-items:center;gap:10px;margin-bottom:6px}
+.m-cats{display:none;gap:8px;flex-wrap:wrap;padding:6px 2px 10px;align-items:center}
+
+/* ── композер ── */
+.composer{background:var(--panel);border:1px solid var(--line);border-radius:var(--rl);padding:16px 18px;box-shadow:var(--shadow)}
+.composer.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+#newText{width:100%;background:transparent;border:0;outline:none;font:600 18px var(--fb);color:var(--ink);padding:6px 2px}
+#newText::placeholder{color:var(--muted);font-weight:500}
+.composer-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;justify-content:flex-start}
+.chips{display:flex;gap:6px;flex-wrap:wrap;flex:1 1 100%;min-width:0;padding:2px 0;order:-1}
+.chip{flex:none;display:inline-flex;gap:6px;align-items:center;padding:7px 13px;border-radius:999px;border:1.5px solid var(--line);background:var(--panel2);font-size:13px;font-weight:600;cursor:pointer;transition:.18s;white-space:nowrap}
+.chip:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--c,#888) 55%,var(--line))}
+.chip.on{background:var(--c);border-color:var(--c);color:#fff;box-shadow:0 5px 14px color-mix(in srgb,var(--c) 40%,transparent)}
+.prio-pick{display:flex;gap:5px}
+.prio{width:34px;height:34px;border-radius:var(--rs);border:1.5px solid var(--line);background:var(--panel2);display:grid;place-items:center;cursor:pointer;transition:.18s}
+.prio svg{width:15px;height:15px;fill:var(--muted);transition:.18s}
+.prio:hover{transform:translateY(-2px)}
+.prio.on[data-p="low"] svg{fill:#8FA0AE}.prio.on[data-p="mid"] svg{fill:#E8A23B}.prio.on[data-p="high"] svg{fill:#E5484D}
+.prio.on{border-color:currentColor;box-shadow:0 3px 10px rgba(0,0,0,.10)}
+.datein-wrap{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);padding:7px 10px;cursor:pointer;transition:.18s;max-width:100%;flex:1;min-width:160px}
+.datein-wrap:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.datein-wrap svg{flex:none;width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;position:relative;z-index:1}
+.datein{border:0;background:transparent;color:var(--ink);font:500 13px var(--fb);cursor:pointer;padding:0;outline:none;width:100%;-webkit-appearance:none}
+.datein::-webkit-calendar-picker-indicator{opacity:0;position:absolute;top:0;left:0;width:100%;height:100%;cursor:pointer;z-index:2}
+.btn-add{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--accent-ink);border:0;padding:11px 19px;border-radius:13px;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 7px 18px color-mix(in srgb,var(--accent) 38%,transparent);transition:.18s}
+.btn-add:hover{transform:translateY(-2px)}
+.btn-add:active{transform:scale(.96)}
+
+/* ── вкладки и поиск ── */
+.board-bar{display:flex;align-items:center;gap:12px;margin-top:26px;flex-wrap:wrap}
+.tabs{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:4px}
+.tab{border:0;background:transparent;padding:8px 16px;border-radius:999px;font-weight:600;font-size:13.5px;color:var(--muted);cursor:pointer;transition:.2s;display:flex;gap:7px;align-items:center}
+.tab .cnt{font-size:11px;font-weight:700;background:color-mix(in srgb,var(--muted) 16%,transparent);padding:1px 7px;border-radius:999px}
+.tab.on{background:var(--panel);color:var(--ink);box-shadow:0 3px 10px rgba(0,0,0,.10)}
+.search{position:relative;margin-left:auto;flex:1;max-width:250px;min-width:160px}
+.search input{width:100%;border:1.5px solid var(--line);border-radius:999px;background:var(--panel);padding:9px 14px 9px 36px;font:500 13.5px var(--fb);color:var(--ink);outline:none;transition:.2s}
+.search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2}
+#clearDone{border:1.5px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;transition:.18s}
+#clearDone:hover{color:var(--danger);border-color:var(--danger)}
+
+/* ── задачи ── */
+.tasks{list-style:none;margin-top:16px;display:flex;flex-direction:column;gap:10px}
+.task{position:relative;display:flex;gap:13px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:var(--rm);padding:14px 14px 14px 20px;transition:transform .18s,box-shadow .18s,border-color .18s,opacity .3s}
+.task::before{content:'';position:absolute;left:0;top:13px;bottom:13px;width:4px;border-radius:4px;background:var(--c)}
+.task:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--c) 38%,var(--line));box-shadow:0 8px 22px color-mix(in srgb,var(--c) 15%,transparent)}
+.task.enter{animation:rise .45s cubic-bezier(.2,.7,.3,1) backwards}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}}
+.task.dragging{opacity:.45;transform:scale(.98)}
+.task.removing{opacity:0;transform:translateX(26px) scale(.96)}
+.check{flex:none;width:26px;height:26px;border-radius:50%;border:2px solid var(--c);background:transparent;cursor:pointer;display:grid;place-items:center;margin-top:1px;transition:background .28s,transform .15s,box-shadow .2s}
+.check:hover{transform:scale(1.14);box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 15%,transparent)}
+.check svg{width:14px;height:14px;stroke:#fff;stroke-width:3.2;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:26;stroke-dashoffset:26;transition:stroke-dashoffset .32s .06s}
+.task.done .check,.task.finishing .check{background:var(--c)}
+.task.done .check svg,.task.finishing .check svg{stroke-dashoffset:0}
+.t-main{flex:1;min-width:0}
+.t-text{font-weight:600;font-size:15px;position:relative;display:inline;line-height:1.45;word-break:break-word}
+.t-text::after{content:'';position:absolute;left:-2px;right:auto;top:54%;height:2px;width:0;border-radius:2px;background:var(--muted);transition:width .5s cubic-bezier(.3,.8,.3,1)}
+.task.done .t-text::after,.task.finishing .t-text::after{width:calc(100% + 4px)}
+.task.done{opacity:.6}
+.task.done .t-text{color:var(--muted)}
+.t-meta{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap}
+.mchip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;background:color-mix(in srgb,var(--cc) 14%,transparent);color:var(--cc)}
+.mchip.due-today{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+.mchip.due-over{background:color-mix(in srgb,var(--danger) 15%,transparent);color:var(--danger)}
+.t-actions{display:flex;gap:4px;opacity:0;transition:opacity .2s}
+.task:hover .t-actions{opacity:1}
+.icon-btn{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;border:0;background:transparent;color:var(--muted);cursor:pointer;transition:.15s}
+.icon-btn:hover{background:var(--panel2);color:var(--ink)}
+.icon-btn.del:hover{color:var(--danger)}
+.icon-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.t-edit{width:100%;font:600 15px var(--fb);color:var(--ink);background:var(--panel2);border:1.5px solid var(--accent);border-radius:8px;padding:6px 9px;outline:none}
+.empty{text-align:center;padding:54px 20px;color:var(--muted)}
+.empty svg{margin-bottom:14px;stroke:var(--muted);opacity:.55;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.empty b{display:block;font-family:var(--fd);font-weight:700;font-size:16px;color:var(--ink);margin-bottom:6px}
+.empty p{font-size:13.5px}
+footer{margin-top:44px;text-align:center;font-size:12px;color:var(--muted)}
+
+/* ── тост, диалог ── */
+#toast{position:fixed;left:50%;bottom:80px;transform:translate(-50%,20px);opacity:0;pointer-events:none;transition:.32s cubic-bezier(.3,.8,.3,1);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center;max-width:92vw;z-index:99;box-shadow:0 12px 34px rgba(0,0,0,.3);font-size:14px;font-weight:600}
+#toast.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+#toast button{border:0;background:transparent;color:var(--accent);font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+dialog{border:0;border-radius:var(--rl);background:var(--panel);color:var(--ink);box-shadow:0 24px 70px rgba(0,0,0,.35);padding:0;width:min(400px,92vw);max-width:92vw}
+dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
+.dlg-card{padding:22px;display:flex;flex-direction:column;gap:16px}
+.dlg-card h3{font-family:var(--fd);font-weight:700;font-size:17px}
+.dlg-card label{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:flex;flex-direction:column;gap:7px}
+.dlg-card input[type=text]{border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);padding:10px 12px;font:600 15px var(--fb);color:var(--ink);outline:none}
+.dlg-card input[type=text]:focus{border-color:var(--accent)}
+.egrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(32px,1fr));gap:6px}
+.egrid button{width:100%;height:34px;font-size:16px;border-radius:8px;border:1.5px solid transparent;background:var(--panel2);cursor:pointer;transition:.15s}
+.egrid button:hover{transform:scale(1.12)}
+.egrid button.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.cgrid{display:flex;gap:8px;flex-wrap:wrap}
+.cgrid button{width:27px;height:27px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:.15s}
+.cgrid button:hover{transform:scale(1.15)}
+.cgrid button.on{border-color:var(--ink);box-shadow:0 0 0 3px color-mix(in srgb,var(--ink) 20%,transparent)}
+.dlg-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:4px}
+.gbtn{border:1.5px solid var(--line);background:transparent;border-radius:12px;padding:10px 16px;font-weight:600;cursor:pointer;transition:.18s}
+.gbtn:hover{background:var(--panel2)}
+
+/* ═══ ИБАДАТ ═══ */
+.ibadat-section{display:none;flex-direction:column;gap:18px;margin-top:4px}
+.ibadat-section.active{display:flex}
+.ibadat-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--rl);padding:20px;box-shadow:var(--shadow)}
+.ibadat-card h2{font-family:var(--fd);font-weight:700;font-size:18px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.ibadat-card h2 span{font-size:22px}
+.salah-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.salah-item{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 8px;border-radius:var(--rm);border:1.5px solid var(--line);background:var(--panel2);cursor:pointer;transition:.2s;user-select:none}
+.salah-item:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.salah-item.checked{background:color-mix(in srgb,var(--accent) 14%,transparent);border-color:var(--accent)}
+.salah-icon{font-size:24px;line-height:1}
+.salah-name{font-size:12px;font-weight:700;text-align:center;color:var(--muted)}
+.salah-item.checked .salah-name{color:var(--accent)}
+.salah-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;transition:.25s}
+.salah-item.checked .salah-check{background:var(--accent);border-color:var(--accent)}
+.salah-check svg{width:12px;height:12px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .3s .05s}
+.salah-item.checked .salah-check svg{stroke-dashoffset:0}
+.quran-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.quran-input{flex:1;min-width:120px;border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);padding:10px 14px;font:600 15px var(--fb);color:var(--ink);outline:none}
+.quran-input:focus{border-color:var(--accent)}
+.quran-unit{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+.quran-total{margin-top:12px;font-size:14px;font-weight:600;color:var(--muted)}
+.quran-total b{color:var(--accent);font-family:var(--fd)}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px}
+.week-day{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:var(--rs);border:1px solid var(--line);background:var(--panel2)}
+.week-day.today{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.week-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.week-day.today .week-label{color:var(--accent)}
+.week-dots{display:flex;flex-direction:column;gap:3px;align-items:center}
+.week-dot{width:10px;height:10px;border-radius:50%;background:var(--line);transition:.2s}
+.week-dot.filled{background:var(--accent)}
+.week-score{font-size:11px;font-weight:700;color:var(--muted);margin-top:2px}
+.week-day.today .week-score{color:var(--accent)}
+.ibadat-stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.ibadat-stat{display:inline-flex;gap:7px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;box-shadow:var(--shadow)}
+
+/* ═══ ВРЕМЯ НАМАЗА И КИБЛА ═══ */
+.prayer-times-widget{display:flex;flex-direction:column;gap:16px;margin-bottom:20px}
+.location-status{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--panel2);border-radius:var(--rs);font-size:13px;font-weight:600;color:var(--muted)}
+.location-icon{font-size:18px}
+.method-selector{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.method-selector label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.method-select{flex:1;min-width:200px;padding:10px 38px 10px 14px;border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);font:600 13px var(--fb);color:var(--ink);outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2369736C' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;transition:border-color .2s,box-shadow .2s}
+.method-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.method-select option{background:var(--panel);color:var(--ink);padding:10px}
+.prayer-times-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:8px}
+.prayer-time-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;background:var(--panel2);border:1.5px solid var(--line);border-radius:var(--rm);transition:.2s}
+.prayer-time-item:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.prayer-time-item.next{background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:var(--accent)}
+.prayer-time-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.prayer-time-item.next .prayer-time-name{color:var(--accent)}
+.prayer-time-value{font-family:var(--fd);font-weight:800;font-size:18px;color:var(--ink)}
+.prayer-time-item.next .prayer-time-value{color:var(--accent)}
+.prayer-time-icon{font-size:20px;line-height:1}
+.next-prayer{text-align:center;padding:14px;background:color-mix(in srgb,var(--accent) 8%,transparent);border:1.5px solid var(--accent);border-radius:var(--rm);font-size:14px;font-weight:700;color:var(--accent)}
+.qibla-compass-container{display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px;background:var(--panel2);border-radius:var(--rl);margin-top:16px}
+.qibla-info{display:flex;flex-direction:column;align-items:center;gap:4px}
+.qibla-angle{font-family:var(--fd);font-weight:800;font-size:32px;color:var(--accent)}
+.qibla-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.compass-wrapper{position:relative;width:220px;height:220px}
+.compass-outer{position:absolute;inset:0;border-radius:50%;background:var(--panel);border:3px solid var(--line);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center}
+.compass-north,.compass-south,.compass-east,.compass-west{position:absolute;font-family:var(--fd);font-weight:800;font-size:14px;color:var(--muted)}
+.compass-north{top:12px;left:50%;transform:translateX(-50%)}
+.compass-south{bottom:12px;left:50%;transform:translateX(-50%)}
+.compass-east{right:14px;top:50%;transform:translateY(-50%)}
+.compass-west{left:14px;top:50%;transform:translateY(-50%)}
+.compass-ticks{position:absolute;inset:8px;border-radius:50%;border:2px dashed var(--line);opacity:.5}
+.compass-inner{position:absolute;inset:20px;border-radius:50%;background:conic-gradient(from 0deg,var(--panel2),var(--panel));border:2px solid var(--line);box-shadow:inset 0 0 20px rgba(0,0,0,.1);transition:transform .1s ease-out}
+.qibla-arrow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3}
+.qibla-arrow svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+.compass-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:var(--accent);border:3px solid var(--panel);box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:2}
+.qibla-status{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--panel);border-radius:var(--rs);font-size:12px;font-weight:600;color:var(--muted)}
+.status-icon{font-size:16px}
+.qibla-status.calibrated{color:var(--accent)}
+.qibla-status.error{color:var(--danger)}
+
+/* ═══ АЯТ ДНЯ ═══ */
+.verse-of-day-container{display:flex;flex-direction:column;gap:14px;padding:16px;background:var(--panel2);border-radius:var(--rl);border:1.5px solid var(--line)}
+.verse-header{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
+.verse-header-icon{font-size:24px}
+.verse-header-title{font-family:var(--fd);font-weight:700;font-size:16px;color:var(--ink)}
+.verse-arabic{text-align:right;font-size:30px;line-height:2.4;font-family:'Amiri','Traditional Arabic',serif;color:var(--accent);padding:20px 16px;background:linear-gradient(135deg,var(--panel),var(--panel2));border-radius:var(--rm);border:1.5px solid var(--line);direction:rtl;box-shadow:0 3px 12px rgba(0,0,0,.08);position:relative;overflow:hidden}
+.verse-arabic::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+.verse-translation{text-align:left;font-size:15px;line-height:1.8;color:var(--ink);padding:16px;background:var(--panel);border-radius:var(--rm);border-left:4px solid var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.verse-reference{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);text-align:center;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px}
+.verse-reference::before,.verse-reference::after{content:'';width:28px;height:1px;background:linear-gradient(90deg,transparent,var(--line))}
+.verse-loading{text-align:center;padding:28px;color:var(--muted);font-size:14px;display:flex;align-items:center;justify-content:center;gap:10px}
+.verse-loading::before{content:'';width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+.verse-error{text-align:center;padding:20px;color:var(--danger);font-size:14px;background:color-mix(in srgb,var(--danger) 10%,transparent);border-radius:var(--rs)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ═══ ФОКУС-ТАЙМЕР ═══ */
+.focus-section{display:none;flex-direction:column;gap:18px;margin-top:4px}
+.focus-section.active{display:flex}
+.focus-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--rl);padding:20px;box-shadow:var(--shadow);text-align:center}
+.focus-card h2{font-family:var(--fd);font-weight:700;font-size:18px;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:10px}
+.focus-card h2 span{font-size:22px}
+.focus-timer{font-family:var(--fd);font-weight:800;font-size:clamp(48px,12vw,96px);line-height:1;color:var(--ink);margin:20px 0;letter-spacing:2px}
+.focus-timer.running{color:var(--accent)}
+.focus-timer.break-mode{color:var(--warn)}
+.focus-label{font-size:14px;font-weight:600;color:var(--muted);margin-bottom:20px;text-transform:uppercase;letter-spacing:2px}
+.focus-controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+.focus-btn{padding:12px 28px;border-radius:13px;font-weight:700;font-size:14px;cursor:pointer;border:0;transition:.18s}
+.focus-btn:hover{transform:translateY(-2px)}
+.focus-btn:active{transform:scale(.96)}
+.focus-btn-start{background:var(--accent);color:var(--accent-ink);box-shadow:0 7px 18px color-mix(in srgb,var(--accent) 38%,transparent)}
+.focus-btn-pause{background:var(--warn);color:#fff;box-shadow:0 7px 18px color-mix(in srgb,var(--warn) 38%,transparent)}
+.focus-btn-reset{background:var(--panel2);color:var(--muted);border:1.5px solid var(--line)}
+.focus-btn-reset:hover{color:var(--danger);border-color:var(--danger)}
+.focus-settings{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+.focus-setting{display:flex;flex-direction:column;align-items:center;gap:4px}
+.focus-setting label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.focus-setting input{width:70px;border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);padding:8px;text-align:center;font:600 14px var(--fb);color:var(--ink);outline:none}
+.focus-setting input:focus{border-color:var(--accent)}
+.focus-stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.focus-stat{display:inline-flex;gap:7px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;box-shadow:var(--shadow)}
+.focus-progress{width:100%;height:6px;background:var(--panel2);border-radius:3px;margin-top:12px;overflow:hidden}
+.focus-progress-bar{height:100%;background:var(--accent);border-radius:3px;transition:width 1s linear}
+.focus-progress-bar.break-mode{background:var(--warn)}
+
+/* ═══ ДНЕВНИК БЛАГОДАРНОСТИ ═══ */
+.gratitude-section{display:none;flex-direction:column;gap:18px;margin-top:4px}
+.gratitude-section.active{display:flex}
+.gratitude-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--rl);padding:20px;box-shadow:var(--shadow)}
+.gratitude-card h2{font-family:var(--fd);font-weight:700;font-size:18px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.gratitude-card h2 span{font-size:22px}
+.gratitude-input-wrap{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.gratitude-textarea{flex:1;min-width:200px;border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);padding:12px 14px;font:500 15px var(--fb);color:var(--ink);outline:none;resize:vertical;min-height:80px;line-height:1.5}
+.gratitude-textarea:focus{border-color:var(--accent)}
+.gratitude-textarea::placeholder{color:var(--muted)}
+.gratitude-entries{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.gratitude-entry{padding:14px 16px;background:var(--panel2);border-radius:var(--rm);border-left:3px solid var(--accent);position:relative}
+.gratitude-entry .ge-date{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px}
+.gratitude-entry .ge-text{font-size:14px;line-height:1.6;color:var(--ink)}
+.gratitude-entry .ge-del{position:absolute;top:10px;right:10px;width:24px;height:24px;border:0;border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;display:grid;place-items:center;font-size:14px;opacity:0;transition:.15s}
+.gratitude-entry:hover .ge-del{opacity:1}
+.gratitude-entry .ge-del:hover{color:var(--danger);background:color-mix(in srgb,var(--danger) 10%,transparent)}
+.gratitude-count{font-size:12px;color:var(--muted);margin-top:12px;text-align:center}
+
+
+/* ═══ ФИНАНСЫ / ЗАКЯТ ═══ */
+.finance-section{display:none;flex-direction:column;gap:18px;margin-top:4px}
+.finance-section.active{display:flex}
+.zakat-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--rl);padding:20px;box-shadow:var(--shadow)}
+.zakat-card h2{font-family:var(--fd);font-weight:700;font-size:18px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.zakat-card h2 span{font-size:22px}
+.zakat-intro{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px;padding:12px 16px;background:var(--panel2);border-radius:var(--rm);border-left:3px solid var(--accent)}
+.zakat-form{display:flex;flex-direction:column;gap:14px}
+.zakat-field{display:flex;flex-direction:column;gap:6px}
+.zakat-field label{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.zakat-field input,.zakat-field select{border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);padding:10px 14px;font:600 15px var(--fb);color:var(--ink);outline:none;width:100%}
+.zakat-field input:focus,.zakat-field select:focus{border-color:var(--accent)}
+.zakat-field .field-hint{font-size:11px;color:var(--muted);line-height:1.4}
+.zakat-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.zakat-result{margin-top:8px;padding:18px;border-radius:var(--rm);background:color-mix(in srgb,var(--accent) 8%,transparent);border:1.5px solid color-mix(in srgb,var(--accent) 25%,var(--line));text-align:center}
+.zakat-result.below-nisab{background:color-mix(in srgb,var(--muted) 8%,transparent);border-color:var(--line)}
+.zakat-result .zr-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px}
+.zakat-result .zr-value{font-family:var(--fd);font-weight:800;font-size:28px;color:var(--accent)}
+.zakat-result.below-nisab .zr-value{font-size:16px;color:var(--muted)}
+.zakat-result .zr-detail{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+.zakat-type-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.zakat-type-tab{padding:7px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--panel2);font-size:12.5px;font-weight:600;cursor:pointer;transition:.18s;white-space:nowrap}
+.zakat-type-tab:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.zakat-type-tab.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+/* ── Валютный селектор ── */
+.currency-bar{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;padding:14px 16px;background:var(--panel2);border-radius:var(--rm);border:1px solid var(--line)}
+.currency-bar .cb-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:140px}
+.currency-bar .cb-field label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
+.currency-bar .cb-field select,.currency-bar .cb-field input{border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel);padding:9px 12px;font:600 14px var(--fb);color:var(--ink);outline:none;width:100%}
+.currency-bar .cb-field select:focus,.currency-bar .cb-field input:focus{border-color:var(--accent)}
+.currency-bar .cb-hint{font-size:11px;color:var(--muted);align-self:flex-end;padding-bottom:10px;white-space:nowrap}
+
+.expense-section{margin-top:8px}
+.expense-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.expense-row input,.expense-row select{border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);padding:9px 12px;font:500 14px var(--fb);color:var(--ink);outline:none}
+.expense-row input:focus,.expense-row select:focus{border-color:var(--accent)}
+.expense-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.expense-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--panel2);border-radius:var(--rs);font-size:13.5px;font-weight:600}
+.expense-item .ei-cat{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
+.expense-item .ei-amount{margin-left:auto;font-family:var(--fd);font-weight:700}
+.expense-item .ei-del{width:24px;height:24px;border:0;border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;display:grid;place-items:center;font-size:14px}
+.expense-item .ei-del:hover{color:var(--danger);background:color-mix(in srgb,var(--danger) 10%,transparent)}
+.expense-summary{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.expense-sum{display:inline-flex;gap:7px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;box-shadow:var(--shadow)}
+.expense-sum b{font-family:var(--fd);color:var(--accent)}
+
+/* ── нижняя навигация (мобильная) ── */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:90;background:var(--panel);border-top:1px solid var(--line);padding:6px 8px env(safe-area-inset-bottom,8px);
+  justify-content:space-around;align-items:center;box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+.bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px;border-radius:12px;border:0;background:transparent;color:var(--muted);cursor:pointer;transition:.2s;font-size:9px;font-weight:600;letter-spacing:.3px}
+.bnav-item span{font-size:18px;line-height:1}
+.bnav-item.on{color:var(--accent)}
+.bnav-item:hover{background:var(--panel2)}
+
+@media(hover:none){.t-actions{opacity:1}.cat-del{opacity:.7}}
+@media(max-width:960px){
+  .app{grid-template-columns:1fr;gap:14px;padding:16px 14px 90px;width:100%;max-width:100vw;overflow-x:hidden}
+  .sidebar{display:none}
+  .m-bar{display:flex}
+  .m-cats{display:flex}
+  .top{flex-direction:column;align-items:flex-start;gap:16px;margin-bottom:16px}
+  .head-right{width:100%;flex-direction:row;align-items:center;justify-content:flex-start;flex-wrap:wrap}
+  .ring-card{width:100%}
+  .composer{padding:14px}
+    .composer-row{gap:8px;align-items:stretch}
+  .chips{order:-1;flex-basis:100%}
+  .prio-pick{order:0}
+  .datein-wrap{order:1;flex:1}
+  .btn-add{order:2;width:auto;flex:1}
+  .composer-row{flex-wrap:wrap;overflow:visible}
+  .datein-wrap{width:100%}
+  .prio-pick{order:-1}
+  .btn-add{width:100%;justify-content:center}
+  .board-bar{gap:10px}
+  .search{flex-basis:100%;max-width:none;margin-left:0;min-width:0}
+  .tabs{width:100%}
+  .tab{flex:1;justify-content:center}
+  .bottom-nav{display:flex}
+  .salah-grid{grid-template-columns:repeat(3,1fr)}
+  .week-grid{gap:4px}
+  .week-day{padding:8px 2px}
+  .week-label{font-size:9px}
+  .week-dot{width:8px;height:8px}
+  .zakat-row{grid-template-columns:1fr}
+  .bnav-item{padding:6px 6px;font-size:8px}
+  .bnav-item span{font-size:16px}
+  .currency-bar{flex-direction:column;align-items:stretch}
+  .currency-bar .cb-hint{align-self:flex-start;padding-bottom:0}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+<link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+<body>
+<canvas id="fx"></canvas>
+
+<div class="app">
+  <!-- САЙДБАР -->
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-star">✦</span><span class="brand-name">Баракат</span></div>
+    <div class="brand-sub">трекер задач</div>
+    <div class="nav-label">Разделы</div>
+    <nav class="nav" id="sectionNav">
+      <div class="cat-row on" data-section="tasks" style="--c:#2E7D5B"><span class="cat-emoji">📋</span><span class="cat-name">Задачи</span></div>
+      <div class="cat-row" data-section="ibadat" style="--c:#2BB3A5"><span class="cat-emoji">🕌</span><span class="cat-name">Ибадат</span></div>
+      <div class="cat-row" data-section="finance" style="--c:#E8A23B"><span class="cat-emoji">💰</span><span class="cat-name">Финансы</span></div>
+      <div class="cat-row" data-section="gratitude" style="--c:#9A6FE0"><span class="cat-emoji">📖</span><span class="cat-name">Благодарность</span></div>
+      <div class="cat-row" data-section="focus" style="--c:#4A8DF7"><span class="cat-emoji">⏱️</span><span class="cat-name">Фокус</span></div>
+
+    </nav>
+    <div class="nav-label" id="catNavLabel">Категории</div>
+    <nav class="nav" id="catNav"></nav>
+    <button class="add-cat" id="addCatBtn">＋ Новая категория</button>
+    <div class="side-foot">
+      <button class="ibtn theme-btn" title="Сменить тему"></button>
+      <button class="ibtn sound-btn" title="Звук"></button>
+      <span class="side-hint">данные хранятся<br>в вашем браузере</span>
+    </div>
+  </aside>
+
+  <main>
+    <!-- мобильная шапка -->
+    <div class="m-bar">
+      <div class="brand"><span class="brand-star">✦</span><span class="brand-name">Баракат</span></div>
+      <span style="flex:1"></span>
+      <button class="ibtn theme-btn"></button>
+      <button class="ibtn sound-btn"></button>
+    </div>
+    <div class="m-cats" id="catNavM"></div>
+
+    <!-- ШАПКА ДНЯ -->
+    <header class="top">
+      <div>
+        <div class="dateline" id="dateline"></div>
+        <h1 class="greet" id="greet" title="Нажми, чтобы изменить имя"></h1>
+        <p class="quote" id="quote"></p>
+      </div>
+      <div class="head-right" id="headRight">
+        <div class="ring-card">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 76 76"><circle class="ring-bg" cx="38" cy="38" r="32"/><circle class="ring-fg" id="ringFg" cx="38" cy="38" r="32"/></svg>
+            <div class="ring-pct" id="ringPct">0%</div>
+          </div>
+          <div class="ring-info"><b>Прогресс</b><small><span id="ringDone">0</span> из <span id="ringTotal">0</span> выполнено</small></div>
+        </div>
+        <div class="pills">
+          <span class="pill">🔥 серия: <b id="streakN">0</b></span>
+          <span class="pill">✅ всего: <b id="totalN">0</b></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══ РАЗДЕЛ: ЗАДАЧИ ═══ -->
+    <div id="sectionTasks">
+      <section class="composer" id="composer">
+        <input id="newText" placeholder="Что нужно сделать?" maxlength="140" autocomplete="off">
+        <div class="composer-row">
+          <div class="chips" id="catPicker"></div>
+          <div class="prio-pick" id="prioPick" title="Приоритет">
+            <button class="prio" data-p="low" title="Низкий"><svg viewBox="0 0 24 24"><path d="M6 3v18M6 4h10l-2.5 3.5L16 11H6"/></svg></button>
+            <button class="prio" data-p="mid" title="Средний"><svg viewBox="0 0 24 24"><path d="M6 3v18M6 4h10l-2.5 3.5L16 11H6"/></svg></button>
+            <button class="prio" data-p="high" title="Высокий"><svg viewBox="0 0 24 24"><path d="M6 3v18M6 4h10l-2.5 3.5L16 11H6"/></svg></button>
+          </div>
+                    <div class="datein-wrap" onclick="this.querySelector('input').showPicker?.()">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+            <label class="datein-wrap" for="newDue">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <input type="datetime-local" class="datein" id="newDue" title="Дата и время">
+          </label>
+          </div>
+          <button class="btn-add" id="addBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Добавить</button>
+        </div>
+      </section>
+      <div class="board-bar">
+        <div class="tabs">
+          <button class="tab on" data-tab="active">Активные <span class="cnt" id="cntA">0</span></button>
+          <button class="tab" data-tab="done">Выполненные <span class="cnt" id="cntD">0</span></button>
+        </div>
+        <button id="clearDone" style="display:none">Очистить выполненные</button>
+        <div class="search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="search" placeholder="Поиск…  ( / )">
+        </div>
+      </div>
+      <ul class="tasks" id="list"></ul>
+    </div>
+
+    <!-- ═══ РАЗДЕЛ: ИБАДАТ ═══ -->
+    <div id="sectionIbadat" class="ibadat-section">
+      <!-- Аят дня -->
+      <div class="ibadat-card">
+        <h2><span>📜</span> Аят дня</h2>
+        <div class="verse-of-day-container" id="verseOfDayContainer">
+          <div class="verse-loading">Загрузка аята...</div>
+        </div>
+      </div>
+      <!-- Время намаза и Кибла -->
+      <div class="ibadat-card">
+        <h2><span>🕋</span> Время намаза и Кибла</h2>
+        <div class="prayer-times-widget">
+          <div class="location-status" id="locationStatus">
+            <span class="location-icon">📍</span>
+            <span class="location-text">Определение местоположения...</span>
+          </div>
+          <div class="method-selector">
+            <label for="prayerMethod">Метод расчёта:</label>
+            <select id="prayerMethod" class="method-select">
+              <option value="5">Umm al-Qura (Мекка)</option>
+              <option value="1">Всемирная исламская лига</option>
+            </select>
+          </div>
+          <div class="prayer-times-list" id="prayerTimesList"></div>
+          <div class="next-prayer" id="nextPrayer"></div>
+        </div>
+        <div class="qibla-compass-container">
+          <div class="qibla-info">
+            <span class="qibla-angle" id="qiblaAngle">--°</span>
+            <span class="qibla-label">Угол киблы</span>
+          </div>
+          <div class="compass-wrapper" id="compassWrapper">
+            <div class="compass-outer" id="compassOuter">
+              <div class="compass-north">N</div>
+              <div class="compass-south">S</div>
+              <div class="compass-east">E</div>
+              <div class="compass-west">W</div>
+              <div class="compass-ticks"></div>
+            </div>
+            <div class="compass-inner" id="compassInner">
+              <div class="qibla-arrow">
+                <svg width="32" height="56" viewBox="0 0 32 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Классическая стрелка компаса -->
+                  <path d="M16 4C16 4 16 42 16 42" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+                  <path d="M16 4L8 20H24L16 4Z" fill="var(--accent)"/>
+                  <path d="M16 42L12 34H20L16 42Z" fill="var(--accent)"/>
+                </svg>
+                <span style="font-size:22px;display:block;text-align:center;margin-top:-4px;line-height:1">🕋</span>
+              </div>
+            </div>
+            <div class="compass-center"></div>
+          </div>
+          <div class="qibla-status" id="qiblaStatus">
+            <span class="status-icon">🧭</span>
+            <span class="status-text">Поверните телефон для калибровки</span>
+          </div>
+        </div>
+      </div>
+      <!-- Намазы сегодня -->
+      <div class="ibadat-card">
+        <h2><span>🕌</span> Намазы сегодня</h2>
+        <div class="salah-grid" id="salahGrid"></div>
+      </div>
+      <!-- Чтение Корана -->
+      <div class="ibadat-card">
+        <h2><span>📖</span> Чтение Корана</h2>
+        <div class="quran-row">
+          <input type="number" class="quran-input" id="quranInput" placeholder="Количество страниц" min="0" step="1">
+          <span class="quran-unit">страниц сегодня</span>
+          <button class="btn-add" id="quranAdd" style="padding:10px 16px">＋</button>
+        </div>
+        <div class="quran-total">Всего прочитано: <b id="quranTotal">0</b> страниц</div>
+      </div>
+      <!-- Недельная сетка -->
+      <div class="ibadat-card">
+        <h2><span>📅</span> Эта неделя</h2>
+        <div class="week-grid" id="weekGrid"></div>
+      </div>
+      <!-- Статистика ибадата -->
+      <div class="ibadat-stats">
+        <span class="ibadat-stat">🔥 серия намазов: <b id="ibadatStreak">0</b></span>
+        <span class="ibadat-stat">✅ полных дней: <b id="ibadatFullDays">0</b></span>
+      </div>
+    </div>
+
+    <!-- ═══ РАЗДЕЛ: ФОКУС-ТАЙМЕР ═══ -->
+    <div id="sectionFocus" class="focus-section">
+      <div class="focus-card">
+        <h2><span>⏱️</span> Фокус-таймер</h2>
+        <div class="focus-label" id="focusLabel">Готов к работе</div>
+        <div class="focus-timer" id="focusTimer">25:00</div>
+        <div class="focus-progress"><div class="focus-progress-bar" id="focusBar" style="width:0%"></div></div>
+        <div class="focus-controls">
+          <button class="focus-btn focus-btn-start" id="focusStart">▶ Старт</button>
+          <button class="focus-btn focus-btn-pause" id="focusPause" style="display:none">⏸ Пауза</button>
+          <button class="focus-btn focus-btn-reset" id="focusReset">↺ Сброс</button>
+        </div>
+        <div class="focus-settings">
+          <div class="focus-setting"><label>Работа (мин)</label><input type="number" id="focusWorkMin" value="25" min="1" max="120"></div>
+          <div class="focus-setting"><label>Отдых (мин)</label><input type="number" id="focusBreakMin" value="5" min="1" max="60"></div>
+        </div>
+        <div class="focus-stats">
+          <span class="focus-stat">🍅 Сессий сегодня: <b id="focusSessions">0</b></span>
+          <span class="focus-stat">⏱️ Фокус сегодня: <b id="focusTotal">0</b> мин</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ РАЗДЕЛ: ДНЕВНИК БЛАГОДАРНОСТИ ═══ -->
+    <div id="sectionGratitude" class="gratitude-section">
+      <div class="gratitude-card">
+        <h2><span>📖</span> За что я благодарен сегодня?</h2>
+        <div class="gratitude-input-wrap">
+          <textarea class="gratitude-textarea" id="gratitudeInput" placeholder="Напишите, за что вы благодарны Аллаху сегодня..." maxlength="500"></textarea>
+          <button class="btn-add" id="gratitudeAdd" style="align-self:flex-end">Сохранить</button>
+        </div>
+        <div class="gratitude-entries" id="gratitudeEntries"></div>
+        <div class="gratitude-count" id="gratitudeCount"></div>
+      </div>
+    </div>
+    <!-- ═══ РАЗДЕЛ: ФИНАНСЫ / ЗАКЯТ ═══ -->
+    <div id="sectionFinance" class="finance-section">
+      <!-- Калькулятор закята -->
+      <div class="zakat-card">
+        <h2><span>🤲</span> Калькулятор закята</h2>
+        <div class="zakat-intro">
+          Закят обязателен при достижении нисаба и прохождении хаула (лунного года). 
+        </div>
+        <!-- ВАЛЮТНЫЙ СЕЛЕКТОР -->
+        <div class="currency-bar">
+          <div class="cb-field">
+            <label>Валюта</label>
+            <select id="curSelect"></select>
+          </div>
+          <div class="cb-field">
+            <label>Курс к $ (за 1 $)</label>
+            <input type="number" id="curRate" min="0.0001" step="any" placeholder="Напр. 80.5">
+          </div>
+          <div class="cb-hint" id="curHint"></div>
+        </div>
+        <div class="zakat-type-tabs" id="zakatTabs"></div>
+        <div id="zakatFormContainer"></div>
+        <div class="zakat-result below-nisab" id="zakatResult">
+          <div class="zr-label">Закят к выплате</div>
+          <div class="zr-value" id="zrValue">—</div>
+          <div class="zr-detail" id="zrDetail">Выберите тип имущества и заполните данные</div>
+        </div>
+      </div>
+      <!-- Расходы -->
+      <div class="zakat-card expense-section">
+        <h2><span>📊</span> Расходы за месяц</h2>
+        <div class="expense-row">
+          <input type="number" id="expAmount" placeholder="Сумма" min="0" step="0.01" style="flex:1;min-width:100px">
+          <select id="expCat" style="min-width:120px">
+            <option value="food">🍎 Еда</option>
+            <option value="transport">🚗 Транспорт</option>
+            <option value="housing">🏡 Жильё</option>
+            <option value="health">💧 Здоровье</option>
+            <option value="sadaqah">🤲 Садака</option>
+            <option value="education">📚 Учёба</option>
+            <option value="other">📦 Другое</option>
+          </select>
+          <button class="btn-add" id="expAdd" style="padding:10px 16px">＋</button>
+        </div>
+        <div class="expense-list" id="expList"></div>
+        <div class="expense-summary" id="expSummary"></div>
+      </div>
+    </div>
+
+    <footer>✦ Баракат — пусть каждый день будет благословенным</footer>
+  </main>
+</div>
+
+<!-- Нижняя навигация (мобильная) -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bnav-item on" data-section="tasks"><span>📋</span>Задачи</button>
+  <button class="bnav-item" data-section="ibadat"><span>🕌</span>Ибадат</button>
+  <button class="bnav-item" data-section="finance"><span>💰</span>Финансы</button>
+  <button class="bnav-item" data-section="gratitude"><span>📖</span>Благодарность</button>
+  <button class="bnav-item" data-section="focus"><span>⏱️</span>Фокус</button>
+</nav>
+
+<!-- ДИАЛОГ КАТЕГОРИИ -->
+<dialog id="dlg">
+  <form class="dlg-card" id="catForm">
+    <h3>Новая категория</h3>
+    <label>Название<input type="text" id="catName" maxlength="20" required placeholder="Например: Путешествия" autocomplete="off"></label>
+    <label>Эмодзи<div class="egrid" id="egrid" style="text-transform:none"></div></label>
+    <label>Цвет<div class="cgrid" id="cgrid" style="text-transform:none"></div></label>
+    <div class="dlg-actions">
+      <button type="button" class="gbtn" id="dlgCancel">Отмена</button>
+      <button type="submit" class="btn-add">Создать</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const KEY='barakat.v1';
+const IBADAT_KEY='barakat.ibadat.v1';
+const FINANCE_KEY='barakat.finance.v1';
+const PRAYER_KEY='barakat.prayer.v1';
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const plural=(n,f)=>{n=Math.abs(n)%100;const d=n%10;if(n>10&&n<20)return f[2];if(d>1&&d<5)return f[1];if(d===1)return f[0];return f[2]};
+const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+const PALETTE=['#9AA7B2','#F0645C','#E86FB0','#E8A23B','#D97B29','#7BC142','#34B87E','#2BB3A5','#4A8DF7','#9A6FE0'];
+const EMOJIS=['✨','🌙','🕌','📚','💪','🧺','🎯','🎨','🧠','🍎','💰','🌿','🤲','🎁','🌟','📞','🚗','✈️','🧹','💡'];
+const QUOTES=[
+ '«Самые любимые дела — те, что совершаются постоянно, даже если они малы» (хадис)',
+ '«Маленький шаг каждый день превращается в большой путь»',
+ '«Не откладывай на завтра то, что можешь сделать сегодня»',
+ '«Порядок в делах — спокойствие в сердце»',
+ '«Сначала самое важное — остальное станет проще»',
+ '«Дисциплина — это мост между целью и результатом»',
+ '«Спланируй вечер — и утро скажет тебе спасибо»',
+ '«Доводи начатое до конца — в этом и есть мастерство»'];
+
+const SALAH_LIST=[
+ {id:'fajr',name:'Фаджр',icon:'🌅'},
+ {id:'dhuhr',name:'Зухр',icon:'☀️'},
+ {id:'asr',name:'Аср',icon:'🌤️'},
+ {id:'maghrib',name:'Магриб',icon:'🌇'},
+ {id:'isha',name:'Иша',icon:'🌙'}];
+
+// ════ МЕТОДЫ РАСЧЁТА ВРЕМЕНИ НАМАЗОВ ════
+const PRAYER_METHODS={
+ 1:{name:'Всемирная исламская лига',fajrAngle:18,ishaAngle:17},
+ 5:{name:'Umm al-Qura (Мекка)',fajrAngle:18.5,ishaAngle:18}
+};
+
+// ════ СОСТОЯНИЕ ДЛЯ ВРЕМЕНИ НАМАЗОВ И КИБЛЫ ════
+let prayerState={
+ latitude:null,
+ longitude:null,
+ method:5,
+ times:null,
+ qiblaAngle:null
+};
+
+
+/* ══════════════════════════════════════
+   ВАЛЮТЫ БЫВШЕГО СССР + USD/EUR
+   ══════════════════════════════════════ */
+const CURRENCIES=[
+ {code:'USD',sym:'$',name:'Доллар США',rate:1},
+ {code:'EUR',sym:'€',name:'Евро',rate:0.92},
+ {code:'RUB',sym:'₽',name:'Российский рубль',rate:80.5},
+ {code:'UAH',sym:'₴',name:'Украинская гривна',rate:41.5},
+ {code:'BYN',sym:'Br',name:'Белорусский рубль',rate:3.25},
+ {code:'KZT',sym:'₸',name:'Казахстанский тенге',rate:485},
+ {code:'UZS',sym:'сўм',name:'Узбекский сум',rate:12700},
+ {code:'KGS',sym:'сом',name:'Кыргызский сом',rate:87.5},
+ {code:'TJS',sym:'сом.',name:'Таджикский сомони',rate:10.6},
+ {code:'TMT',sym:'ман.',name:'Туркменский манат',rate:3.5},
+ {code:'AZN',sym:'₼',name:'Азербайджанский манат',rate:1.7},
+ {code:'GEL',sym:'₾',name:'Грузинский лари',rate:2.7},
+ {code:'AMD',sym:'֏',name:'Армянский драм',rate:385},
+ {code:'MDL',sym:'lei',name:'Молдавский лей',rate:17.8},
+ {code:'EEK',sym:'€',name:'Эстония (EUR)',rate:0.92},
+ {code:'LVL',sym:'€',name:'Латвия (EUR)',rate:0.92},
+ {code:'LTL',sym:'€',name:'Литва (EUR)',rate:0.92}];
+
+function getCur(){
+ return CURRENCIES.find(c=>c.code===finance.currency)||CURRENCIES[0];}
+
+function toUSD(amount){
+ const rate=parseFloat(finance.exchangeRate)||getCur().rate;
+ return amount/rate;}
+
+function fromUSD(amount){
+ const rate=parseFloat(finance.exchangeRate)||getCur().rate;
+ return amount*rate;}
+
+function fmtCur(usdAmount){
+ const cur=getCur();
+ const local=fromUSD(usdAmount);
+ if(cur.code==='USD') return '$'+usdAmount.toFixed(2);
+ return '$'+usdAmount.toFixed(2)+' / '+local.toLocaleString('ru-RU',{maximumFractionDigits:2})+' '+cur.sym;}
+
+function fmtLocal(amount){
+ const cur=getCur();
+ return amount.toLocaleString('ru-RU',{maximumFractionDigits:2})+' '+cur.sym;}
+
+/* ══════════════════════════════════════
+   СОСТОЯНИЕ ЗАДАЧ
+   ══════════════════════════════════════ */
+function defaults(){return{
+ v:1, filter:'all', tab:'active', search:'', newCat:'general', newPrio:null, section:'tasks',
+ settings:{theme:null,sound:true,name:''},
+ cats:[
+  {id:'general',name:'Общие',emoji:'✨',color:'#9AA7B2',fixed:true},
+  {id:'c-pers',name:'Личное',emoji:'🌿',color:'#F0645C'},
+  {id:'c-work',name:'Работа',emoji:'💼',color:'#4A8DF7'},
+  {id:'c-shop',name:'Покупки',emoji:'🛒',color:'#E8A23B'},
+  {id:'c-deen',name:'Ибадат',emoji:'🕌',color:'#2BB3A5'},
+  {id:'c-hlth',name:'Здоровье',emoji:'💧',color:'#34B87E'},
+  {id:'c-stdy',name:'Учёба',emoji:'📚',color:'#9A6FE0'},
+  {id:'c-home',name:'Дом',emoji:'🏡',color:'#E86FB0'}],
+ tasks:[]}}
+
+let state=defaults();
+function seed(){const n=Date.now();state.tasks=[
+ {id:uid(),text:'Составить список целей на неделю',catId:'general',prio:null,due:null,done:true,createdAt:n-9e5,completedAt:n-6e5},
+ {id:uid(),text:'Купить финики и мёд',catId:'c-shop',prio:'mid',due:ymd(new Date()),done:false,createdAt:n-8e5},
+ {id:uid(),text:'Подготовить отчёт для команды',catId:'c-work',prio:'high',due:null,done:false,createdAt:n-7e5},
+ {id:uid(),text:'Прочитать 20 страниц книги',catId:'c-pers',prio:'low',due:null,done:false,createdAt:n-6e5},
+ {id:uid(),text:'Вечерняя прогулка 30 минут',catId:'c-hlth',prio:null,due:null,done:false,createdAt:n-5e5}];}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({...state,search:''}))}catch(e){}}
+function load(){try{const r=localStorage.getItem(KEY);if(!r){seed();return}
+ const d=JSON.parse(r);state={...state,...d,settings:{...state.settings,...(d.settings||{})},search:''};
+ if(!state.cats.find(c=>c.id==='general'))state.cats.unshift({id:'general',name:'Общие',emoji:'✨',color:'#9AA7B2',fixed:true});
+ state.tasks.forEach(t=>{if(!catById(t.catId))t.catId='general'});
+ if(!state.section)state.section='tasks';
+}catch(e){seed()}}
+const catById=id=>state.cats.find(c=>c.id===id)||state.cats[0];
+const byId=id=>state.tasks.find(t=>t.id===id);
+
+/* ══════════════════════════════════════
+   СОСТОЯНИЕ ИБАДАТА
+   ══════════════════════════════════════ */
+let ibadat={days:{}};
+function loadIbadat(){try{const r=localStorage.getItem(IBADAT_KEY);if(r)ibadat=JSON.parse(r)}catch(e){}}
+function saveIbadat(){try{localStorage.setItem(IBADAT_KEY,JSON.stringify(ibadat))}catch(e){}}
+function getDay(dateStr){if(!ibadat.days[dateStr])ibadat.days[dateStr]={salah:{fajr:false,dhuhr:false,asr:false,maghrib:false,isha:false},quran:0};return ibadat.days[dateStr]}
+function todayStr(){return ymd(new Date())}
+
+// Загрузка настроек времени намазов
+function loadPrayerSettings(){
+ try{
+  const r=localStorage.getItem(PRAYER_KEY);
+  if(r){
+   const saved=JSON.parse(r);
+   prayerState.method=saved.method||5;
+  }
+ }catch(e){}
+ // Устанавливаем значение в селект
+ const select=$('#prayerMethod');
+ if(select)select.value=prayerState.method;
+}
+function savePrayerSettings(){
+ try{
+  localStorage.setItem(PRAYER_KEY,JSON.stringify({method:prayerState.method}));
+ }catch(e){}
+}
+
+// ════ АЯТ ДНЯ ════
+let verseData={arabic:[],russian:[]};
+let verseInitialized=false;
+
+async function loadVerseFiles(){
+ if(verseInitialized)return;
+ try{
+  const [araRes,rusRes]=await Promise.all([
+   fetch('database/chapterverse/ara-quranacademy.txt'),
+   fetch('database/chapterverse/rus-elmirkuliev.txt')
+  ]);
+  if(!araRes.ok||!rusRes.ok)throw new Error('Файлы не найдены');
+  const [araText,rusText]=await Promise.all([araRes.text(),rusRes.text()]);
+  verseData.arabic=araText.trim().split('\n').slice(0,6236);
+  verseData.russian=rusText.trim().split('\n').slice(0,6236);
+  verseInitialized=true;
+ }catch(e){
+  console.error('Ошибка загрузки аятов:',e);
+  verseData.error=true;
+ }
+}
+
+function renderVerseOfDay(){
+ const container=$('#verseOfDayContainer');
+ if(!container)return;
+
+ // Проверяем, есть ли уже сохранённый случайный аят на сегодня
+ const todayStr=new Date().toDateString();
+ let verseIndex=localStorage.getItem('barakat_verse_index');
+ let verseDate=localStorage.getItem('barakat_verse_date');
+ 
+ // Если нет сохранённого индекса или дата сменилась — выбираем новый случайный аят
+ if(!verseIndex||verseDate!==todayStr){
+  verseIndex=Math.floor(Math.random()*6236); // 0-based индекс (0-6235)
+  localStorage.setItem('barakat_verse_index',verseIndex);
+  localStorage.setItem('barakat_verse_date',todayStr);
+ }else{
+  verseIndex=parseInt(verseIndex,10);
+ }
+
+ if(verseData.error){
+  container.innerHTML='<div class="verse-error">Не удалось загрузить аяты</div>';
+  return;
+ }
+
+ if(!verseInitialized||verseData.arabic.length===0){
+  container.innerHTML='<div class="verse-loading"><span>Загрузка аята...</span></div>';
+  loadVerseFiles().then(()=>renderVerseOfDay());
+  return;
+ }
+
+ const arabicLine=verseData.arabic[verseIndex]||'';
+ const russianLine=verseData.russian[verseIndex]||'';
+ 
+ // Извлекаем текст аята (формат: сура|аят|текст)
+ const arabicText=arabicLine.split('|').slice(2).join('|')||'...';
+ const russianText=russianLine.split('|').slice(2).join('|')||'...';
+ 
+ // Получаем номер суры и аята из данных
+ const partsA=arabicLine.split('|');
+ const surahNum=partsA[0]||'?';
+ const ayahNum=partsA[1]||'?';
+
+ container.innerHTML=`
+  <div class="verse-header">
+   <span class="verse-header-icon">📜</span>
+   <span class="verse-header-title">Аят дня</span>
+  </div>
+  <div class="verse-arabic">${arabicText}</div>
+  <div class="verse-translation">${russianText}</div>
+  <div class="verse-reference">Сура ${surahNum}, Аят ${ayahNum}</div>
+ `;
+}
+
+
+/* ══════════════════════════════════════
+   СОСТОЯНИЕ ФИНАНСОВ
+   ══════════════════════════════════════ */
+let finance={expenses:[],zakatType:'total',zakatData:{},currency:'RUB',exchangeRate:80.5};
+function loadFinance(){try{const r=localStorage.getItem(FINANCE_KEY);if(r){const d=JSON.parse(r);finance={...finance,...d}}}catch(e){}}
+function saveFinance(){try{localStorage.setItem(FINANCE_KEY,JSON.stringify(finance))}catch(e){}}
+
+/* ── звук ── */
+let AC=null;
+const tone=(f,dur=.12,type='triangle',g=.13,delay=0)=>{if(!state.settings.sound)return;try{
+ AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),gn=AC.createGain();
+ o.type=type;o.frequency.value=f;const t0=AC.currentTime+delay;
+ gn.gain.setValueAtTime(.0001,t0);gn.gain.exponentialRampToValueAtTime(g,t0+.012);gn.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+ o.connect(gn).connect(AC.destination);o.start(t0);o.stop(t0+dur+.03)}catch(e){}};
+const sndPop=()=>{tone(740,.1);tone(988,.14,'sine',.09,.07)};
+const sndTick=()=>tone(520,.06,'sine',.07);
+const sndFanfare=()=>[523,659,784,1047].forEach((f,i)=>tone(f,.2,'triangle',.13,i*.1));
+
+/* ── конфетти ── */
+const cvs=$('#fx'),ctx=cvs.getContext('2d');let parts=[],raf=0;
+const sizeCvs=()=>{cvs.width=innerWidth;cvs.height=innerHeight};sizeCvs();addEventListener('resize',sizeCvs);
+function burst(x,y,colors,count=26,power=1){
+ for(let i=0;i<count;i++)parts.push({x,y,vx:(Math.random()-.5)*9*power,vy:(Math.random()*-6-2)*power,g:.19,
+  s:Math.random()*5+3.5,r:Math.random()*6.3,vr:(Math.random()-.5)*.3,c:colors[i%colors.length],life:1,decay:.012+Math.random()*.012});
+ if(!raf)raf=requestAnimationFrame(loop);}
+function loop(){ctx.clearRect(0,0,cvs.width,cvs.height);
+ parts=parts.filter(p=>p.life>0);
+ parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.r+=p.vr;p.life-=p.decay;
+  ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.globalAlpha=Math.max(p.life,0);
+  ctx.fillStyle=p.c;ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*1.5);ctx.restore()});
+ if(parts.length)raf=requestAnimationFrame(loop);else{raf=0;ctx.clearRect(0,0,cvs.width,cvs.height)}}
+const FXC=['#F0645C','#E8A23B','#34B87E','#4A8DF7','#2BB3A5','#E86FB0','#F2C14E'];
+
+/* ── тост ── */
+let toastT;
+function toast(msg,undo){const el=$('#toast');
+ el.innerHTML=`<span>${msg}</span>${undo?'<button type="button">Отменить</button>':''}`;
+ if(undo)el.querySelector('button').onclick=()=>{undo();hideToast()};
+ el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(hideToast,4200);}
+const hideToast=()=>$('#toast').classList.remove('show');
+
+/* ── фильтрация ── */
+const matchF=t=>state.filter==='all'||t.catId===state.filter;
+const matchS=t=>!state.search||t.text.toLowerCase().includes(state.search);
+const scoped=()=>state.tasks.filter(matchF);
+
+/* ══════════════════════════════════════
+   ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ
+   ══════════════════════════════════════ */
+function switchSection(sec){
+ state.section=sec;save();
+ $('#sectionTasks').style.display=sec==='tasks'?'':'none';
+ $('#sectionIbadat').classList.toggle('active',sec==='ibadat');
+ $('#sectionFinance').classList.toggle('active',sec==='finance');
+ $('#sectionGratitude').classList.toggle('active',sec==='gratitude');
+ $('#sectionFocus').classList.toggle('active',sec==='focus');
+ // Сайдбар: подсветка раздела
+ $$('#sectionNav .cat-row').forEach(r=>r.classList.toggle('on',r.dataset.section===sec));
+ // Сайдбар: показ/скрытие категорий
+ const isTasks=sec==='tasks';
+ $('#catNavLabel').style.display=isTasks?'':'none';
+ $('#catNav').style.display=isTasks?'':'none';
+ $('#addCatBtn').style.display=isTasks?'':'none';
+ // Мобильные категории и кнопка добавления
+ $('#catNavM').style.display=isTasks?'':'none';
+ // Шапка: кольцо прогресса только для задач
+ $('#headRight').style.display=isTasks?'':'none';
+ // Нижняя навигация
+ $$('.bnav-item').forEach(b=>b.classList.toggle('on',b.dataset.section===sec));
+ // Рендер
+ if(sec==='tasks'){renderAll()}
+ else if(sec==='ibadat'){renderIbadat();initGeolocation()}
+ else if(sec==='finance'){renderFinance()}
+ else if(sec==='gratitude'){renderGratitude()}
+ else if(sec==='focus'){renderFocus()}}
+$('#sectionNav').addEventListener('click',e=>{const r=e.target.closest('[data-section]');if(r)switchSection(r.dataset.section)});
+$('#bottomNav').addEventListener('click',e=>{const b=e.target.closest('[data-section]');if(b)switchSection(b.dataset.section)});
+
+/* ══════════════════════════════════════
+   🤲 ЗАКЯТ: КАЛЬКУЛЯТОР С МУЛЬТИВАЛЮТОЙ
+   ══════════════════════════════════════ */
+const ZAKAT_TYPES=[
+ {id:'total',name:'💰 Общий расчёт',desc:'Деньги + золото + серебро + товары'}, 
+ {id:'money',name:'💰 Деньги',desc:'Наличные, счета, депозиты'},
+ {id:'gold',name:'🥇 Золото',desc:'Слитки, монеты, украшения (ханафиты)'},
+ {id:'silver',name:'🥈 Серебро',desc:'Слитки, монеты, посуда'},
+ {id:'trade',name:'🏢 Торговые товары',desc:'Товары для перепродажи'},
+ {id:'sheep',name:'🐑 Овцы / козы',desc:'Свободный выпас (саима)'},
+ {id:'cattle',name:'🐄 Коровы',desc:'Свободный выпас (саима)'},
+ {id:'camels',name:'🐪 Верблюды',desc:'Свободный выпас (саима)'},
+ {id:'crops',name:'🌾 Урожай',desc:'Зерновые, финики, виноград'},
+ {id:'rikaz',name:'⛏️ Риказ (клад)',desc:'Найденные сокровища, недра'}];
+
+// Нисаб (базовые значения в USD, пересчитываются через курс пользователя)
+const SILVER_PRICE_GR_USD=1.10;
+const GOLD_PRICE_GR_USD=85;
+const NISAB_SILVER_GR=612.36;
+const NISAB_GOLD_GR=87.48;
+const NISAB_SILVER_USD=NISAB_SILVER_GR*SILVER_PRICE_GR_USD; // ~$673
+const NISAB_GOLD_USD=NISAB_GOLD_GR*GOLD_PRICE_GR_USD;       // ~$7,436
+const WASQ_KG=130.6;
+const NISAB_CROPS_KG=5*WASQ_KG;
+
+/* ── Валютный селектор: рендер и события ── */
+function renderCurrencyBar(){
+ const sel=$('#curSelect');
+ sel.innerHTML=CURRENCIES.map(c=>
+  `<option value="${c.code}" ${finance.currency===c.code?'selected':''}>${c.sym} ${c.name}</option>`
+ ).join('');
+ $('#curRate').value=finance.exchangeRate||getCur().rate;
+ updateCurHint();}
+
+function updateCurHint(){
+ const cur=getCur();
+ const rate=parseFloat(finance.exchangeRate)||cur.rate;
+ const nisabSilverLocal=fromUSD(NISAB_SILVER_USD);
+ $('#curHint').textContent=`1 $ = ${rate} ${cur.sym} | Нисаб ≈ ${nisabSilverLocal.toLocaleString('ru-RU',{maximumFractionDigits:0})} ${cur.sym}`;}
+
+$('#curSelect').addEventListener('change',e=>{
+ finance.currency=e.target.value;
+ const cur=getCur();
+ finance.exchangeRate=cur.rate;
+ saveFinance();
+ renderCurrencyBar();
+ updateZakatResult();
+ renderExpenses();});
+
+$('#curRate').addEventListener('input',e=>{
+ finance.exchangeRate=parseFloat(e.target.value)||0;
+ saveFinance();
+ updateCurHint();
+ updateZakatResult();});
+
+/* ── Расчёт закята (все денежные суммы конвертируются в USD) ── */
+function calcZakat(type,data){
+ const d=data||{};
+ let result={zakatUSD:0,belowNisab:false,detail:'',rate:0};
+ switch(type){
+  case 'total':{
+   const cash=toUSD(parseFloat(d.cash)||0);const bank=toUSD(parseFloat(d.bank)||0);
+   const goldGr=parseFloat(d.goldGr)||0;const silverGr=parseFloat(d.silverGr)||0;
+   const tradeVal=toUSD(parseFloat(d.tradeVal)||0);const debts=toUSD(parseFloat(d.debts)||0);
+   const goldUSD=goldGr*GOLD_PRICE_GR_USD;const silverUSD=silverGr*SILVER_PRICE_GR_USD;
+   const totalAssets=cash+bank+goldUSD+silverUSD+tradeVal;const net=totalAssets-debts;
+   result.rate=2.5;
+   if(net<NISAB_SILVER_USD){result.belowNisab=true;result.detail=`Совокупность активов: ${fmtCur(net)} < нисаб ${fmtCur(NISAB_SILVER_USD)} (${NISAB_SILVER_GR} г серебра). Закят не обязателен.`;return result}
+   result.zakatUSD=net*0.025;
+   result.detail=`Наличные: ${fmtCur(cash)} | Счета: ${fmtCur(bank)} | Золото: ${goldGr} г (${fmtCur(goldUSD)}) | Серебро: ${silverGr} г (${fmtCur(silverUSD)}) | Товары: ${fmtCur(tradeVal)} | Долги: −${fmtCur(debts)} | Нетто: ${fmtCur(net)} × 2.5%`;break}
+  case 'money':{
+   const cash=toUSD(parseFloat(d.cash)||0);
+   const bank=toUSD(parseFloat(d.bank)||0);
+   const debts=toUSD(parseFloat(d.debts)||0);
+   const net=cash+bank-debts;
+   result.rate=2.5;
+   if(net<NISAB_SILVER_USD){result.belowNisab=true;result.detail=`Нетто: ${fmtCur(net)} < нисаб ${fmtCur(NISAB_SILVER_USD)} (${NISAB_SILVER_GR} г серебра)`;return result}
+   result.zakatUSD=net*0.025;
+   result.detail=`Нетто: ${fmtCur(net)} × 2.5% | Нисаб: ${fmtCur(NISAB_SILVER_USD)}`;
+   break}
+  case 'gold':{
+   const grams=parseFloat(d.grams)||0;
+   result.rate=2.5;
+   if(grams<NISAB_GOLD_GR){result.belowNisab=true;result.detail=`${grams} г < нисаб ${NISAB_GOLD_GR} г`;return result}
+   result.zakatUSD=grams*0.025*GOLD_PRICE_GR_USD;
+   result.detail=`${grams} г × 2.5% = ${(grams*0.025).toFixed(2)} г золота (${fmtCur(grams*0.025*GOLD_PRICE_GR_USD)}) | Нисаб: ${NISAB_GOLD_GR} г`;
+   break}
+  case 'silver':{
+   const grams=parseFloat(d.grams)||0;
+   result.rate=2.5;
+   if(grams<NISAB_SILVER_GR){result.belowNisab=true;result.detail=`${grams} г < нисаб ${NISAB_SILVER_GR} г`;return result}
+   result.zakatUSD=grams*0.025*SILVER_PRICE_GR_USD;
+   result.detail=`${grams} г × 2.5% = ${(grams*0.025).toFixed(2)} г серебра (${fmtCur(grams*0.025*SILVER_PRICE_GR_USD)}) | Нисаб: ${NISAB_SILVER_GR} г`;
+   break}
+  case 'trade':{
+   const value=toUSD(parseFloat(d.value)||0);
+   const debts=toUSD(parseFloat(d.debts)||0);
+   const net=value-debts;
+   result.rate=2.5;
+   if(net<NISAB_SILVER_USD){result.belowNisab=true;result.detail=`Стоимость: ${fmtCur(net)} < нисаб ${fmtCur(NISAB_SILVER_USD)}`;return result}
+   result.zakatUSD=net*0.025;
+   result.detail=`Рыночная стоимость: ${fmtCur(net)} × 2.5%`;
+   break}
+  case 'sheep':{
+   const n=parseInt(d.count)||0;
+   if(n<40){result.belowNisab=true;result.detail=`${n} голов < нисаб 40 голов`;return result}
+   let z=0;
+   if(n>=40&&n<=120)z=1;
+   else if(n>=121&&n<=200)z=2;
+   else if(n>=201&&n<=399)z=3;
+   else z=3+Math.floor((n-399)/100);
+   result.zakatUSD=z;
+   result.detail=`${n} голов → ${z} ${plural(z,['овца','овцы','овец'])} | Нисаб: 40 голов`;
+   break}
+  case 'cattle':{
+   const n=parseInt(d.count)||0;
+   if(n<30){result.belowNisab=true;result.detail=`${n} голов < нисаб 30 голов`;return result}
+   let z=0,zDesc='';
+   if(n>=30&&n<=39){z=1;zDesc='1 телёнок (таби\')'}
+   else if(n>=40&&n<=59){z=1;zDesc='1 двухлетка (мусинна)'}
+   else if(n>=60&&n<=69){z=2;zDesc='2 телёнка'}
+   else if(n>=70&&n<=79){z=2;zDesc='1 телёнок + 1 двухлетка'}
+   else{z=Math.floor(n/30)+Math.floor(n/40);zDesc=`по формуле: ${z} голов`}
+   result.zakatUSD=z;
+   result.detail=`${n} голов → ${zDesc} | Нисаб: 30 голов`;
+   break}
+  case 'camels':{
+   const n=parseInt(d.count)||0;
+   if(n<5){result.belowNisab=true;result.detail=`${n} голов < нисаб 5 голов`;return result}
+   let z=0,zDesc='';
+   if(n>=5&&n<=9){z=1;zDesc='1 овца'}
+   else if(n>=10&&n<=14){z=2;zDesc='2 овцы'}
+   else if(n>=15&&n<=19){z=3;zDesc='3 овцы'}
+   else if(n>=20&&n<=24){z=4;zDesc='4 овцы'}
+   else if(n>=25&&n<=35){z=1;zDesc='1 верблюдица (бинт махад)'}
+   else if(n>=36&&n<=45){z=1;zDesc='1 верблюдица (бинт лабун)'}
+   else if(n>=46&&n<=60){z=1;zDesc='1 верблюдица (хикка)'}
+   else if(n>=61&&n<=75){z=1;zDesc='1 верблюдица (джад\'а)'}
+   else if(n>=76&&n<=90){z=2;zDesc='2 бинт лабун'}
+   else if(n>=91&&n<=120){z=2;zDesc='2 хикка'}
+   else{z=Math.floor(n/40)*2+Math.floor((n%40)/30);zDesc=`${z} голов (по формуле)`}
+   result.zakatUSD=z;
+   result.detail=`${n} голов → ${zDesc} | Нисаб: 5 голов`;
+   break}
+  case 'crops':{
+   const kg=parseFloat(d.kg)||0;
+   const irrigated=d.irrigated==='yes';
+   const ratePct=irrigated?5:10;
+   result.rate=ratePct;
+   if(kg<NISAB_CROPS_KG){result.belowNisab=true;result.detail=`${kg} кг < нисаб ${NISAB_CROPS_KG.toFixed(0)} кг (5 васков)`;return result}
+   result.zakatUSD=kg*(ratePct/100);
+   result.detail=`${kg} кг × ${ratePct}% (${irrigated?'искусственный полив':'дождевой полив'}) = ${result.zakatUSD.toFixed(1)} кг | Нисаб: ${NISAB_CROPS_KG.toFixed(0)} кг`;
+   break}
+  case 'rikaz':{
+   const value=toUSD(parseFloat(d.value)||0);
+   result.rate=20;
+   if(value<=0){result.belowNisab=true;result.detail='Укажите стоимость найденного';return result}
+   result.zakatUSD=value*0.20;
+   result.detail=`${fmtCur(value)} × 20% (нет нисаба, выплачивается немедленно при находке. Включает древние клады и полезные ископаемые)`;
+   break}}
+ return result;}
+
+function renderZakatTabs(){
+ $('#zakatTabs').innerHTML=ZAKAT_TYPES.map(t=>
+  `<button class="zakat-type-tab ${finance.zakatType===t.id?'on':''}" data-zt="${t.id}">${t.name}</button>`).join('');}
+
+function renderZakatForm(){
+ const type=finance.zakatType;
+ const saved=finance.zakatData[type]||{};
+ const cur=getCur();
+ const sym=cur.sym;
+ let html='<div class="zakat-form">';
+ switch(type){
+  case 'total':
+   html+=`<div class="zakat-row"><div class="zakat-field"><label>Наличные (${sym})</label><input type="number" data-zf="cash" value="${saved.cash||''}" min="0" step="0.01" placeholder="0"></div><div class="zakat-field"><label>Банковские счета (${sym})</label><input type="number" data-zf="bank" value="${saved.bank||''}" min="0" step="0.01" placeholder="0"></div></div>
+   <div class="zakat-row"><div class="zakat-field"><label>Золото (граммы)</label><input type="number" data-zf="goldGr" value="${saved.goldGr||''}" min="0" step="0.01" placeholder="0"><span class="field-hint">Инвестиционное золото. Женские украшения для ношения НЕ включаются (позиция Аль-Ляджна ад-Даима).</span></div><div class="zakat-field"><label>Серебро (граммы)</label><input type="number" data-zf="silverGr" value="${saved.silverGr||''}" min="0" step="0.01" placeholder="0"></div></div>
+   <div class="zakat-field"><label>Торговые товары (${sym})</label><input type="number" data-zf="tradeVal" value="${saved.tradeVal||''}" min="0" step="0.01" placeholder="0"><span class="field-hint">Рыночная стоимость товаров для перепродажи по закупочной цене.</span></div>
+   <div class="zakat-field"><label>Срочные долги (${sym})</label><input type="number" data-zf="debts" value="${saved.debts||''}" min="0" step="0.01" placeholder="0"><span class="field-hint">Вычитаются только долги, подлежащие немедленному возврату. Долгосрочные (ипотека, рассрочка) не вычитаются полностью — только текущая годовая часть. (Позиция шейха Аль-Фаузана)</span></div>`;break;
+  case 'money':
+   html+=`<div class="zakat-row">
+    <div class="zakat-field"><label>Наличные (${sym})</label><input type="number" data-zf="cash" value="${saved.cash||''}" min="0" step="0.01" placeholder="0"></div>
+    <div class="zakat-field"><label>Банковские счета (${sym})</label><input type="number" data-zf="bank" value="${saved.bank||''}" min="0" step="0.01" placeholder="0"></div>
+   </div>
+   <div class="zakat-field"><label>Срочные долги (${sym})</label><input type="number" data-zf="debts" value="${saved.debts||''}" min="0" step="0.01" placeholder="0">
+    <span class="field-hint">Вычитаются только долги, подлежащие немедленному возврату. Долгосрочные (ипотека, рассрочка) не вычитаются полностью. (Аль-Ляджна ад-Даима)</span></div>`;
+   break;
+  case 'gold':
+   html+=`<div class="zakat-field"><label>Вес золота (граммы)</label><input type="number" data-zf="grams" value="${saved.grams||''}" min="0" step="0.01" placeholder="0">
+    <span class="field-hint">Нисаб: ${NISAB_GOLD_GR} г. Только инвестиционное золото и слитки. Женские украшения для личного ношения НЕ облагаются закятом (фетва Аль-Ляджна ад-Даима №1048, шейх Ибн Баз). Украшения, хранимые как накопление / инвестиция — облагаются.</span></div>`;
+   break;
+  case 'silver':
+   html+=`<div class="zakat-field"><label>Вес серебра (граммы)</label><input type="number" data-zf="grams" value="${saved.grams||''}" min="0" step="0.01" placeholder="0">
+    <span class="field-hint">Нисаб: ${NISAB_SILVER_GR} г. Включая посуду, слитки и монеты из серебра.</span></div>`;
+   break;
+  case 'trade':
+   html+=`<div class="zakat-field"><label>Рыночная стоимость товаров (${sym})</label><input type="number" data-zf="value" value="${saved.value||''}" min="0" step="0.01" placeholder="0">
+    <span class="field-hint">Оценивается по текущей закупочной (не розничной!) цене ежегодно в дату хаула. Товары для личного пользования не включаются.</span></div>
+   <div class="zakat-field"><label>Долги бизнеса (${sym})</label><input type="number" data-zf="debts" value="${saved.debts||''}" min="0" step="0.01" placeholder="0">
+    <span class="field-hint">Вычитаются из стоимости товаров.</span></div>`;
+   break;
+  case 'sheep':
+   html+=`<div class="zakat-field"><label>Количество голов</label><input type="number" data-zf="count" value="${saved.count||''}" min="0" step="1" placeholder="0">
+    <span class="field-hint">Нисаб: 40 голов. Только саима (свободный выпас большую часть года). Скот на кормлении (ма\`луфа) не облагается закятом.</span></div>`;
+   break;
+  case 'cattle':
+   html+=`<div class="zakat-field"><label>Количество голов</label><input type="number" data-zf="count" value="${saved.count||''}" min="0" step="1" placeholder="0">
+    <span class="field-hint">Нисаб: 30 голов. Только саима (свободный выпас). Включает коров и буйволов.</span></div>`;
+   break;
+  case 'camels':
+   html+=`<div class="zakat-field"><label>Количество голов</label><input type="number" data-zf="count" value="${saved.count||''}" min="0" step="1" placeholder="0">
+    <span class="field-hint">Нисаб: 5 голов. Только саима. Шкала закята сложная и зависит от точного количества — результат приблизительный, проконсультируйтесь с учёным.</span></div>`;
+   break;
+  case 'crops':
+   html+=`<div class="zakat-field"><label>Вес урожая (кг)</label><input type="number" data-zf="kg" value="${saved.kg||''}" min="0" step="0.1" placeholder="0">
+    <span class="field-hint">Нисаб: ${NISAB_CROPS_KG.toFixed(0)} кг (5 васков). Применяется к зерновым, финикам, винограду и аналогичным культурам.</span></div>
+   <div class="zakat-field"><label>Тип полива</label>
+    <select data-zf="irrigated"><option value="no" ${saved.irrigated!=='yes'?'selected':''}>🌧️ Дождевой / естественный (10%)</option><option value="yes" ${saved.irrigated==='yes'?'selected':''}>💧 Искусственный / орошение (5%)</option></select>
+    <span class="field-hint">Смешанный полив: большинство учёных рекомендуют среднюю ставку 7.5%. Закят с урожая выплачивается сразу после сбора, хаул не требуется.</span></div>`;
+   break;
+  case 'rikaz':
+   html+=`<div class="zakat-field"><label>Стоимость найденного (${sym})</label><input type="number" data-zf="value" value="${saved.value||''}" min="0" step="0.01" placeholder="0">
+    <span class="field-hint">Нет нисаба. Ставка 20% (хумс). Выплачивается немедленно при находке. Включает древние клады (рикяз) и полезные ископаемые (ма\`дин). Разногласие учёных: некоторые относят ма\`дин к 2.5%.</span></div>`;
+   break;}
+ html+='</div>';
+ $('#zakatFormContainer').innerHTML=html;
+ // Подключаем live-calculation
+ $$('#zakatFormContainer input, #zakatFormContainer select').forEach(el=>{
+  el.addEventListener('input',()=>updateZakatResult());
+  el.addEventListener('change',()=>updateZakatResult())});
+ updateZakatResult();}
+
+function updateZakatResult(){
+ const type=finance.zakatType;
+ const data={};
+ $$('#zakatFormContainer [data-zf]').forEach(el=>{data[el.dataset.zf]=el.value});
+ finance.zakatData[type]=data;saveFinance();
+ const res=calcZakat(type,data);
+ const el=$('#zakatResult');
+ el.classList.toggle('below-nisab',res.belowNisab);
+ if(res.belowNisab){
+  $('#zrValue').textContent='Ниже нисаба';
+  $('#zrDetail').textContent=res.detail;
+ }else{
+  const isHead=['sheep','cattle','camels'].includes(type);
+  const isKg=type==='crops';
+  let display;
+  if(isHead) display=res.zakatUSD+' '+plural(res.zakatUSD,['голова','головы','голов']);
+  else if(isKg) display=res.zakatUSD.toFixed(1)+' кг';
+  else display=fmtCur(res.zakatUSD);
+  $('#zrValue').textContent=display;
+  $('#zrDetail').textContent=res.detail;
+ }}
+
+$('#zakatTabs').addEventListener('click',e=>{
+ const tab=e.target.closest('[data-zt]');if(!tab)return;
+ finance.zakatType=tab.dataset.zt;saveFinance();
+ renderZakatTabs();renderZakatForm();sndTick()});
+
+/* ══════════════════════════════════════
+   ⏱️ ФОКУС-ТАЙМЕР (ПОМОДОРО)
+   ══════════════════════════════════════ */
+const FOCUS_KEY='barakat.focus.v1';
+let focusState={workMin:25,breakMin:5,secondsLeft:25*60,isRunning:false,isBreak:false,sessionsToday:0,totalMinToday:0,lastDate:''};
+let focusInterval=null;
+function loadFocus(){try{const r=localStorage.getItem(FOCUS_KEY);if(r){const d=JSON.parse(r);focusState={...focusState,...d};const today=todayStr();if(focusState.lastDate!==today){focusState.sessionsToday=0;focusState.totalMinToday=0;focusState.lastDate=today}}}catch(e){}}
+function saveFocus(){try{focusState.lastDate=todayStr();localStorage.setItem(FOCUS_KEY,JSON.stringify(focusState))}catch(e){}}
+function fmtTime(s){const m=Math.floor(s/60);const sec=s%60;return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0')}
+function renderFocus(){
+ $('#focusTimer').textContent=fmtTime(focusState.secondsLeft);
+ $('#focusTimer').classList.toggle('running',focusState.isRunning&&!focusState.isBreak);
+ $('#focusTimer').classList.toggle('break-mode',focusState.isBreak);
+ $('#focusLabel').textContent=focusState.isBreak?'☕ Перерыв':focusState.isRunning?'🎯 Фокус':'Готов к работе';
+ $('#focusStart').style.display=focusState.isRunning?'none':'';
+ $('#focusPause').style.display=focusState.isRunning?'':'none';
+ const totalSec=focusState.isBreak?focusState.breakMin*60:focusState.workMin*60;
+ const pct=totalSec>0?((totalSec-focusState.secondsLeft)/totalSec)*100:0;
+ $('#focusBar').style.width=pct+'%';
+ $('#focusBar').classList.toggle('break-mode',focusState.isBreak);
+ $('#focusWorkMin').value=focusState.workMin;
+ $('#focusBreakMin').value=focusState.breakMin;
+ $('#focusSessions').textContent=focusState.sessionsToday;
+ $('#focusTotal').textContent=focusState.totalMinToday;}
+function startFocus(){
+ if(focusState.isRunning)return;
+ focusState.isRunning=true;
+ if(!focusState.isBreak&&focusState.secondsLeft===focusState.workMin*60){/* новая сессия */}
+ saveFocus();renderFocus();
+ focusInterval=setInterval(()=>{
+  if(focusState.secondsLeft<=0){clearInterval(focusInterval);focusInterval=null;
+   if(!focusState.isBreak){focusState.sessionsToday++;focusState.totalMinToday+=focusState.workMin;saveFocus();sndFanfare();burst(innerWidth/2,innerHeight*.35,FXC,50,1.5);toast(`🍅 Сессия завершена! +${focusState.workMin} мин фокуса`);
+    focusState.isBreak=true;focusState.secondsLeft=focusState.breakMin*60;focusState.isRunning=true;saveFocus();renderFocus();
+    focusInterval=setInterval(()=>{if(focusState.secondsLeft<=0){clearInterval(focusInterval);focusInterval=null;focusState.isBreak=false;focusState.isRunning=false;focusState.secondsLeft=focusState.workMin*60;saveFocus();renderFocus();sndPop();toast('☕ Перерыв окончен! Готов к работе')}else{focusState.secondsLeft--;saveFocus();renderFocus()}},1000)}
+   else{focusState.isBreak=false;focusState.isRunning=false;focusState.secondsLeft=focusState.workMin*60;saveFocus();renderFocus();sndPop();toast('☕ Перерыв окончен!')}}
+  else{focusState.secondsLeft--;saveFocus();renderFocus()}},1000)}
+function pauseFocus(){if(!focusState.isRunning)return;clearInterval(focusInterval);focusInterval=null;focusState.isRunning=false;saveFocus();renderFocus()}
+function resetFocus(){clearInterval(focusInterval);focusInterval=null;focusState.isRunning=false;focusState.isBreak=false;focusState.secondsLeft=focusState.workMin*60;saveFocus();renderFocus()}
+$('#focusStart').onclick=startFocus;
+$('#focusPause').onclick=pauseFocus;
+$('#focusReset').onclick=resetFocus;
+$('#focusWorkMin').addEventListener('change',e=>{const v=parseInt(e.target.value)||25;focusState.workMin=Math.max(1,Math.min(120,v));if(!focusState.isRunning&&!focusState.isBreak)focusState.secondsLeft=focusState.workMin*60;saveFocus();renderFocus()});
+$('#focusBreakMin').addEventListener('change',e=>{const v=parseInt(e.target.value)||5;focusState.breakMin=Math.max(1,Math.min(60,v));saveFocus();renderFocus()});
+/* ══════════════════════════════════════
+   📖 ДНЕВНИК БЛАГОДАРНОСТИ
+   ══════════════════════════════════════ */
+const GRATITUDE_KEY='barakat.gratitude.v1';
+let gratitudeEntries=[];
+function loadGratitude(){try{const r=localStorage.getItem(GRATITUDE_KEY);if(r)gratitudeEntries=JSON.parse(r)}catch(e){}}
+function saveGratitude(){try{localStorage.setItem(GRATITUDE_KEY,JSON.stringify(gratitudeEntries))}catch(e){}}
+function renderGratitude(){
+ const el=$('#gratitudeEntries');
+ if(!gratitudeEntries.length){el.innerHTML='<div class="empty" style="padding:20px"><p>Пока нет записей. Напишите первую благодарность 🤲</p></div>';$('#gratitudeCount').textContent='';return}
+ el.innerHTML=gratitudeEntries.slice().reverse().map((e,i)=>{
+  const realIdx=gratitudeEntries.length-1-i;
+  return `<div class="gratitude-entry"><div class="ge-date">${e.date}</div><div class="ge-text">${esc(e.text)}</div><button class="ge-del" data-gidx="${realIdx}">✕</button></div>`}).join('');
+ $('#gratitudeCount').textContent=`Всего записей: ${gratitudeEntries.length}`}
+$('#gratitudeAdd').onclick=()=>{
+ const inp=$('#gratitudeInput');const text=inp.value.trim();if(!text)return;
+ const now=new Date();const date=now.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+ gratitudeEntries.push({text,date});saveGratitude();renderGratitude();inp.value='';sndTick();toast('Благодарность сохранена 🤲')};
+$('#gratitudeInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#gratitudeAdd').click()}});
+$('#gratitudeEntries').addEventListener('click',e=>{
+ const btn=e.target.closest('[data-gidx]');if(!btn)return;
+ const idx=parseInt(btn.dataset.gidx);const snap=[...gratitudeEntries];
+ gratitudeEntries.splice(idx,1);saveGratitude();renderGratitude();
+ toast('Запись удалена',()=>{gratitudeEntries=snap;saveGratitude();renderGratitude()})});
+/* ═══ РАСХОДЫ (в локальной валюте) ═══ */
+const EXP_CATS={food:'🍎 Еда',transport:'🚗 Транспорт',housing:'🏡 Жильё',health:'💧 Здоровье',sadaqah:'🤲 Садака',education:'📚 Учёба',other:'📦 Другое'};
+function currentMonthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+function renderExpenses(){
+ const mk=currentMonthKey();
+ const cur=getCur();
+ const items=finance.expenses.filter(e=>e.month===mk);
+ const total=items.reduce((s,e)=>s+e.amount,0);
+ $('#expList').innerHTML=items.length?items.slice().reverse().map(e=>
+  `<div class="expense-item">
+   <span class="ei-cat">${EXP_CATS[e.cat]||e.cat}</span>
+   <span class="ei-amount">${e.amount.toLocaleString('ru-RU',{maximumFractionDigits:2})} ${cur.sym}</span>
+   <button class="ei-del" data-eid="${e.id}">✕</button>
+  </div>`).join(''):'<div class="empty" style="padding:20px"><p>Нет расходов за этот месяц</p></div>';
+ const byCat={};items.forEach(e=>{byCat[e.cat]=(byCat[e.cat]||0)+e.amount});
+ $('#expSummary').innerHTML=`<span class="expense-sum">📊 Итого: <b>${total.toLocaleString('ru-RU',{maximumFractionDigits:2})} ${cur.sym}</b></span>`+
+  Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([c,v])=>
+   `<span class="expense-sum">${EXP_CATS[c]||c}: <b>${v.toLocaleString('ru-RU',{maximumFractionDigits:2})} ${cur.sym}</b></span>`).join('');}
+$('#expAdd').onclick=()=>{
+ const amt=parseFloat($('#expAmount').value);if(!amt||amt<=0)return;
+ const cat=$('#expCat').value;
+ finance.expenses.push({id:uid(),amount:amt,cat,month:currentMonthKey(),desc:''});
+ saveFinance();renderExpenses();$('#expAmount').value='';sndTick();
+ toast(`Расход ${amt} ${getCur().sym} добавлен`)};
+$('#expAmount').addEventListener('keydown',e=>{if(e.key==='Enter')$('#expAdd').click()});
+$('#expList').addEventListener('click',e=>{
+ const btn=e.target.closest('[data-eid]');if(!btn)return;
+ const eid=btn.dataset.eid;
+ const snap=[...finance.expenses];
+ finance.expenses=finance.expenses.filter(x=>x.id!==eid);
+ saveFinance();renderExpenses();
+ toast('Расход удалён',()=>{finance.expenses=snap;saveFinance();renderExpenses()})});
+
+function renderFinance(){renderCurrencyBar();renderZakatTabs();renderZakatForm();renderExpenses()}
+
+/* ═══ ИБАДАТ: рендер ═══ */
+function renderIbadat(){
+ const today=todayStr();
+ const day=getDay(today);
+ $('#salahGrid').innerHTML=SALAH_LIST.map(s=>{
+  const checked=day.salah[s.id];
+  return `<div class="salah-item ${checked?'checked':''}" data-salah="${s.id}">
+   <span class="salah-icon">${s.icon}</span>
+   <span class="salah-name">${s.name}</span>
+   <div class="salah-check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5.2 5L20 6.8"/></svg></div>
+  </div>`}).join('');
+ $('#quranTotal').textContent=day.quran;
+ renderWeekGrid();
+ renderIbadatStats();
+ renderPrayerTimes();
+ renderVerseOfDay();}
+
+// ════ РАСЧЁТ ВРЕМЕНИ НАМАЗОВ ════
+function toRadians(deg){return deg*Math.PI/180}
+function toDegrees(rad){return rad*180/Math.PI}
+
+function calculatePrayerTimes(lat,lon,method,date){
+ const m=PRAYER_METHODS[method]||PRAYER_METHODS[5];
+ const d=date||new Date();
+ 
+ // День в году
+ const start=new Date(d.getFullYear(),0,0);
+ const diff=d-start;
+ const oneDay=1000*60*60*24;
+ const dayOfYear=Math.floor(diff/oneDay);
+ 
+ // Склонение Солнца
+ const declination=toRadians(-23.45*Math.cos(toRadians(360/365*(dayOfYear+10))));
+ 
+ // Уравнение времени (минуты)
+ const B=toRadians(360/365*(dayOfYear-81));
+ const equationOfTime=9.87*Math.sin(2*B)-7.53*Math.cos(B)-1.5*Math.sin(B);
+ 
+ // Время зухра - учитываем долготу для коррекции местного времени
+ const timezone=-d.getTimezoneOffset()/60; // Положительное значение для восточных долгот
+ const noonLocal=12 - equationOfTime/60; // Местный полдень без учёта часового пояса
+ const lonCorrection=lon/15; // Коррекция по долготе (часов)
+ const dhuhrTime=noonLocal + (timezone - lonCorrection); // Полуденное время в часах
+ 
+ // Аср: когда тень объекта = высота объекта + тень от полудня
+ const asrFactor=1; // стандартный мазхаб
+ const latRad=toRadians(lat);
+ const asrAltitude=Math.atan(1/(asrFactor+Math.tan(Math.abs(latRad-declination))));
+ 
+ // Фаджр и Иша по углам солнца над горизонтом
+ const fajrAngle=toRadians(-m.fajrAngle);
+ const ishaAngle=m.ishaAngle>0?toRadians(-m.ishaAngle):null;
+ 
+ // Расчёт времени для угла солнца
+ function timeForAngle(angleRad){
+  const cosHourAngle=(Math.sin(angleRad)-Math.sin(latRad)*Math.sin(declination))/(Math.cos(latRad)*Math.cos(declination));
+  if(cosHourAngle<-1||cosHourAngle>1)return null;
+  const hourAngle=toDegrees(Math.acos(cosHourAngle))/15;
+  return hourAngle;
+ }
+ 
+ const fajrOffset=timeForAngle(fajrAngle);
+ const sunriseOffset=timeForAngle(toRadians(-0.833));
+ const asrOffset=timeForAngle(asrAltitude);
+ const sunsetOffset=timeForAngle(toRadians(-0.833));
+ const ishaOffset=ishaAngle!==null?timeForAngle(ishaAngle):null;
+ 
+ function formatTime(hours){
+  if(hours===null)return'--:--';
+  let h=Math.floor(hours);
+  let m=Math.round((hours-h)*60);
+  if(m>=60){h++;m-=60}
+  if(h>=24)h-=24;
+  if(h<0)h+=24;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+ }
+ 
+ return{
+  fajr:{time:formatTime(dhuhrTime-fajrOffset),hours:dhuhrTime-fajrOffset},
+  sunrise:{time:formatTime(dhuhrTime-sunriseOffset),hours:dhuhrTime-sunriseOffset},
+  dhuhr:{time:formatTime(dhuhrTime),hours:dhuhrTime},
+  asr:{time:formatTime(dhuhrTime+asrOffset),hours:dhuhrTime+asrOffset},
+  maghrib:{time:formatTime(dhuhrTime+sunsetOffset),hours:dhuhrTime+sunsetOffset},
+  isha:{time:ishaOffset!==null?formatTime(dhuhrTime+ishaOffset):'--:--',hours:ishaOffset!==null?dhuhrTime+ishaOffset:null}
+ };
+}
+
+function calculateQibla(lat,lon){
+ const meccaLat=toRadians(21.4225);
+ const meccaLon=toRadians(39.8262);
+ const userLat=toRadians(lat);
+ const userLon=toRadians(lon);
+ 
+ const dLon=meccaLon-userLon;
+ 
+ const x=Math.sin(dLon)*Math.cos(meccaLat);
+ const y=Math.cos(userLat)*Math.sin(meccaLat)-Math.sin(userLat)*Math.cos(meccaLat)*Math.cos(dLon);
+ 
+ let qibla=toDegrees(Math.atan2(x,y));
+ if(qibla<0)qibla+=360;
+ 
+ return qibla;
+}
+
+function renderPrayerTimes(){
+ if(prayerState.latitude===null||prayerState.longitude===null){
+  $('#prayerTimesList').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--muted)">Не удалось определить местоположение</div>';
+  return;
+ }
+ 
+ const times=calculatePrayerTimes(prayerState.latitude,prayerState.longitude,prayerState.method,new Date());
+ prayerState.times=times;
+ 
+ const icons={fajr:'🌅',sunrise:'🌄',dhuhr:'☀️',asr:'🌤️',maghrib:'🌇',isha:'🌙'};
+ const names={fajr:'Фаджр',sunrise:'Восход',dhuhr:'Зухр',asr:'Аср',maghrib:'Магриб',isha:'Иша'};
+ 
+ const now=new Date();
+ const currentHours=now.getHours()+now.getMinutes()/60;
+ 
+ let nextPrayerName='';
+ let nextPrayerTime='';
+ let minDiff=Infinity;
+ 
+ let html='';
+ ['fajr','sunrise','dhuhr','asr','maghrib','isha'].forEach(key=>{
+  const t=times[key];
+  const isNext=t.hours!==null&&t.hours>currentHours&&t.hours-currentHours<minDiff;
+  if(isNext){minDiff=t.hours-currentHours;nextPrayerName=names[key];nextPrayerTime=t.time}
+  html+=`<div class="prayer-time-item ${isNext?'next':''}">
+   <span class="prayer-time-icon">${icons[key]}</span>
+   <span class="prayer-time-name">${names[key]}</span>
+   <span class="prayer-time-value">${t.time}</span>
+  </div>`;
+ });
+ 
+ $('#prayerTimesList').innerHTML=html;
+ 
+ if(nextPrayerName){
+  $('#nextPrayer').innerHTML=`Следующий намаз: <span style="color:var(--accent)">${nextPrayerName}</span> в <span style="color:var(--accent)">${nextPrayerTime}</span>`;
+ }else{
+  $('#nextPrayer').innerHTML='Намазы на сегодня завершены';
+ }
+}
+
+function initCompass(){
+ if(!window.DeviceOrientationEvent){
+  $('#qiblaStatus').innerHTML='<span class="status-icon">⚠️</span><span class="status-text">Компас не поддерживается</span>';
+  $('#qiblaStatus').classList.add('error');
+  return;
+ }
+ 
+ let heading=0;
+ let qiblaBearing=prayerState.qiblaAngle||0;
+ 
+ function handleOrientation(e){
+  let h=0;
+  // iOS: webkitCompassHeading — это угол относительно магнитного севера
+  if(e.webkitCompassHeading!==undefined){
+   h=e.webkitCompassHeading;
+  }else if(e.alpha!==null){
+   // Android: alpha — это угол поворота вокруг оси Z (0-360)
+   h=360-e.alpha;
+  }
+  heading=h;
+  
+  if(prayerState.qiblaAngle!==null){
+   // Поворачиваем внутренний круг компаса против направления поворота телефона
+   // чтобы стрелка киблы всегда указывала на Каабу
+   const rotation=-heading+prayerState.qiblaAngle;
+   $('#compassInner').style.transform=`rotate(${rotation}deg)`;
+   $('#qiblaAngle').textContent=Math.round(prayerState.qiblaAngle)+'°';
+   
+   const statusEl=$('#qiblaStatus');
+   if(!statusEl.classList.contains('calibrated')){
+    statusEl.innerHTML='<span class="status-icon">✓</span><span class="status-text">Компас откалиброван</span>';
+    statusEl.classList.add('calibrated');
+   }
+  }
+ }
+ 
+ window.addEventListener('deviceorientation',handleOrientation,true);
+ 
+ // Запрос разрешения для iOS 13+
+ if(typeof DeviceOrientationEvent.requestPermission==='function'){
+  $('#qiblaStatus').innerHTML='<span class="status-icon">📱</span><span class="status-text">Нажмите для доступа к компасу</span>';
+  $('#qiblaStatus').style.cursor='pointer';
+  $('#qiblaStatus').onclick=async()=>{
+   try{
+    const permission=await DeviceOrientationEvent.requestPermission();
+    if(permission==='granted'){
+     handleOrientation({alpha:0});
+     $('#qiblaStatus').style.cursor='default';
+    }else{
+     $('#qiblaStatus').innerHTML='<span class="status-icon">⚠️</span><span class="status-text">Доступ запрещён</span>';
+     $('#qiblaStatus').classList.add('error');
+    }
+   }catch(e){
+    $('#qiblaStatus').innerHTML='<span class="status-icon">⚠️</span><span class="status-text">Ошибка доступа</span>';
+    $('#qiblaStatus').classList.add('error');
+   }
+  };
+ }else{
+  // Для устройств без запроса разрешений (Android, старые iOS)
+  $('#qiblaStatus').innerHTML='<span class="status-icon">🧭</span><span class="status-text">Компас активен</span>';
+  $('#qiblaStatus').classList.add('calibrated');
+ }
+}
+
+function initGeolocation(){
+ function success(pos){
+  const crd=pos.coords;
+  prayerState.latitude=crd.latitude;
+  prayerState.longitude=crd.longitude;
+  prayerState.qiblaAngle=calculateQibla(crd.latitude,crd.longitude);
+  
+  const locEl=$('#locationStatus');
+  locEl.innerHTML=`<span class="location-icon">✓</span><span class="location-text">Широта: ${crd.latitude.toFixed(4)}, Долгота: ${crd.longitude.toFixed(4)}</span>`;
+  
+  renderPrayerTimes();
+  initCompass();
+ }
+ 
+ function error(err){
+  console.warn(`Ошибка геолокации (${err.code}): ${err.message}`);
+  const locEl=$('#locationStatus');
+  locEl.innerHTML=`<span class="location-icon">⚠️</span><span class="location-text">Не удалось определить местоположение</span>`;
+  locEl.style.color='var(--danger)';
+ }
+ 
+ if(navigator.geolocation){
+  navigator.geolocation.getCurrentPosition(success,error,{
+   enableHighAccuracy:true,
+   timeout:10000,
+   maximumAge:300000
+  });
+ }else{
+  error({code:0,message:'Геолокация не поддерживается'});
+ }
+}
+
+$('#salahGrid').addEventListener('click',e=>{
+ const item=e.target.closest('.salah-item');if(!item)return;
+ const salahId=item.dataset.salah;
+ const day=getDay(todayStr());
+ day.salah[salahId]=!day.salah[salahId];
+ saveIbadat();renderIbadat();
+ if(day.salah[salahId]){
+  sndPop();
+  const r=item.getBoundingClientRect();
+  burst(r.left+r.width/2,r.top+r.height/2,['#2BB3A5','#F2C14E','#fff'],18,1);
+  // Проверка: все 5 намазов?
+  if(SALAH_LIST.every(s=>day.salah[s.id])){
+   setTimeout(()=>{burst(innerWidth/2,innerHeight*.35,FXC,60,1.5);sndFanfare();toast('МашаАлла! Все намазы выполнены 🤲')},200)}}});
+
+$('#quranAdd').onclick=()=>{
+ const inp=$('#quranInput');
+ const val=parseInt(inp.value)||0;if(val<=0)return;
+ const day=getDay(todayStr());
+ day.quran+=val;saveIbadat();renderIbadat();
+ inp.value='';sndTick();
+ toast(`+${val} ${plural(val,['страница','страницы','страниц'])} Корана 📖`)};
+$('#quranInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('#quranAdd').click()});
+
+// Переключение метода расчёта намазов
+$('#prayerMethod').addEventListener('change',e=>{
+ prayerState.method=parseInt(e.target.value);
+ savePrayerSettings();
+ if(prayerState.latitude!==null&&prayerState.longitude!==null){
+  renderPrayerTimes();
+ }});
+
+function renderWeekGrid(){
+ const today=new Date();
+ const dayOfWeek=today.getDay(); // 0=Sun
+ const mondayOffset=dayOfWeek===0?-6:1-dayOfWeek;
+ const monday=new Date(today);monday.setDate(today.getDate()+mondayOffset);
+ const dayNames=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+ let html='';
+ for(let i=0;i<7;i++){
+  const d=new Date(monday);d.setDate(monday.getDate()+i);
+  const ds=ymd(d);
+  const isToday=ds===todayStr();
+  const dayData=ibadat.days[ds];
+  const doneCount=dayData?SALAH_LIST.filter(s=>dayData.salah[s.id]).length:0;
+  const dots=SALAH_LIST.map(s=>{
+   const filled=dayData&&dayData.salah[s.id];
+   return `<div class="week-dot ${filled?'filled':''}"></div>`}).join('');
+  html+=`<div class="week-day ${isToday?'today':''}">
+   <span class="week-label">${dayNames[i]}</span>
+   <div class="week-dots">${dots}</div>
+   <span class="week-score">${doneCount}/5</span>
+  </div>`}
+ $('#weekGrid').innerHTML=html;}
+
+function renderIbadatStats(){
+ // Серия полных дней (все 5 намазов)
+ const days=ibadat.days;
+ let streak=0,cur=new Date();
+ // Проверяем сегодня сначала
+ const todayKey=todayStr();
+ const todayData=days[todayKey];
+ const todayFull=todayData&&SALAH_LIST.every(s=>todayData.salah[s.id]);
+ if(!todayFull){cur.setDate(cur.getDate()-1)}
+ while(true){
+  const k=ymd(cur);const d=days[k];
+  if(d&&SALAH_LIST.every(s=>d.salah[s.id])){streak++;cur.setDate(cur.getDate()-1)}else break}
+ $('#ibadatStreak').textContent=streak+' '+plural(streak,['день','дня','дней']);
+ // Всего полных дней
+ let fullDays=0;
+ Object.values(days).forEach(d=>{if(SALAH_LIST.every(s=>d.salah[s.id]))fullDays++});
+ $('#ibadatFullDays').textContent=fullDays;}
+
+/* ══════════════════════════════════════
+   РЕНДЕР: ЗАДАЧИ
+   ══════════════════════════════════════ */
+function renderNav(){
+ const act=state.tasks.filter(t=>!t.done);
+ const row=(id,emoji,name,color,count,fixed)=>`
+  <div class="cat-row ${state.filter===id?'on':''}" data-f="${id}" style="--c:${color}">
+   <span class="cat-emoji">${emoji}</span><span class="cat-name">${esc(name)}</span>
+   <span class="cnt">${count}</span>
+   ${fixed?'':`<button class="cat-del" data-del="${id}" title="Удалить категорию"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/></svg></button>`}
+  </div>`;
+ $('#catNav').innerHTML=row('all','🗂️','Все задачи','#8A9AA8',act.length,true)
+  +state.cats.map(c=>row(c.id,c.emoji,c.name,c.color,act.filter(t=>t.catId===c.id).length,c.fixed)).join('');
+ $('#catNavM').innerHTML=`<button class=\"chip ${state.filter==='all'?'on':''}\" data-f=\"all\" style=\"--c:#8A9AA8\">🗂️ Все</button>`
+  +state.cats.map(c=>`<button class="chip ${state.filter===c.id?'on':''}" data-f="${c.id}" style="--c:${c.color}">${c.emoji} ${esc(c.name)}</button>`).join('');
+ // Добавляем кнопку "+ Категория" в мобильную версию
+ const mobAddBtn = document.createElement('button');
+ mobAddBtn.className = 'chip';
+ mobAddBtn.textContent = '+ Категория';
+ mobAddBtn.style.cssText = '--c:#8A9AA8;border-style:dashed;opacity:0.85';
+ mobAddBtn.onclick = openCatDialog;
+ $('#catNavM').appendChild(mobAddBtn);
+ renderPicker();}
+function renderPicker(){
+ $('#catPicker').innerHTML=state.cats.map(c=>
+  `<button class="chip ${state.newCat===c.id?'on':''}" data-pick="${c.id}" style="--c:${c.color}">${c.emoji} ${esc(c.name)}</button>`).join('');}
+function renderTabs(){
+ const s=scoped();
+ $('#cntA').textContent=s.filter(t=>!t.done).length;
+ $('#cntD').textContent=s.filter(t=>t.done).length;
+ $$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===state.tab));
+ $('#clearDone').style.display=(state.tab==='done'&&s.some(t=>t.done))?'':'none';}
+const PRIO={low:['Низкий','#8FA0AE'],mid:['Средний','#E8A23B'],high:['Высокий','#E5484D']};
+function dueChip(t){if(!t.due)return'';
+ const today=ymd(new Date()),d=t.due;
+ let cls='',label='📅 '+new Date(d+'T00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+ if(d<today){cls='due-over';label='⏰ Просрочено'}
+ else if(d===today){cls='due-today';label='📅 Сегодня'}
+ else{const diff=Math.round((new Date(d)-new Date(today))/864e5);if(diff===1)label='📅 Завтра'}
+ return `<span class="mchip ${cls}">${label}</span>`;}
+function itemHTML(t,i){
+ const c=catById(t.catId);
+ const draggable=state.tab==='active'&&!state.search&&state.filter==='all'&&!t.done;
+ const editing=state.editing===t.id;
+ return `<li class="task ${t.done?'done':''} enter" data-id="${t.id}" style="--c:${c.color};animation-delay:${Math.min(i,10)*.035}s" ${draggable?'draggable="true"':''}>
+  <button class="check" title="${t.done?'Вернуть в работу':'Отметить выполненной'}"><svg viewBox="0 0 24 24"><path d="M4 12.5l5.2 5L20 6.8"/></svg></button>
+  <div class="t-main">
+    ${editing
+      ?`<input class="t-edit" value="${esc(t.text)}" maxlength="140">`
+      :`<span class="t-text">${esc(t.text)}</span>`}
+    <div class="t-meta">
+      <span class="mchip" style="--cc:${c.color}">${c.emoji} ${esc(c.name)}</span>
+      ${t.prio?`<span class="mchip" style="--cc:${PRIO[t.prio][1]}">⚑ ${PRIO[t.prio][0]}</span>`:''}
+      ${dueChip(t)}
+    </div>
+  </div>
+  <div class="t-actions">
+    ${!t.done&&!editing?`<button class="icon-btn" data-act="edit" title="Редактировать"><svg viewBox="0 0 24 24"><path d="M4 20l4.5-1L20 7.5 16.5 4 5 15.5 4 20z"/></svg></button>`:''}
+    <button class="icon-btn del" data-act="del" title="Удалить"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/></svg></button>
+  </div></li>`;}
+function emptyHTML(){
+ if(state.search)return `<div class="empty"><b>Ничего не найдено</b><p>Попробуйте другой запрос</p></div>`;
+ return state.tab==='active'
+  ?`<div class="empty"><svg width="110" height="86" viewBox="0 0 110 86"><circle cx="44" cy="44" r="26"/><path d="M34 44l7 7 14-15"/><path d="M84 14l3 8 8 3-8 3-3 8-3-8-8-3 8-3z"/></svg><b>Здесь пока пусто</b><p>Добавьте первую задачу — начните с малого ✨</p></div>`
+  :`<div class="empty"><svg width="110" height="86" viewBox="0 0 110 86"><rect x="20" y="18" width="70" height="52" rx="10"/><path d="M38 38l6 6 12-13"/><path d="M36 56h38"/></svg><b>Пока ничего не выполнено</b><p>Отметьте задачу галочкой — она переедет сюда</p></div>`;}
+function renderList(){
+ let list=state.tasks.filter(t=>state.tab==='done'?t.done:!t.done).filter(matchF).filter(matchS);
+ if(state.tab==='done')list.sort((a,b)=>(b.completedAt||0)-(a.completedAt||0));
+ $('#list').innerHTML=list.length?list.map(itemHTML).join(''):emptyHTML();
+ if(state.editing){const inp=$('#list .t-edit');if(inp){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length)}}}
+
+/* ── рендер: статистика ── */
+function renderStats(){
+ const s=scoped(),done=s.filter(t=>t.done).length,total=s.length;
+ const pct=total?Math.round(done/total*100):0;
+ $('#ringFg').style.strokeDashoffset=201-(201*pct/100);
+ $('#ringPct').textContent=pct+'%';
+ $('#ringDone').textContent=done;$('#ringTotal').textContent=total;
+ const days=new Set(state.tasks.filter(t=>t.completedAt).map(t=>ymd(new Date(t.completedAt))));
+ let streak=0,cur=new Date();
+ if(!days.has(ymd(cur)))cur.setDate(cur.getDate()-1);
+ while(days.has(ymd(cur))){streak++;cur.setDate(cur.getDate()-1)}
+ $('#streakN').textContent=streak+' '+plural(streak,['день','дня','дней']);
+ $('#totalN').textContent=state.tasks.filter(t=>t.done).length;}
+function renderAll(){renderNav();renderTabs();renderList();renderStats();}
+
+/* ── действия ── */
+function addTask(){
+ const inp=$('#newText'),text=inp.value.trim();
+ if(!text){$('#composer').classList.remove('shake');void $('#composer').offsetWidth;$('#composer').classList.add('shake');inp.focus();return}
+  const dueVal=$('#newDue').value||null;
+ state.tasks.unshift({id:uid(),text,catId:state.newCat,prio:state.newPrio,due:dueVal,done:false,createdAt:Date.now()});
+ if(dueVal){scheduleNotification(state.tasks[0])}
+ if(state.tab!=='active')state.tab='active';
+ inp.value='';$('#newDue').value='';save();renderAll();sndTick();inp.focus();}
+/* ══════════════════════════════════════
+   🔔 УВЕДОМЛЕНИЯ О СРОКАХ ЗАДАЧ
+   ══════════════════════════════════════ */
+let notifTimers={};
+function requestNotifPermission(){if('Notification' in window && Notification.permission==='default'){Notification.requestPermission()}}
+function scheduleNotification(task){
+ if(!task.due||task.done)return;
+ clearTimeout(notifTimers[task.id]);
+ const dueTime=new Date(task.due).getTime();const now=Date.now();const delay=dueTime-now;
+ if(delay<=0){return}
+ notifTimers[task.id]=setTimeout(()=>{
+  if(task.done)return;
+  if('Notification' in window && Notification.permission==='granted'){
+   new Notification('⏰ Баракат — срок задачи!',{body:task.text,icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">✦</text></svg>'})}
+  else{toast(`⏰ Срок: ${task.text}`)}
+  sndPop()},delay)}
+function rescheduleAllNotifications(){
+ Object.values(notifTimers).forEach(clearTimeout);notifTimers={};
+ state.tasks.forEach(t=>{if(!t.done&&t.due)scheduleNotification(t)})}
+requestNotifPermission();
+$('#addBtn').onclick=addTask;
+$('#newText').addEventListener('keydown',e=>{if(e.key==='Enter')addTask()});
+
+$('#catPicker').addEventListener('click',e=>{const b=e.target.closest('[data-pick]');if(!b)return;state.newCat=b.dataset.pick;save();renderPicker()});
+$('#prioPick').addEventListener('click',e=>{const b=e.target.closest('.prio');if(!b)return;
+ state.newPrio=state.newPrio===b.dataset.p?null:b.dataset.p;
+ $$('#prioPick .prio').forEach(x=>x.classList.toggle('on',x.dataset.p===state.newPrio));});
+
+$('#newDue').min=ymd(new Date());
+
+function toggleDone(id,li){
+ const t=byId(id);if(!t)return;
+ if(!t.done){
+  if(li.dataset.busy)return;li.dataset.busy='1';li.classList.add('finishing');
+  const r=li.querySelector('.check').getBoundingClientRect();
+  burst(r.left+13,r.top+13,[catById(t.catId).color,'#F2C14E','#fff'],22,1);sndPop();
+  const wasAll=state.tasks.length>0&&state.tasks.every(x=>x.done||x.id===id);
+  setTimeout(()=>{t.done=true;t.completedAt=Date.now();save();renderAll();
+clearTimeout(notifTimers[t.id]);delete notifTimers[t.id];
+   if(wasAll){setTimeout(()=>{burst(innerWidth/2,innerHeight*.32,FXC,70,1.7);burst(innerWidth*.2,innerHeight*.4,FXC,30,1.3);burst(innerWidth*.8,innerHeight*.4,FXC,30,1.3);sndFanfare();toast('МашаАлла! Все задачи выполнены 🎉')},150)}},520);
+ }else{t.done=false;t.completedAt=null;state.tab='active';save();renderAll();sndTick();}}
+
+function removeTask(id,li){
+ li.classList.add('removing');
+ setTimeout(()=>{const snap=[...state.tasks];state.tasks=state.tasks.filter(t=>t.id!==id);save();renderAll();
+  toast('Задача удалена',()=>{state.tasks=snap;save();renderAll()})},200);}
+
+$('#list').addEventListener('click',e=>{
+ const li=e.target.closest('.task');if(!li)return;const id=li.dataset.id;
+ if(e.target.closest('.check'))return toggleDone(id,li);
+ const act=e.target.closest('[data-act]');if(!act)return;
+ if(act.dataset.act==='del')return removeTask(id,li);
+ if(act.dataset.act==='edit'){state.editing=id;renderList();}});
+$('#list').addEventListener('keydown',e=>{
+ if(!e.target.classList.contains('t-edit'))return;const li=e.target.closest('.task');
+ if(e.key==='Enter'){commitEdit(li)}
+ if(e.key==='Escape'){state.editing=null;renderList()}});
+$('#list').addEventListener('focusout',e=>{
+ if(e.target.classList.contains('t-edit'))commitEdit(e.target.closest('.task'))});
+function commitEdit(li){if(!li||!state.editing)return;const t=byId(li.dataset.id);
+ const v=li.querySelector('.t-edit').value.trim();if(v)t.text=v;
+ state.editing=null;save();renderAll();}
+
+/* drag & drop порядка */
+let dragEl=null;
+$('#list').addEventListener('dragstart',e=>{const li=e.target.closest('.task');if(!li)return;
+ dragEl=li;requestAnimationFrame(()=>li.classList.add('dragging'))});
+$('#list').addEventListener('dragover',e=>{e.preventDefault();if(!dragEl)return;
+ const els=[...$('#list').querySelectorAll('.task:not(.dragging)')];
+ const after=els.reduce((best,el)=>{const r=el.getBoundingClientRect(),off=e.clientY-r.top-r.height/2;
+  return off<0&&off>best.off?{off,el}:best},{off:-Infinity,el:null}).el;
+ after?$('#list').insertBefore(dragEl,after):$('#list').appendChild(dragEl)});
+$('#list').addEventListener('dragend',()=>{if(!dragEl)return;dragEl.classList.remove('dragging');
+ const ids=[...$('#list').querySelectorAll('.task')].map(l=>l.dataset.id);
+ const ordered=ids.map(byId).filter(Boolean);
+ state.tasks=[...ordered,...state.tasks.filter(t=>t.done)];save();dragEl=null});
+
+/* вкладки, поиск, очистка */
+$$('.tab').forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;save();renderTabs();renderList()});
+$('#search').addEventListener('input',e=>{state.search=e.target.value.trim().toLowerCase();renderList()});
+$('#clearDone').onclick=()=>{const snap=[...state.tasks];
+ state.tasks=state.tasks.filter(t=>!(t.done&&matchF(t)));save();renderAll();
+ toast('Выполненные очищены',()=>{state.tasks=snap;save();renderAll()})};
+
+/* навигация по категориям */
+function navClick(e){
+ const del=e.target.closest('[data-del]');
+ if(del){e.stopPropagation();return deleteCat(del.dataset.del)}
+ const row=e.target.closest('[data-f]');if(!row)return;
+ state.filter=row.dataset.f;save();renderNav();renderTabs();renderList();renderStats();}
+$('#catNav').addEventListener('click',navClick);
+$('#catNavM').addEventListener('click',navClick);
+function deleteCat(id){
+ const c=catById(id);if(c.fixed)return;
+ const snap=[...state.tasks],snapCats=[...state.cats];
+ state.tasks.forEach(t=>{if(t.catId===id)t.catId='general'});
+ state.cats=state.cats.filter(x=>x.id!==id);
+ if(state.filter===id)state.filter='all';
+ if(state.newCat===id)state.newCat='general';
+ save();renderAll();
+ toast(`Категория «${c.name}» удалена`,()=>{state.tasks=snap;state.cats=snapCats;save();renderAll()});}
+
+/* ── диалог категории ── */
+const dlg=$('#dlg');let dlgEmoji='✨',dlgColor='#4A8DF7';
+$('#egrid').innerHTML=EMOJIS.map(e=>`<button type="button" data-e="${e}">${e}</button>`).join('');
+$('#cgrid').innerHTML=PALETTE.map(c=>`<button type="button" data-c="${c}" style="background:${c}"></button>`).join('');
+function markDlg(){$$('#egrid button').forEach(b=>b.classList.toggle('on',b.dataset.e===dlgEmoji));
+ $$('#cgrid button').forEach(b=>b.classList.toggle('on',b.dataset.c===dlgColor))}
+$('#egrid').onclick=e=>{const b=e.target.closest('button');if(b){dlgEmoji=b.dataset.e;markDlg()}};
+$('#cgrid').onclick=e=>{const b=e.target.closest('button');if(b){dlgColor=b.dataset.c;markDlg()}};
+function openCatDialog(){$('#catName').value='';dlgEmoji='✨';dlgColor=PALETTE[Math.floor(Math.random()*PALETTE.length)];markDlg();dlg.showModal();setTimeout(()=>$('#catName').focus(),50)}
+$('#addCatBtn').onclick=openCatDialog;
+$('#dlgCancel').onclick=()=>dlg.close();
+$('#catForm').addEventListener('submit',e=>{e.preventDefault();
+ const name=$('#catName').value.trim();if(!name)return;
+ const cat={id:uid(),name,emoji:dlgEmoji,color:dlgColor};
+ state.cats.push(cat);state.newCat=cat.id;state.filter=cat.id;save();renderAll();dlg.close();
+ burst(innerWidth/2,innerHeight/2,[dlgColor,'#fff'],30,1.2);
+ toast(`Категория «${name}» создана ${dlgEmoji}`);});
+
+/* ── тема и звук ── */
+function effTheme(){return state.settings.theme||((new Date().getHours()>=19||new Date().getHours()<7)?'dark':'light')}
+function applyToggles(){
+ document.documentElement.dataset.theme=effTheme();
+ $$('.theme-btn').forEach(b=>b.textContent=effTheme()==='dark'?'☀️':'🌙');
+ $$('.sound-btn').forEach(b=>b.textContent=state.settings.sound?'🔊':'🔇');}
+$$('.theme-btn').forEach(b=>b.onclick=()=>{state.settings.theme=effTheme()==='dark'?'light':'dark';save();applyToggles()});
+$$('.sound-btn').forEach(b=>b.onclick=()=>{state.settings.sound=!state.settings.sound;save();applyToggles();if(state.settings.sound)sndTick()});
+
+/* ── имя пользователя ── */
+let editingName=false;
+function editName(){
+ if(editingName)return;editingName=true;
+ $('#greet').innerHTML=`<input class="name-edit" value="${esc(state.settings.name||'')}" placeholder="Твоё имя" maxlength="20">`;
+ const inp=$('#greet .name-edit');inp.focus();
+ let finished=false;
+ const done=()=>{if(finished)return;finished=true;state.settings.name=inp.value.trim();editingName=false;save();renderHello()};
+ inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape'){finished=true;editingName=false;renderHello()}});
+ inp.addEventListener('blur',done);}
+
+/* ── приветствие, дата, цитата ── */
+function renderHello(){
+ const now=new Date(),h=now.getHours();
+ const [g,em]=h>=5&&h<11?['Доброе утро','☀️']:h>=11&&h<17?['Добрый день','🌤️']:h>=17&&h<23?['Добрый вечер','🌆']:['Доброй ночи','🌙'];
+ const nm=(state.settings.name||'').trim();
+ $('#greet').innerHTML=nm?`${g}, ${esc(nm)} ${em}`:`${g}! ${em}<span class="name-hint">нажми — впиши своё имя</span>`;
+ $('#greet').onclick=editName;
+ let d=now.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+ $('#dateline').innerHTML=`${d[0].toUpperCase()+d.slice(1)} · <b id="clock"></b>`;
+ $('#quote').textContent=QUOTES[Math.floor(Date.now()/864e5)%QUOTES.length];
+ tickClock();}
+function tickClock(){const c=$('#clock');if(c){const n=new Date();
+ c.textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`}}
+setInterval(tickClock,20000);
+
+/* ── хоткеи ── */
+document.addEventListener('keydown',e=>{
+ const typing=/INPUT|TEXTAREA/.test(document.activeElement.tagName)||dlg.open;
+ if(e.key==='/'&&!typing){e.preventDefault();$('#search').focus()}
+ if(e.key==='Escape'&&state.editing){state.editing=null;renderList()}});
+
+/* ── старт ── */
+load();loadIbadat();loadPrayerSettings();loadFinance();loadGratitude();loadFocus();applyToggles();renderHello();rescheduleAllNotifications();loadVerseFiles();switchSection(state.section||'tasks');</script>
+</body>
+</html>
