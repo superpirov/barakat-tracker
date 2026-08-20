@@ -272,9 +272,10 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 
 /* ═══ АЯТ ДНЯ ═══ */
 .verse-of-day-container{display:flex;flex-direction:column;gap:14px;padding:16px;background:var(--panel2);border-radius:var(--rl);border:1.5px solid var(--line)}
-.verse-arabic{text-align:right;font-size:28px;line-height:2.2;font-family:'Amiri','Traditional Arabic',serif;color:var(--ink);padding:18px 14px;background:var(--panel);border-radius:var(--rm);border:1px solid var(--line);direction:rtl}
-.verse-translation{text-align:left;font-size:15px;line-height:1.7;color:var(--muted);padding:14px;background:var(--panel);border-radius:var(--rm);border-left:3px solid var(--accent)}
-.verse-reference{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);text-align:center;margin-top:6px}
+.verse-arabic{text-align:right;font-size:28px;line-height:2.2;font-family:'Amiri','Traditional Arabic',serif;color:var(--ink);padding:18px 14px;background:var(--panel);border-radius:var(--rm);border:1px solid var(--line);direction:rtl;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.verse-translation{text-align:left;font-size:15px;line-height:1.7;color:var(--ink);padding:14px;background:var(--panel);border-radius:var(--rm);border-left:3px solid var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.verse-reference{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);text-align:center;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px}
+.verse-reference::before,.verse-reference::after{content:'';width:24px;height:1px;background:var(--line)}
 .verse-loading{text-align:center;padding:24px;color:var(--muted);font-size:14px}
 .verse-error{text-align:center;padding:20px;color:var(--danger);font-size:14px;background:color-mix(in srgb,var(--danger) 10%,transparent);border-radius:var(--rs)}
 
@@ -556,12 +557,13 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
             </div>
             <div class="compass-inner" id="compassInner">
               <div class="qibla-arrow">
-                <svg width="32" height="56" viewBox="0 0 32 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 4C16 4 16 42 16 42" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/>
-                  <circle cx="16" cy="12" r="8" fill="var(--accent)"/>
-                  <path d="M16 42L10 30H22L16 42Z" fill="var(--accent)"/>
+                <svg width="28" height="48" viewBox="0 0 28 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Классическая аккуратная стрелка -->
+                  <path d="M14 2C14 2 14 38 14 38" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M14 38L8 28H20L14 38Z" fill="var(--accent)"/>
+                  <circle cx="14" cy="8" r="6" fill="var(--accent)"/>
                 </svg>
-                <span style="font-size:24px;display:block;text-align:center;margin-top:4px">🕋</span>
+                <span style="font-size:20px;display:block;text-align:center;margin-top:2px;line-height:1">🕋</span>
               </div>
             </div>
             <div class="compass-center"></div>
