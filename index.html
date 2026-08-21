@@ -110,12 +110,12 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .chip:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--c,#888) 55%,var(--line))}
 .chip.on{background:var(--c);border-color:var(--c);color:#fff;box-shadow:0 5px 14px color-mix(in srgb,var(--c) 40%,transparent)}
 .prio-pick{display:flex;gap:5px}
-.prio{width:34px;height:34px;border-radius:var(--rs);border:1.5px solid var(--line);background:var(--panel2);display:grid;place-items:center;cursor:pointer;transition:.18s}
+.prio{width:42px;height:42px;border-radius:var(--rs);border:1.5px solid var(--line);background:var(--panel2);display:grid;place-items:center;cursor:pointer;transition:.18s}
 .prio svg{width:15px;height:15px;fill:var(--muted);transition:.18s}
 .prio:hover{transform:translateY(-2px)}
 .prio.on[data-p="low"] svg{fill:#8FA0AE}.prio.on[data-p="mid"] svg{fill:#E8A23B}.prio.on[data-p="high"] svg{fill:#E5484D}
 .prio.on{border-color:currentColor;box-shadow:0 3px 10px rgba(0,0,0,.10)}
-.datein-wrap{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);padding:7px 10px;cursor:pointer;transition:.18s;max-width:100%;flex:1;min-width:160px}
+.datein-wrap{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);padding:7px 10px;cursor:pointer;transition:.18s;max-width:100%;flex:1;min-width:160px;height:42px;box-sizing:border-box}
 .datein-wrap:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
 .datein-wrap svg{flex:none;width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;position:relative;z-index:1}
 .datein{border:0;background:transparent;color:var(--ink);font:500 13px var(--fb);cursor:pointer;padding:0;outline:none;width:100%;-webkit-appearance:none}
