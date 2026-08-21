@@ -168,6 +168,9 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .icon-btn.del:hover{color:var(--danger)}
 .icon-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .t-edit{width:100%;font:600 15px var(--fb);color:var(--ink);background:var(--panel2);border:1.5px solid var(--accent);border-radius:8px;padding:6px 9px;outline:none}
+.t-edit-row{display:flex;flex-direction:column;gap:8px;width:100%}
+.t-edit-date{font:500 13px var(--fb);color:var(--ink);background:var(--panel2);border:1.5px solid var(--line);border-radius:8px;padding:6px 9px;outline:none;cursor:pointer}
+.t-edit-date:focus{border-color:var(--accent)}
 .empty{text-align:center;padding:54px 20px;color:var(--muted)}
 .empty svg{margin-bottom:14px;stroke:var(--muted);opacity:.55;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .empty b{display:block;font-family:var(--fd);font-weight:700;font-size:16px;color:var(--ink);margin-bottom:6px}
@@ -1792,7 +1795,7 @@ function itemHTML(t,i){
   <button class="check" title="${t.done?'Вернуть в работу':'Отметить выполненной'}"><svg viewBox="0 0 24 24"><path d="M4 12.5l5.2 5L20 6.8"/></svg></button>
   <div class="t-main">
     ${editing
-      ?`<input class="t-edit" value="${esc(t.text)}" maxlength="140">`
+      ?`<div class="t-edit-row"><input class="t-edit" value="${esc(t.text)}" maxlength="140"><input type="date" class="t-edit-date" value="${t.due?t.due.slice(0,10):''}" min="${ymd(new Date())}"></div>`
       :`<span class="t-text">${esc(t.text)}</span>`}
     <div class="t-meta">
       <span class="mchip" style="--cc:${c.color}">${c.emoji} ${esc(c.name)}</span>
@@ -1895,13 +1898,15 @@ $('#list').addEventListener('click',e=>{
  if(act.dataset.act==='del')return removeTask(id,li);
  if(act.dataset.act==='edit'){state.editing=id;renderList();}});
 $('#list').addEventListener('keydown',e=>{
- if(!e.target.classList.contains('t-edit'))return;const li=e.target.closest('.task');
+ if(!e.target.classList.contains('t-edit')&&!e.target.classList.contains('t-edit-date'))return;const li=e.target.closest('.task');
  if(e.key==='Enter'){commitEdit(li)}
  if(e.key==='Escape'){state.editing=null;renderList()}});
 $('#list').addEventListener('focusout',e=>{
- if(e.target.classList.contains('t-edit'))commitEdit(e.target.closest('.task'))});
+ if(e.target.classList.contains('t-edit')||e.target.classList.contains('t-edit-date'))commitEdit(e.target.closest('.task'))});
 function commitEdit(li){if(!li||!state.editing)return;const t=byId(li.dataset.id);
  const v=li.querySelector('.t-edit').value.trim();if(v)t.text=v;
+ const d=li.querySelector('.t-edit-date').value||null;
+ if(d!==t.due){t.due=d;if(d){scheduleNotification(t)}else{clearTimeout(notifTimers[t.id]);delete notifTimers[t.id]}}
  state.editing=null;save();renderAll();}
 
 /* drag & drop порядка */
