@@ -249,6 +249,10 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 .prayer-time-item.next .prayer-time-value{color:var(--accent)}
 .prayer-time-icon{font-size:20px;line-height:1}
 .next-prayer{text-align:center;padding:14px;background:color-mix(in srgb,var(--accent) 8%,transparent);border:1.5px solid var(--accent);border-radius:var(--rm);font-size:14px;font-weight:700;color:var(--accent)}
+.night-times{text-align:center;padding:12px 14px;background:var(--panel2);border:1.5px solid var(--line);border-radius:var(--rm);font-size:13px;font-weight:600;color:var(--muted);margin-top:8px}
+.night-times .night-row{display:flex;justify-content:space-between;gap:12px;margin-top:6px}
+.night-times .night-label{color:var(--muted);font-weight:500}
+.night-times .night-value{color:var(--ink);font-family:var(--fd);font-weight:700}
 .qibla-compass-container{display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px;background:var(--panel2);border-radius:var(--rl);margin-top:16px}
 .qibla-info{display:flex;flex-direction:column;align-items:center;gap:4px}
 .qibla-angle{font-family:var(--fd);font-weight:800;font-size:32px;color:var(--accent)}
@@ -547,6 +551,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
           </div>
           <div class="prayer-times-list" id="prayerTimesList"></div>
           <div class="next-prayer" id="nextPrayer"></div>
+          <div class="night-times" id="nightTimes"></div>
         </div>
         <div class="qibla-compass-container">
           <div class="qibla-info">
@@ -1527,6 +1532,44 @@ function renderPrayerTimes(){
  }else{
   $('#nextPrayer').innerHTML='Намазы на сегодня завершены';
  }
+ 
+ // Расчет середины ночи и последней трети ночи
+ const maghribHours = times.maghrib.hours;
+ const fajrHours = times.fajr.hours;
+ 
+ // Если Фаджр раньше Магриба (следующий день), добавляем 24 часа
+ let nightDuration = fajrHours > maghribHours ? fajrHours - maghribHours : (fajrHours + 24) - maghribHours;
+ 
+ // Середина ночи = Магриб + половина длительности ночи
+ const midnightHours = maghribHours + (nightDuration / 2);
+ const midnightNormalized = midnightHours >= 24 ? midnightHours - 24 : midnightHours;
+ 
+ // Последняя треть ночи начинается после 2/3 ночного периода
+ const lastThirdStartHours = maghribHours + (nightDuration * 2 / 3);
+ const lastThirdStartNormalized = lastThirdStartHours >= 24 ? lastThirdStartHours - 24 : lastThirdStartHours;
+ 
+ function formatNightTime(hours){
+  let h = Math.floor(hours);
+  let m = Math.round((hours - h) * 60);
+  if(m >= 60){ h++; m -= 60; }
+  if(h >= 24) h -= 24;
+  if(h < 0) h += 24;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+ }
+ 
+ const midnightTime = formatNightTime(midnightNormalized);
+ const lastThirdTime = formatNightTime(lastThirdStartNormalized);
+ 
+ $('#nightTimes').innerHTML = `
+  <div class="night-row">
+   <span class="night-label">Середина ночи:</span>
+   <span class="night-value" style="color:var(--accent)">${midnightTime}</span>
+  </div>
+  <div class="night-row">
+   <span class="night-label">Последняя треть ночи:</span>
+   <span class="night-value" style="color:var(--accent)">${lastThirdTime}</span>
+  </div>
+ `;
 }
 
 function initCompass(){
