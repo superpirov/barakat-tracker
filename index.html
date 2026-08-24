@@ -839,12 +839,7 @@ function defaults(){return{
  tasks:[]}}
 
 let state=defaults();
-function seed(){const n=Date.now();state.tasks=[
- {id:uid(),text:'Составить список целей на неделю',catId:'general',prio:null,due:null,done:true,createdAt:n-9e5,completedAt:n-6e5},
- {id:uid(),text:'Купить финики и мёд',catId:'c-shop',prio:'mid',due:ymd(new Date()),done:false,createdAt:n-8e5},
- {id:uid(),text:'Подготовить отчёт для команды',catId:'c-work',prio:'high',due:null,done:false,createdAt:n-7e5},
- {id:uid(),text:'Прочитать 20 страниц книги',catId:'c-pers',prio:'low',due:null,done:false,createdAt:n-6e5},
- {id:uid(),text:'Вечерняя прогулка 30 минут',catId:'c-hlth',prio:null,due:null,done:false,createdAt:n-5e5}];}
+function seed(){const n=Date.now();state.tasks=[];}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({...state,search:''}))}catch(e){}}
 function load(){try{const r=localStorage.getItem(KEY);if(!r){seed();return}
  const d=JSON.parse(r);state={...state,...d,settings:{...state.settings,...(d.settings||{})},search:''};
