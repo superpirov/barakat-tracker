@@ -1,16 +1,4 @@
 ```
-# Build/dist directory
+# Build artifacts
 dist/
-
-# IDE files
-.vscode/
-.idea/
-
-# Log files
-*.log
-
-# Environment files
-.env
-.env.local
-*.env.*
 ```
