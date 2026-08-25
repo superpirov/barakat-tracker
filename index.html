@@ -391,17 +391,81 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 .expense-sum{display:inline-flex;gap:7px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;box-shadow:var(--shadow)}
 .expense-sum b{font-family:var(--fd);color:var(--accent)}
 
-/* ── нижняя навигация (мобильная) ── */
-.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:90;background:var(--panel);border-top:1px solid var(--line);padding:6px 8px env(safe-area-inset-bottom,8px);
-  justify-content:space-around;align-items:center;box-shadow:0 -4px 20px rgba(0,0,0,.08)}
-.bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px;border-radius:12px;border:0;background:transparent;color:var(--muted);cursor:pointer;transition:.2s;font-size:9px;font-weight:600;letter-spacing:.3px}
-.bnav-item span{font-size:18px;line-height:1}
-.bnav-item.on{color:var(--accent)}
-.bnav-item:hover{background:var(--panel2)}
+/* ═══ ГЛАВНАЯ / ДАШБОРД ═══ */
+.home-section,.tasks-section{display:none}
+.js-section.active{display:flex;flex-direction:column;gap:18px;animation:fadeUp .4s cubic-bezier(.2,.7,.3,1)}
+.tasks-section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}}
+
+.prayer-hero{position:relative;overflow:hidden;border-radius:24px;padding:22px;color:#fff;
+ background:linear-gradient(135deg,#1E6F52,#2E9E71 55%,#3FBF8A);
+ box-shadow:0 18px 40px color-mix(in srgb,var(--accent) 28%,transparent)}
+html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#17553D 60%,#1F7A56)}
+.prayer-hero::after{content:'';position:absolute;right:-40px;top:-40px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.09)}
+.prayer-hero::before{content:'';position:absolute;right:40px;bottom:-80px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.07)}
+.ph-top{display:flex;justify-content:space-between;align-items:center;gap:10px;position:relative;z-index:1}
+.ph-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;opacity:.9;font-weight:700}
+.ph-loc{font-size:11.5px;opacity:.85;display:inline-flex;align-items:center;gap:5px;max-width:48%;text-align:right;font-weight:600}
+.ph-main{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:10px;position:relative;z-index:1;flex-wrap:wrap}
+.ph-count{font-family:var(--fd);font-weight:800;font-size:clamp(30px,8vw,46px);letter-spacing:1px;line-height:1;font-variant-numeric:tabular-nums}
+.ph-sub{font-size:12px;opacity:.85;margin-top:5px;font-weight:600}
+.ph-name{font-family:var(--fd);font-weight:800;font-size:24px;display:flex;align-items:center;gap:10px;justify-content:flex-end}
+.ph-time{display:inline-block;margin-top:7px;font-family:var(--fd);font-weight:700;font-size:14px;background:rgba(255,255,255,.18);padding:8px 14px;border-radius:999px;backdrop-filter:blur(4px)}
+.ph-mini{display:flex;gap:6px;margin-top:16px;position:relative;z-index:1;overflow-x:auto;scrollbar-width:none}
+.ph-mini::-webkit-scrollbar{display:none}
+.phm{flex:1;min-width:58px;text-align:center;background:rgba(255,255,255,.13);border-radius:12px;padding:8px 4px;transition:.25s}
+.phm.cur{background:rgba(255,255,255,.3);box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.phm small{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;opacity:.85;font-weight:700;margin-bottom:2px}
+.phm b{font-family:var(--fd);font-weight:700;font-size:12.5px;font-variant-numeric:tabular-nums}
+.ph-form{display:none;gap:8px;margin-top:12px;position:relative;z-index:1;flex-wrap:wrap}
+.ph-form.show{display:flex}
+.ph-form input{flex:1;min-width:110px;border:0;border-radius:11px;padding:10px 13px;font:600 13px var(--fb);outline:none;background:rgba(255,255,255,.94);color:#14231B}
+.ph-form button{border:0;background:#14231B;color:#fff;font:700 13px var(--fb);padding:10px 18px;border-radius:11px;cursor:pointer}
+.ph-presets{display:flex;gap:6px;flex-wrap:wrap;position:relative;z-index:1;margin-top:10px}
+.ph-presets button{background:rgba(255,255,255,.14);border:0;color:#fff;font:600 11.5px var(--fb);padding:6px 12px;border-radius:999px;cursor:pointer;transition:.15s}
+.ph-presets button:hover{background:rgba(255,255,255,.26)}
+.ph-manual{margin-top:12px;font-size:12.5px;opacity:.95;position:relative;z-index:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ph-manual button{background:rgba(255,255,255,.16);border:0;color:#fff;font-weight:700;font-size:12px;padding:7px 13px;border-radius:999px;cursor:pointer;transition:.15s}
+.ph-manual button:hover{background:rgba(255,255,255,.28)}
+
+.dash-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px}
+.dstat{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;min-width:0}
+.dstat-icon{width:38px;height:38px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:17px;background:color-mix(in srgb,var(--c) 16%,transparent)}
+.dstat b{font-family:var(--fd);font-weight:800;font-size:15px;display:block;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dstat small{font-size:11.5px;color:var(--muted);font-weight:600}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px}
+.tile{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:12px;min-height:118px;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:20px;cursor:pointer;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s,border-color .2s;text-align:left;font:inherit;color:inherit}
+.tile::before{content:'';position:absolute;top:-32px;right:-32px;width:110px;height:110px;border-radius:50%;background:color-mix(in srgb,var(--c) 12%,transparent);transition:transform .3s}
+.tile:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--c) 45%,var(--line))}
+.tile:hover::before{transform:scale(1.35)}
+.tile-top{display:flex;align-items:center;justify-content:space-between}
+.tile-emoji{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:20px;background:color-mix(in srgb,var(--c) 16%,transparent)}
+.tile-arrow{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);border:1px solid var(--line);color:var(--muted);transition:.2s;font-size:13px}
+.tile:hover .tile-arrow{background:var(--c);border-color:var(--c);color:#fff;transform:translateX(2px)}
+.tile-name{font-family:var(--fd);font-weight:700;font-size:15.5px}
+.tile-stat{font-size:12px;color:var(--muted);font-weight:600;line-height:1.45}
+.tile-stat b{color:var(--ink)}
+
+.home-verse{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:var(--shadow);cursor:pointer;transition:border-color .2s,transform .2s}
+.home-verse:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.home-verse-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.home-verse-head h2{font-family:var(--fd);font-size:15px;font-weight:700;display:flex;gap:8px;align-items:center}
+.home-verse .verse-arabic{font-size:22px;line-height:2;padding:12px 14px}
+.home-verse .verse-translation{font-size:13.5px;padding:12px 14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ── нижняя навигация: плавающая пилюля ── */
+.bottom-nav{display:none;position:fixed;bottom:calc(12px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:90;max-width:calc(100vw - 20px);
+ background:color-mix(in srgb,var(--panel) 88%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+ border:1px solid var(--line);border-radius:999px;padding:6px;gap:4px;overflow-x:auto;scrollbar-width:none;box-shadow:0 10px 30px rgba(0,0,0,.22)}
+.bottom-nav::-webkit-scrollbar{display:none}
+.bnav-item{flex:none;display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:999px;border:0;background:transparent;color:var(--muted);cursor:pointer;transition:.2s;font-size:12.5px;font-weight:600;white-space:nowrap}
+.bnav-item span{font-size:16px;line-height:1}
+.bnav-item.on{background:var(--accent);color:var(--accent-ink);box-shadow:0 5px 14px color-mix(in srgb,var(--accent) 40%,transparent)}
 
 @media(hover:none){.t-actions{opacity:1}.cat-del{opacity:.7}}
 @media(max-width:960px){
-  .app{grid-template-columns:1fr;gap:14px;padding:16px 14px 90px;width:100%;max-width:100vw;overflow-x:hidden}
+  .app{grid-template-columns:1fr;gap:14px;padding:16px 14px 104px;width:100%;max-width:100vw;overflow-x:hidden}
   .sidebar{display:none}
   .m-bar{display:flex}
   .m-cats{display:flex}
@@ -429,8 +493,8 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
   .week-label{font-size:9px}
   .week-dot{width:8px;height:8px}
   .zakat-row{grid-template-columns:1fr}
-  .bnav-item{padding:6px 6px;font-size:8px}
-  .bnav-item span{font-size:16px}
+  #toast{bottom:100px}
+  .ph-name{font-size:20px}
   .currency-bar{flex-direction:column;align-items:stretch}
   .currency-bar .cb-hint{align-self:flex-start;padding-bottom:0}
 }
@@ -447,12 +511,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
     <div class="brand-sub">трекер задач</div>
     <div class="nav-label">Разделы</div>
     <nav class="nav" id="sectionNav">
-      <div class="cat-row on" data-section="tasks" style="--c:#2E7D5B"><span class="cat-emoji">📋</span><span class="cat-name">Задачи</span></div>
-      <div class="cat-row" data-section="ibadat" style="--c:#2BB3A5"><span class="cat-emoji">🕌</span><span class="cat-name">Ибадат</span></div>
-      <div class="cat-row" data-section="finance" style="--c:#E8A23B"><span class="cat-emoji">💰</span><span class="cat-name">Финансы</span></div>
-      <div class="cat-row" data-section="gratitude" style="--c:#9A6FE0"><span class="cat-emoji">📖</span><span class="cat-name">Благодарность</span></div>
-      <div class="cat-row" data-section="focus" style="--c:#4A8DF7"><span class="cat-emoji">⏱️</span><span class="cat-name">Фокус</span></div>
-
+      <!-- разделы генерируются из массива SECTIONS в JS — новые добавляются одной строкой -->
     </nav>
     <div class="nav-label" id="catNavLabel">Категории</div>
     <nav class="nav" id="catNav"></nav>
@@ -496,8 +555,55 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
       </div>
     </header>
 
+    <!-- ═══ РАЗДЕЛ: ГЛАВНАЯ (ДАШБОРД) ═══ -->
+    <div id="sectionHome" class="js-section home-section" data-section="home">
+      <div class="prayer-hero">
+        <div class="ph-top">
+          <span class="ph-label">🕌 Следующий намаз</span>
+          <span class="ph-loc" id="dashLoc">📍 определяем…</span>
+        </div>
+        <div class="ph-main">
+          <div>
+            <div class="ph-count" id="dashCountdown">--:--:--</div>
+            <div class="ph-sub" id="dashSub">осталось до намаза</div>
+          </div>
+          <div style="text-align:right">
+            <div class="ph-name"><span id="dashNextIcon">🌅</span><span id="dashNextName">—</span></div>
+            <span class="ph-time" id="dashNextTime">--:--</span>
+          </div>
+        </div>
+        <div class="ph-mini" id="dashMini"></div>
+        <div class="ph-form" id="geoForm">
+          <input type="number" id="geoLat" step="any" placeholder="Широта (55.75)">
+          <input type="number" id="geoLon" step="any" placeholder="Долгота (37.62)">
+          <button type="button" id="geoSaveBtn">Сохранить</button>
+        </div>
+        <div class="ph-presets" id="geoPresets"></div>
+        <div class="ph-manual" id="dashGeoHint" style="display:none">
+          📍 Включите доступ к геолокации
+          <button type="button" id="geoRetryBtn">Повторить</button>
+          или
+          <button type="button" id="geoManualBtn">введите город вручную</button>
+        </div>
+      </div>
+
+      <div class="dash-stats" id="dashStats"></div>
+
+      <div class="tiles" id="sectionTiles"></div>
+
+      <div class="home-verse" data-section="ibadat">
+        <div class="home-verse-head">
+          <h2><span>📜</span> Аят дня</h2>
+          <span class="tile-arrow">→</span>
+        </div>
+        <div id="verseOfDayHome">
+          <div class="verse-loading">Загрузка аята...</div>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ РАЗДЕЛ: ЗАДАЧИ ═══ -->
-    <div id="sectionTasks">
+    <div id="sectionTasks" class="js-section tasks-section" data-section="tasks">
       <section class="composer" id="composer">
         <input id="newText" placeholder="Что нужно сделать?" maxlength="140" autocomplete="off">
         <div class="composer-row">
@@ -507,13 +613,10 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
             <button class="prio" data-p="mid" title="Средний"><svg viewBox="0 0 24 24"><path d="M6 3v18M6 4h10l-2.5 3.5L16 11H6"/></svg></button>
             <button class="prio" data-p="high" title="Высокий"><svg viewBox="0 0 24 24"><path d="M6 3v18M6 4h10l-2.5 3.5L16 11H6"/></svg></button>
           </div>
-                    <div class="datein-wrap" onclick="this.querySelector('input').showPicker?.()">
+          <label class="datein-wrap" for="newDue" onclick="document.getElementById('newDue').showPicker?.()">
             <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
-            <label class="datein-wrap" for="newDue">
-            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
             <input type="datetime-local" class="datein" id="newDue" title="Дата и время">
           </label>
-          </div>
           <button class="btn-add" id="addBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Добавить</button>
         </div>
       </section>
@@ -532,7 +635,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
     </div>
 
     <!-- ═══ РАЗДЕЛ: ИБАДАТ ═══ -->
-    <div id="sectionIbadat" class="ibadat-section">
+    <div id="sectionIbadat" class="ibadat-section js-section" data-section="ibadat">
       <!-- Аят дня -->
       <div class="ibadat-card">
         <h2><span>📜</span> Аят дня</h2>
@@ -619,7 +722,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
     </div>
 
     <!-- ═══ РАЗДЕЛ: ФОКУС-ТАЙМЕР ═══ -->
-    <div id="sectionFocus" class="focus-section">
+    <div id="sectionFocus" class="focus-section js-section" data-section="focus">
       <div class="focus-card">
         <h2><span>⏱️</span> Фокус-таймер</h2>
         <div class="focus-label" id="focusLabel">Готов к работе</div>
@@ -642,7 +745,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
     </div>
 
     <!-- ═══ РАЗДЕЛ: ДНЕВНИК БЛАГОДАРНОСТИ ═══ -->
-    <div id="sectionGratitude" class="gratitude-section">
+    <div id="sectionGratitude" class="gratitude-section js-section" data-section="gratitude">
       <div class="gratitude-card">
         <h2><span>📖</span> За что я благодарен сегодня?</h2>
         <div class="gratitude-input-wrap">
@@ -654,7 +757,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
       </div>
     </div>
     <!-- ═══ РАЗДЕЛ: ФИНАНСЫ / ЗАКЯТ ═══ -->
-    <div id="sectionFinance" class="finance-section">
+    <div id="sectionFinance" class="finance-section js-section" data-section="finance">
       <!-- Калькулятор закята -->
       <div class="zakat-card">
         <h2><span>🤲</span> Калькулятор закята</h2>
@@ -706,14 +809,8 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
   </main>
 </div>
 
-<!-- Нижняя навигация (мобильная) -->
-<nav class="bottom-nav" id="bottomNav">
-  <button class="bnav-item on" data-section="tasks"><span>📋</span>Задачи</button>
-  <button class="bnav-item" data-section="ibadat"><span>🕌</span>Ибадат</button>
-  <button class="bnav-item" data-section="finance"><span>💰</span>Финансы</button>
-  <button class="bnav-item" data-section="gratitude"><span>📖</span>Благодарность</button>
-  <button class="bnav-item" data-section="focus"><span>⏱️</span>Фокус</button>
-</nav>
+<!-- Нижняя навигация: пункты генерируются из массива SECTIONS -->
+<nav class="bottom-nav" id="bottomNav"></nav>
 
 <!-- ДИАЛОГ КАТЕГОРИИ -->
 <dialog id="dlg">
@@ -825,7 +922,7 @@ function fmtLocal(amount){
    СОСТОЯНИЕ ЗАДАЧ
    ══════════════════════════════════════ */
 function defaults(){return{
- v:1, filter:'all', tab:'active', search:'', newCat:'general', newPrio:null, section:'tasks',
+ v:1, filter:'all', tab:'active', search:'', newCat:'general', newPrio:null, section:'home',
  settings:{theme:null,sound:true,name:''},
  cats:[
   {id:'general',name:'Общие',emoji:'✨',color:'#9AA7B2',fixed:true},
@@ -900,8 +997,8 @@ async function loadVerseFiles(){
  }
 }
 
-function renderVerseOfDay(){
- const container=$('#verseOfDayContainer');
+function renderVerseOfDay(sel){
+ const container=$(sel||'#verseOfDayContainer');
  if(!container)return;
 
  // Проверяем, есть ли уже сохранённый случайный аят на сегодня
@@ -923,11 +1020,11 @@ function renderVerseOfDay(){
   return;
  }
 
- if(!verseInitialized||verseData.arabic.length===0){
-  container.innerHTML='<div class="verse-loading"><span>Загрузка аята...</span></div>';
-  loadVerseFiles().then(()=>renderVerseOfDay());
-  return;
- }
+  if(!verseInitialized||verseData.arabic.length===0){
+   container.innerHTML='<div class="verse-loading"><span>Загрузка аята...</span></div>';
+   loadVerseFiles().then(()=>renderVerseOfDay(sel));
+   return;
+  }
 
  const arabicLine=verseData.arabic[verseIndex]||'';
  const russianLine=verseData.russian[verseIndex]||'';
@@ -971,10 +1068,11 @@ const sndFanfare=()=>[523,659,784,1047].forEach((f,i)=>tone(f,.2,'triangle',.13,
 const cvs=$('#fx'),ctx=cvs.getContext('2d');let parts=[],raf=0;
 const sizeCvs=()=>{cvs.width=innerWidth;cvs.height=innerHeight};sizeCvs();addEventListener('resize',sizeCvs);
 function burst(x,y,colors,count=26,power=1){
+ if(!ctx)return;
  for(let i=0;i<count;i++)parts.push({x,y,vx:(Math.random()-.5)*9*power,vy:(Math.random()*-6-2)*power,g:.19,
   s:Math.random()*5+3.5,r:Math.random()*6.3,vr:(Math.random()-.5)*.3,c:colors[i%colors.length],life:1,decay:.012+Math.random()*.012});
  if(!raf)raf=requestAnimationFrame(loop);}
-function loop(){ctx.clearRect(0,0,cvs.width,cvs.height);
+function loop(){if(!ctx)return;ctx.clearRect(0,0,cvs.width,cvs.height);
  parts=parts.filter(p=>p.life>0);
  parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.r+=p.vr;p.life-=p.decay;
   ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.globalAlpha=Math.max(p.life,0);
@@ -996,36 +1094,187 @@ const matchS=t=>!state.search||t.text.toLowerCase().includes(state.search);
 const scoped=()=>state.tasks.filter(matchF);
 
 /* ══════════════════════════════════════
-   ПЕРЕКЛЮЧЕНИЕ РАЗДЕЛОВ
+   РАЗДЕЛЫ ПРИЛОЖЕНИЯ (единый конфиг —
+   новый раздел добавляется одной строкой здесь)
    ══════════════════════════════════════ */
+const SECTIONS=[
+ {id:'home',name:'Главная',emoji:'🏠',color:'#34B87E'},
+ {id:'tasks',name:'Задачи',emoji:'📋',color:'#2E7D5B'},
+ {id:'ibadat',name:'Ибадат',emoji:'🕌',color:'#2BB3A5'},
+ {id:'finance',name:'Финансы',emoji:'💰',color:'#E8A23B'},
+ {id:'gratitude',name:'Благодарность',emoji:'📖',color:'#9A6FE0'},
+ {id:'focus',name:'Фокус',emoji:'⏱️',color:'#4A8DF7'}];
+
+function buildSectionNav(){
+ $('#sectionNav').innerHTML=SECTIONS.map(s=>
+  `<div class="cat-row" data-section="${s.id}" style="--c:${s.color}"><span class="cat-emoji">${s.emoji}</span><span class="cat-name">${s.name}</span></div>`).join('');
+ $('#bottomNav').innerHTML=SECTIONS.map(s=>
+  `<button class="bnav-item" data-section="${s.id}"><span>${s.emoji}</span>${s.name}</button>`).join('');}
+
+const SECTION_RENDER={
+ home:renderHome,
+ tasks:renderAll,
+ ibadat:()=>{renderIbadat();initGeolocation();initCompass()},
+ finance:renderFinance,
+ gratitude:renderGratitude,
+ focus:renderFocus};
+
 function switchSection(sec){
+ if(!SECTION_RENDER[sec])sec='home';
  state.section=sec;save();
- $('#sectionTasks').style.display=sec==='tasks'?'':'none';
- $('#sectionIbadat').classList.toggle('active',sec==='ibadat');
- $('#sectionFinance').classList.toggle('active',sec==='finance');
- $('#sectionGratitude').classList.toggle('active',sec==='gratitude');
- $('#sectionFocus').classList.toggle('active',sec==='focus');
- // Сайдбар: подсветка раздела
+ $$('.js-section').forEach(el=>el.classList.toggle('active',el.dataset.section===sec));
  $$('#sectionNav .cat-row').forEach(r=>r.classList.toggle('on',r.dataset.section===sec));
- // Сайдбар: показ/скрытие категорий
+ $$('.bnav-item').forEach(b=>b.classList.toggle('on',b.dataset.section===sec));
  const isTasks=sec==='tasks';
  $('#catNavLabel').style.display=isTasks?'':'none';
  $('#catNav').style.display=isTasks?'':'none';
  $('#addCatBtn').style.display=isTasks?'':'none';
- // Мобильные категории и кнопка добавления
  $('#catNavM').style.display=isTasks?'':'none';
- // Шапка: кольцо прогресса только для задач
- $('#headRight').style.display=isTasks?'':'none';
- // Нижняя навигация
- $$('.bnav-item').forEach(b=>b.classList.toggle('on',b.dataset.section===sec));
- // Рендер
- if(sec==='tasks'){renderAll()}
- else if(sec==='ibadat'){renderIbadat();initGeolocation()}
- else if(sec==='finance'){renderFinance()}
- else if(sec==='gratitude'){renderGratitude()}
- else if(sec==='focus'){renderFocus()}}
+ $('#headRight').style.display=(isTasks||sec==='home')?'':'none';
+ SECTION_RENDER[sec]();
+ if(sec==='home')initGeolocation();
+ tickPrayer();}
 $('#sectionNav').addEventListener('click',e=>{const r=e.target.closest('[data-section]');if(r)switchSection(r.dataset.section)});
 $('#bottomNav').addEventListener('click',e=>{const b=e.target.closest('[data-section]');if(b)switchSection(b.dataset.section)});
+$('#sectionHome').addEventListener('click',e=>{
+ if(e.target.closest('.ph-form')||e.target.closest('.ph-manual')||e.target.closest('.ph-presets'))return;
+ const t=e.target.closest('[data-section]');if(t)switchSection(t.dataset.section)});
+
+/* ══════════════════════════════════════
+   ГЕОЛОКАЦИЯ: кэш, запрос, ручной ввод
+   ══════════════════════════════════════ */
+const GEO_KEY='barakat.geo.v1';
+let geoRequested=false;
+function loadGeo(){try{const r=JSON.parse(localStorage.getItem(GEO_KEY)||'null');
+ if(r&&typeof r.lat==='number'&&typeof r.lon==='number'&&Math.abs(r.lat)<=90&&Math.abs(r.lon)<=180){
+  prayerState.latitude=r.lat;prayerState.longitude=r.lon;return true}}catch(e){}return false}
+function saveGeo(){try{localStorage.setItem(GEO_KEY,JSON.stringify({lat:prayerState.latitude,lon:prayerState.longitude}))}catch(e){}}
+function initGeolocation(){
+ if(prayerState.latitude!==null){applyLocation();return}
+ if(geoRequested)return;geoRequested=true;
+ const fail=err=>{geoRequested=false;console.warn('Ошибка геолокации:',err);
+  const locEl=$('#locationStatus');
+  if(locEl){locEl.innerHTML='<span class="location-icon">⚠️</span><span class="location-text">Не удалось определить местоположение</span>';locEl.style.color='var(--danger)'}
+  $('#dashGeoHint').style.display='';};
+ if(!navigator.geolocation)return fail({code:0,message:'Геолокация не поддерживается'});
+ navigator.geolocation.getCurrentPosition(pos=>{
+  geoRequested=false;
+  prayerState.latitude=pos.coords.latitude;prayerState.longitude=pos.coords.longitude;
+  saveGeo();applyLocation();toast('Локация определена 📍')
+ },fail,{enableHighAccuracy:false,timeout:9000,maximumAge:600000});}
+function applyLocation(){
+ const has=prayerState.latitude!==null;
+ const locEl=$('#locationStatus');
+ if(locEl){
+  if(has){locEl.innerHTML=`<span class="location-icon">✅</span><span class="location-text">Широта ${prayerState.latitude.toFixed(3)}, долгота ${prayerState.longitude.toFixed(3)}</span>`;locEl.style.color=''}
+  else{locEl.innerHTML='<span class="location-icon">📍</span><span class="location-text">Местоположение не определено</span>';locEl.style.color=''}}
+ $('#dashLoc').textContent=has?`📍 ${prayerState.latitude.toFixed(2)}, ${prayerState.longitude.toFixed(2)}`:'📍 локация не задана';
+ $('#dashGeoHint').style.display=has?'none':'';
+ if(!has)return;
+ prayerState.qiblaAngle=calculateQibla(prayerState.latitude,prayerState.longitude);
+ $('#qiblaAngle').textContent=Math.round(prayerState.qiblaAngle)+'°';
+ // Стрелка в положении «карта»: север сверху, угол киблы от севера
+ $('#compassInner').style.transform=`rotate(${prayerState.qiblaAngle}deg)`;
+ renderPrayerTimes();renderDashMini();tickPrayer();}
+const GEO_PRESETS=[['Москва',55.7558,37.6173],['СПб',59.9311,30.3609],['Казань',55.7963,49.1088],['Ташкент',41.2995,69.2401],['Мекка',21.4225,39.8262]];
+$('#geoPresets').innerHTML=GEO_PRESETS.map(p=>`<button type="button" data-glat="${p[1]}" data-glon="${p[2]}">${p[0]}</button>`).join('');
+$('#geoManualBtn').onclick=()=>$('#geoForm').classList.toggle('show');
+$('#geoRetryBtn').onclick=()=>{$('#dashGeoHint').style.display='none';prayerState.latitude=null;prayerState.longitude=null;initGeolocation()};
+$('#geoSaveBtn').onclick=()=>{
+ const la=parseFloat($('#geoLat').value),lo=parseFloat($('#geoLon').value);
+ if(isNaN(la)||isNaN(lo)||Math.abs(la)>90||Math.abs(lo)>180)return toast('Проверьте координаты');
+ prayerState.latitude=la;prayerState.longitude=lo;saveGeo();
+ $('#geoForm').classList.remove('show');applyLocation();toast('Координаты сохранены 📍')};
+
+/* ══════════════════════════════════════
+   ОБРАТНЫЙ ОТСЧЁТ ДО НАМАЗА (тик каждую секунду)
+   ══════════════════════════════════════ */
+const P_NAMES={fajr:['Фаджр','🌅'],sunrise:['Восход','🌄'],dhuhr:['Зухр','☀️'],asr:['Аср','🌤️'],maghrib:['Магриб','🌇'],isha:['Иша','🌙']};
+function nextPrayerInfo(){
+ if(!prayerState.times)return null;
+ const now=new Date(),curH=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600;
+ for(const k of ['fajr','sunrise','dhuhr','asr','maghrib','isha']){
+  const t=prayerState.times[k];
+  if(t.hours!==null&&t.hours>curH)return{key:k,hours:t.hours,time:t.time}}
+ const f=prayerState.times.fajr;
+ return f.hours===null?null:{key:'fajr',hours:f.hours+24,time:f.time,tomorrow:true};}
+function fmtDur(sec){const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;
+ return(h?String(h).padStart(2,'0')+':':'')+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
+function updateMiniCur(){
+ const box=$('#dashMini');if(!box||!prayerState.times)return;
+ const now=new Date(),curH=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600;
+ let cur=null;['fajr','sunrise','dhuhr','asr','maghrib','isha'].forEach(k=>{const t=prayerState.times[k];if(t.hours!==null&&t.hours<=curH)cur=k});
+ if(cur===null)cur='isha';
+ box.querySelectorAll('.phm').forEach(n=>n.classList.toggle('cur',n.dataset.k===cur));}
+function renderDashMini(){
+ const box=$('#dashMini');if(!box)return;
+ box.innerHTML=['fajr','sunrise','dhuhr','asr','maghrib','isha'].map(k=>{
+  const t=(prayerState.times&&prayerState.times[k])||{time:'--:--'};
+  return `<div class="phm" data-k="${k}"><small>${P_NAMES[k][0]}</small><b>${t.time}</b></div>`}).join('');
+ updateMiniCur();}
+function tickPrayer(){
+ if(!prayerState.times)return;
+ const info=nextPrayerInfo(),el=$('#nextPrayer'),dc=$('#dashCountdown');
+ if(info){
+  const now=new Date(),curH=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600;
+  const left=Math.max(0,Math.round((info.hours-curH)*3600));
+  const nm=P_NAMES[info.key];
+  if(dc){dc.textContent=fmtDur(left);
+   $('#dashNextName').textContent=nm[0]+(info.tomorrow?' (завтра)':'');
+   $('#dashNextIcon').textContent=nm[1];
+   $('#dashNextTime').textContent='в '+info.time;
+   $('#dashSub').textContent='осталось до намаза '+nm[0]}
+  if(el)el.innerHTML=`Следующий намаз: <span style="color:var(--accent)">${nm[0]}${info.tomorrow?' (завтра)':''}</span> в <span style="color:var(--accent)">${info.time}</span> · через <b style="color:var(--accent)">${fmtDur(left)}</b>`;
+ }else if(el)el.textContent='Не удалось рассчитать время намазов';
+ updateMiniCur();}
+
+/* ══════════════════════════════════════
+   ДАШБОРД: статистика и плитки разделов
+   ══════════════════════════════════════ */
+function taskStreak(){
+ const days=new Set(state.tasks.filter(t=>t.completedAt).map(t=>ymd(new Date(t.completedAt))));
+ let st=0,c=new Date();
+ if(!days.has(ymd(c)))c.setDate(c.getDate()-1);
+ while(days.has(ymd(c))){st++;c.setDate(c.getDate()-1)}
+ return st;}
+function renderDashStats(){
+ const ts=taskStreak();
+ const d=getDay(todayStr());
+ const n=SALAH_LIST.filter(s=>d.salah[s.id]).length;
+ const items=[
+  {c:'#E8A23B',i:'🔥',v:ts+' '+plural(ts,['день','дня','дней']),l:'серия задач'},
+  {c:'#2BB3A5',i:'🕌',v:n+' / 5',l:'намазов сегодня'},
+  {c:'#4A8DF7',i:'⏱️',v:focusState.totalMinToday+' мин',l:'фокус сегодня'},
+  {c:'#9A6FE0',i:'🤲',v:String(gratitudeEntries.length),l:plural(gratitudeEntries.length,['запись','записи','записей'])+' в дневнике'}];
+ $('#dashStats').innerHTML=items.map(x=>
+  `<div class="dstat" style="--c:${x.c}"><span class="dstat-icon">${x.i}</span><div><b>${x.v}</b><small>${x.l}</small></div></div>`).join('');}
+function renderTiles(){
+ const defs=[
+  {id:'tasks',stat:()=>{const a=state.tasks.filter(t=>!t.done).length;
+    const td=state.tasks.filter(t=>t.completedAt&&ymd(new Date(t.completedAt))===todayStr()).length;
+    return`<b>${a}</b> ${plural(a,['активная','активные','активных'])} · сегодня выполнено: ${td}`}},
+  {id:'ibadat',stat:()=>{const dd=getDay(todayStr());
+    const nn=SALAH_LIST.filter(s=>dd.salah[s.id]).length;
+    return`Намазы: <b>${nn}/5</b> · Коран: <b>${dd.quran}</b> стр.`}},
+  {id:'finance',stat:()=>{const mk=currentMonthKey();
+    const sum=finance.expenses.filter(e=>e.month===mk).reduce((s,e)=>s+e.amount,0);
+    return`Расходы за месяц: <b>${fmtLocal(sum)}</b>`}},
+  {id:'gratitude',stat:()=>`${plural(gratitudeEntries.length,['Запись','Записи','Записей'])}: <b>${gratitudeEntries.length}</b>`},
+  {id:'focus',stat:()=>`Сессий сегодня: <b>${focusState.sessionsToday}</b> · ${focusState.totalMinToday} мин`}];
+ $('#sectionTiles').innerHTML=defs.map(df=>{const s=SECTIONS.find(x=>x.id===df.id);
+  return `<button type="button" class="tile" data-section="${s.id}" style="--c:${s.color}">
+   <span class="tile-top"><span class="tile-emoji">${s.emoji}</span><span class="tile-arrow">→</span></span>
+   <span class="tile-name">${s.name}</span>
+   <span class="tile-stat">${df.stat()}</span></button>`}).join('');}
+function renderHome(){renderDashStats();renderTiles();renderVerseOfDay('#verseOfDayHome');renderDashMini()}
+
+/* Смена суток: пересчёт времён, шапки и статистики */
+let _bootDay=todayStr();
+function dateGuard(){
+ if(todayStr()===_bootDay)return;_bootDay=todayStr();
+ renderHello();
+ if(prayerState.latitude!==null){prayerState.times=null;renderPrayerTimes()}
+ if(state.section==='home')renderHome();else if(state.section==='ibadat')renderIbadat();}
 
 /* ══════════════════════════════════════
    🤲 ЗАКЯТ: КАЛЬКУЛЯТОР С МУЛЬТИВАЛЮТОЙ
@@ -1311,16 +1560,24 @@ function renderFocus(){
  $('#focusTotal').textContent=focusState.totalMinToday;}
 function startFocus(){
  if(focusState.isRunning)return;
- focusState.isRunning=true;
- if(!focusState.isBreak&&focusState.secondsLeft===focusState.workMin*60){/* новая сессия */}
- saveFocus();renderFocus();
+ if(focusState.secondsLeft<=0)focusState.secondsLeft=(focusState.isBreak?focusState.breakMin:focusState.workMin)*60;
+ focusState.isRunning=true;saveFocus();renderFocus();sndTick();
+ clearInterval(focusInterval);
  focusInterval=setInterval(()=>{
-  if(focusState.secondsLeft<=0){clearInterval(focusInterval);focusInterval=null;
-   if(!focusState.isBreak){focusState.sessionsToday++;focusState.totalMinToday+=focusState.workMin;saveFocus();sndFanfare();burst(innerWidth/2,innerHeight*.35,FXC,50,1.5);toast(`🍅 Сессия завершена! +${focusState.workMin} мин фокуса`);
-    focusState.isBreak=true;focusState.secondsLeft=focusState.breakMin*60;focusState.isRunning=true;saveFocus();renderFocus();
-    focusInterval=setInterval(()=>{if(focusState.secondsLeft<=0){clearInterval(focusInterval);focusInterval=null;focusState.isBreak=false;focusState.isRunning=false;focusState.secondsLeft=focusState.workMin*60;saveFocus();renderFocus();sndPop();toast('☕ Перерыв окончен! Готов к работе')}else{focusState.secondsLeft--;saveFocus();renderFocus()}},1000)}
-   else{focusState.isBreak=false;focusState.isRunning=false;focusState.secondsLeft=focusState.workMin*60;saveFocus();renderFocus();sndPop();toast('☕ Перерыв окончен!')}}
-  else{focusState.secondsLeft--;saveFocus();renderFocus()}},1000)}
+  focusState.secondsLeft--;
+  if(focusState.secondsLeft<=0){
+   clearInterval(focusInterval);focusInterval=null;
+   if(!focusState.isBreak){
+    focusState.sessionsToday++;focusState.totalMinToday+=focusState.workMin;
+    sndFanfare();burst(innerWidth/2,innerHeight*.35,FXC,50,1.5);
+    toast(`🍅 Сессия завершена! +${focusState.workMin} мин фокуса`);
+    focusState.isBreak=true;focusState.secondsLeft=focusState.breakMin*60;
+   }else{
+    sndPop();toast('☕ Перерыв окончен! Готов к работе');
+    focusState.isBreak=false;focusState.isRunning=false;focusState.secondsLeft=focusState.workMin*60;}
+  }
+  saveFocus();renderFocus();
+ },1000)}
 function pauseFocus(){if(!focusState.isRunning)return;clearInterval(focusInterval);focusInterval=null;focusState.isRunning=false;saveFocus();renderFocus()}
 function resetFocus(){clearInterval(focusInterval);focusInterval=null;focusState.isRunning=false;focusState.isBreak=false;focusState.secondsLeft=focusState.workMin*60;saveFocus();renderFocus()}
 $('#focusStart').onclick=startFocus;
@@ -1405,72 +1662,91 @@ function renderIbadat(){
  renderVerseOfDay();}
 
 // ════ РАСЧЁТ ВРЕМЕНИ НАМАЗОВ ════
+// Точный астрономический алгоритм (позиция Солнца по юлианской дате,
+// как в PrayTimes.org) + коррекция для высоких широт (angle-based).
 function toRadians(deg){return deg*Math.PI/180}
 function toDegrees(rad){return rad*180/Math.PI}
+const _rad=toRadians,_deg=toDegrees;
+const fixAngle=a=>a-360*Math.floor(a/360);
+
+function julianDate(y,m,d){
+ if(m<=2){y--;m+=12}
+ const A=Math.floor(y/100),B=2-A+Math.floor(A/4);
+ return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5;}
+
+// Склонение Солнца (рад) и уравнение времени (часы)
+function sunPosition(jd){
+ const D=jd-2451545.0;
+ const g=fixAngle(357.529+0.98560028*D);            // средняя аномалия,°
+ const q=fixAngle(280.459+0.98564736*D);            // средняя долгота,°
+ const L=fixAngle(q+1.915*Math.sin(_rad(g))+0.020*Math.sin(_rad(2*g))); // эклиптическая долгота,°
+ const e=23.439-0.00000036*D;                       // наклон оси,°
+ const RA=_deg(Math.atan2(Math.cos(_rad(e))*Math.sin(_rad(L)),Math.cos(_rad(L))))/15;
+ let eqt=q/15-RA;eqt=((eqt%24)+24)%24;if(eqt>12)eqt-=24;
+ const decl=_deg(Math.asin(Math.sin(_rad(e))*Math.sin(_rad(L))));
+ return{declination:_rad(decl),equation:eqt};}
 
 function calculatePrayerTimes(lat,lon,method,date){
  const m=PRAYER_METHODS[method]||PRAYER_METHODS[5];
  const d=date||new Date();
- 
- // День в году
- const start=new Date(d.getFullYear(),0,0);
- const diff=d-start;
- const oneDay=1000*60*60*24;
- const dayOfYear=Math.floor(diff/oneDay);
- 
- // Склонение Солнца
- const declination=toRadians(-23.45*Math.cos(toRadians(360/365*(dayOfYear+10))));
- 
- // Уравнение времени (минуты)
- const B=toRadians(360/365*(dayOfYear-81));
- const equationOfTime=9.87*Math.sin(2*B)-7.53*Math.cos(B)-1.5*Math.sin(B);
- 
- // Время зухра - учитываем долготу для коррекции местного времени
- const timezone=-d.getTimezoneOffset()/60; // Положительное значение для восточных долгот
- const noonLocal=12 - equationOfTime/60; // Местный полдень без учёта часового пояса
- const lonCorrection=lon/15; // Коррекция по долготе (часов)
- const dhuhrTime=noonLocal + (timezone - lonCorrection); // Полуденное время в часах
- 
- // Аср: когда тень объекта = высота объекта + тень от полудня
- const asrFactor=1; // стандартный мазхаб
- const latRad=toRadians(lat);
- const asrAltitude=Math.atan(1/(asrFactor+Math.tan(Math.abs(latRad-declination))));
- 
- // Фаджр и Иша по углам солнца над горизонтом
- const fajrAngle=toRadians(-m.fajrAngle);
- const ishaAngle=m.ishaAngle>0?toRadians(-m.ishaAngle):null;
- 
- // Расчёт времени для угла солнца
- function timeForAngle(angleRad){
-  const cosHourAngle=(Math.sin(angleRad)-Math.sin(latRad)*Math.sin(declination))/(Math.cos(latRad)*Math.cos(declination));
-  if(cosHourAngle<-1||cosHourAngle>1)return null;
-  const hourAngle=toDegrees(Math.acos(cosHourAngle))/15;
-  return hourAngle;
- }
- 
- const fajrOffset=timeForAngle(fajrAngle);
- const sunriseOffset=timeForAngle(toRadians(-0.833));
- const asrOffset=timeForAngle(asrAltitude);
- const sunsetOffset=timeForAngle(toRadians(-0.833));
- const ishaOffset=ishaAngle!==null?timeForAngle(ishaAngle):null;
- 
- function formatTime(hours){
+ const tz=-d.getTimezoneOffset()/60;
+ // Юлианская дата, приведённая к долготе точки
+ const jbase=julianDate(d.getFullYear(),d.getMonth()+1,d.getDate())-lon/(15*24);
+
+ const midDay=t=>{const s=sunPosition(jbase+t);return((12-s.equation)%24+24)%24};
+ function angleTime(angleDeg,t,ccw){
+  const s=sunPosition(jbase+t);
+  const sinDecl=Math.sin(s.declination),cosDecl=Math.cos(s.declination);
+  const cosH=(Math.sin(_rad(angleDeg))-Math.sin(_rad(lat))*sinDecl)/(Math.cos(_rad(lat))*cosDecl);
+  if(cosH<-1||cosH>1)return null;                    // солнце не достигает угла (высокие широты)
+  const H=_deg(Math.acos(cosH))/15;
+  return midDay(t)+(ccw?-H:H);}
+
+ const dhuhrRaw=midDay(.5);
+ // уточнение зухра вторым проходом (точность ~секунды)
+ const dhuhr=midDay(dhuhrRaw/24);
+ // угол = высота солнца над горизонтом в градусах (для фаджра/иша/восхода — отрицательная)
+ const riseT=angleTime(-0.833,.25,true);
+ const setT=angleTime(-0.833,.75,false);
+ let fajrT=angleTime(-m.fajrAngle,5/24,true);
+ const asrShadow=Math.abs(lat-_deg(sunPosition(jbase+13/24).declination));
+ const asrAlt=_deg(Math.atan(1/(1+Math.tan(_rad(asrShadow)))));
+ const asrT=angleTime(asrAlt,13/24,false);
+ let ishaT=m.ishaAngle>0?angleTime(-m.ishaAngle,19/24,false):null;
+
+ // ── Высокие широты: если Фаджр/Иша не наступают — метод «ночных долей» ──
+ // (доля ночи, пропорциональная углу: угол/60 от длительности ночи,
+ //  откладывается от восхода назад для Фаджра и от заката вперёд для Иша)
+ if((fajrT===null||ishaT===null)&&riseT!==null&&setT!==null){
+  const nightLen=24-(setT-riseT);
+  if(fajrT===null)fajrT=riseT-nightLen*(m.fajrAngle/60);
+  if(ishaT===null)ishaT=setT+nightLen*(m.ishaAngle/60);}
+
+ // Переход из «солнечной» системы координат в локальное время часов (нормализация 0..24)
+ const adj=h=>h===null?null:(((h+tz-lon/15)%24)+24)%24;
+ function fmt(hours){
   if(hours===null)return'--:--';
-  let h=Math.floor(hours);
-  let m=Math.round((hours-h)*60);
-  if(m>=60){h++;m-=60}
-  if(h>=24)h-=24;
-  if(h<0)h+=24;
-  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
- }
- 
+  hours=((hours%24)+24)%24;
+  let h=Math.floor(hours),mm=Math.round((hours-h)*60);
+  if(mm>=60){h++;mm-=60}
+  return `${String(h).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;}
+
+ const F={
+  fajr:fajrT!==null?adj(fajrT):null,
+  sunrise:adj(riseT),
+  dhuhr:adj(dhuhr),
+  asr:adj(asrT),
+  maghrib:adj(setT),
+  isha:ishaT!==null?adj(ishaT):null
+ };
+
  return{
-  fajr:{time:formatTime(dhuhrTime-fajrOffset),hours:dhuhrTime-fajrOffset},
-  sunrise:{time:formatTime(dhuhrTime-sunriseOffset),hours:dhuhrTime-sunriseOffset},
-  dhuhr:{time:formatTime(dhuhrTime),hours:dhuhrTime},
-  asr:{time:formatTime(dhuhrTime+asrOffset),hours:dhuhrTime+asrOffset},
-  maghrib:{time:formatTime(dhuhrTime+sunsetOffset),hours:dhuhrTime+sunsetOffset},
-  isha:{time:ishaOffset!==null?formatTime(dhuhrTime+ishaOffset):'--:--',hours:ishaOffset!==null?dhuhrTime+ishaOffset:null}
+  fajr:{time:fmt(F.fajr),hours:F.fajr},
+  sunrise:{time:fmt(F.sunrise),hours:F.sunrise},
+  dhuhr:{time:fmt(F.dhuhr),hours:F.dhuhr},
+  asr:{time:fmt(F.asr),hours:F.asr},
+  maghrib:{time:fmt(F.maghrib),hours:F.maghrib},
+  isha:{time:fmt(F.isha),hours:F.isha}
  };
 }
 
@@ -1570,100 +1846,39 @@ function renderPrayerTimes(){
 }
 
 function initCompass(){
- if(!window.DeviceOrientationEvent){
-  $('#qiblaStatus').innerHTML='<span class="status-icon">⚠️</span><span class="status-text">Компас не поддерживается</span>';
-  $('#qiblaStatus').classList.add('error');
-  return;
- }
- 
- let heading=0;
- let qiblaBearing=prayerState.qiblaAngle||0;
- 
+ const status=$('#qiblaStatus');
+ const setStatus=(html,cls)=>{status.innerHTML=html;status.className='qibla-status'+(cls?' '+cls:'');status.style.cursor='';status.onclick=null};
+ if(!window.DeviceOrientationEvent)return setStatus('<span class="status-icon">⚠️</span><span class="status-text">Компас не поддерживается</span>','error');
+
+ let calibrated=false;
  function handleOrientation(e){
-  let h=0;
-  // iOS: webkitCompassHeading — это угол относительно магнитного севера
-  if(e.webkitCompassHeading!==undefined){
-   h=e.webkitCompassHeading;
-  }else if(e.alpha!==null){
-   // Android: alpha — это угол поворота вокруг оси Z (0-360)
-   h=360-e.alpha;
-  }
-  heading=h;
-  
-  if(prayerState.qiblaAngle!==null){
-   // Поворачиваем внутренний круг компаса против направления поворота телефона
-   // чтобы стрелка киблы всегда указывала на Каабу
-   const rotation=-heading+prayerState.qiblaAngle;
-   $('#compassInner').style.transform=`rotate(${rotation}deg)`;
-   $('#qiblaAngle').textContent=Math.round(prayerState.qiblaAngle)+'°';
-   
-   const statusEl=$('#qiblaStatus');
-   if(!statusEl.classList.contains('calibrated')){
-    statusEl.innerHTML='<span class="status-icon">✓</span><span class="status-text">Компас откалиброван</span>';
-    statusEl.classList.add('calibrated');
-   }
-  }
- }
+  let h=null;
+  if(typeof e.webkitCompassHeading==='number')h=e.webkitCompassHeading;      // iOS
+  else if(e.absolute&&typeof e.alpha==='number')h=360-e.alpha;               // Android (absolute)
+  if(h===null||prayerState.qiblaAngle===null)return;
+  // Стрелка компаса: поворачиваем диск против хода телефона + угол киблы
+  $('#compassInner').style.transform=`rotate(${-h+prayerState.qiblaAngle}deg)`;
+  if(!calibrated){calibrated=true;
+   setStatus('<span class="status-icon">✓</span><span class="status-text">Компас активен — держите телефон горизонтально</span>','calibrated')}}
  
- window.addEventListener('deviceorientation',handleOrientation,true);
- 
- // Запрос разрешения для iOS 13+
  if(typeof DeviceOrientationEvent.requestPermission==='function'){
-  $('#qiblaStatus').innerHTML='<span class="status-icon">📱</span><span class="status-text">Нажмите для доступа к компасу</span>';
-  $('#qiblaStatus').style.cursor='pointer';
-  $('#qiblaStatus').onclick=async()=>{
+  setStatus('<span class="status-icon">📱</span><span class="status-text">Нажмите, чтобы включить компас</span>');
+  status.style.cursor='pointer';
+  status.onclick=async()=>{
    try{
-    const permission=await DeviceOrientationEvent.requestPermission();
-    if(permission==='granted'){
-     handleOrientation({alpha:0});
-     $('#qiblaStatus').style.cursor='default';
-    }else{
-     $('#qiblaStatus').innerHTML='<span class="status-icon">⚠️</span><span class="status-text">Доступ запрещён</span>';
-     $('#qiblaStatus').classList.add('error');
-    }
-   }catch(e){
-    $('#qiblaStatus').innerHTML='<span class="status-icon">⚠️</span><span class="status-text">Ошибка доступа</span>';
-    $('#qiblaStatus').classList.add('error');
-   }
-  };
+    const p=await DeviceOrientationEvent.requestPermission();
+    if(p==='granted'){setStatus('<span class="status-icon">🧭</span><span class="status-text">Ожидание данных компаса…</span>');window.addEventListener('deviceorientation',handleOrientation,true)}
+    else setStatus('<span class="status-icon">⚠️</span><span class="status-text">Доступ к компасу запрещён</span>','error')
+   }catch(err){setStatus('<span class="status-icon">⚠️</span><span class="status-text">Ошибка доступа к компасу</span>','error')}};
+ }else if('ondeviceorientationabsolute' in window){
+  window.addEventListener('deviceorientationabsolute',handleOrientation,true);
+  setStatus('<span class="status-icon">🧭</span><span class="status-text">Если есть магнитный датчик — поверните телефон для калибровки</span>');
  }else{
-  // Для устройств без запроса разрешений (Android, старые iOS)
-  $('#qiblaStatus').innerHTML='<span class="status-icon">🧭</span><span class="status-text">Компас активен</span>';
-  $('#qiblaStatus').classList.add('calibrated');
+  window.addEventListener('deviceorientation',handleOrientation,true);
+  setStatus('<span class="status-icon">🧭</span><span class="status-text">Если есть магнитный датчик — поверните телефон для калибровки</span>');
  }
 }
 
-function initGeolocation(){
- function success(pos){
-  const crd=pos.coords;
-  prayerState.latitude=crd.latitude;
-  prayerState.longitude=crd.longitude;
-  prayerState.qiblaAngle=calculateQibla(crd.latitude,crd.longitude);
-  
-  const locEl=$('#locationStatus');
-  locEl.innerHTML=`<span class="location-icon">✓</span><span class="location-text">Широта: ${crd.latitude.toFixed(4)}, Долгота: ${crd.longitude.toFixed(4)}</span>`;
-  
-  renderPrayerTimes();
-  initCompass();
- }
- 
- function error(err){
-  console.warn(`Ошибка геолокации (${err.code}): ${err.message}`);
-  const locEl=$('#locationStatus');
-  locEl.innerHTML=`<span class="location-icon">⚠️</span><span class="location-text">Не удалось определить местоположение</span>`;
-  locEl.style.color='var(--danger)';
- }
- 
- if(navigator.geolocation){
-  navigator.geolocation.getCurrentPosition(success,error,{
-   enableHighAccuracy:true,
-   timeout:10000,
-   maximumAge:300000
-  });
- }else{
-  error({code:0,message:'Геолокация не поддерживается'});
- }
-}
 
 $('#salahGrid').addEventListener('click',e=>{
  const item=e.target.closest('.salah-item');if(!item)return;
@@ -1719,18 +1934,21 @@ function renderWeekGrid(){
   </div>`}
  $('#weekGrid').innerHTML=html;}
 
-function renderIbadatStats(){
- // Серия полных дней (все 5 намазов)
+function salahStreak(){
  const days=ibadat.days;
  let streak=0,cur=new Date();
- // Проверяем сегодня сначала
- const todayKey=todayStr();
- const todayData=days[todayKey];
+ const todayData=days[todayStr()];
  const todayFull=todayData&&SALAH_LIST.every(s=>todayData.salah[s.id]);
- if(!todayFull){cur.setDate(cur.getDate()-1)}
+ if(!todayFull)cur.setDate(cur.getDate()-1);
  while(true){
   const k=ymd(cur);const d=days[k];
   if(d&&SALAH_LIST.every(s=>d.salah[s.id])){streak++;cur.setDate(cur.getDate()-1)}else break}
+ return streak;}
+
+function renderIbadatStats(){
+ // Серия полных дней (все 5 намазов)
+ const days=ibadat.days;
+ const streak=salahStreak();
  $('#ibadatStreak').textContent=streak+' '+plural(streak,['день','дня','дней']);
  // Всего полных дней
  let fullDays=0;
@@ -1842,6 +2060,7 @@ function addTask(){
    ══════════════════════════════════════ */
 let notifTimers={};
 function requestNotifPermission(){if('Notification' in window && Notification.permission==='default'){Notification.requestPermission()}}
+const NOTIF_ICON='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">✦</text></svg>');
 function scheduleNotification(task){
  if(!task.due||task.done)return;
  clearTimeout(notifTimers[task.id]);
@@ -1852,7 +2071,7 @@ function scheduleNotification(task){
  notifTimers[task.id]=setTimeout(()=>{
   if(task.done)return;
   if('Notification' in window && Notification.permission==='granted'){
-   new Notification('⏰ Баракат — срок задачи!',{body:task.text,icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">✦</text></svg>'})}
+   new Notification('⏰ Баракат — срок задачи!',{body:task.text,icon:NOTIF_ICON})}
   else{toast(`⏰ Срок: ${task.text}`)}
   sndPop()},delay)}
 function rescheduleAllNotifications(){
@@ -2003,6 +2222,12 @@ document.addEventListener('keydown',e=>{
  if(e.key==='Escape'&&state.editing){state.editing=null;renderList()}});
 
 /* ── старт ── */
-load();loadIbadat();loadPrayerSettings();loadFinance();loadGratitude();loadFocus();applyToggles();renderHello();rescheduleAllNotifications();loadVerseFiles();switchSection(state.section||'tasks');</script>
+load();loadIbadat();loadPrayerSettings();loadFinance();loadGratitude();loadFocus();
+if(!SECTIONS.some(s=>s.id===state.section))state.section='home';
+applyToggles();renderHello();rescheduleAllNotifications();
+buildSectionNav();
+if(loadGeo())applyLocation();
+setInterval(tickPrayer,1000);setInterval(dateGuard,30000);
+switchSection(state.section);</script>
 </body>
 </html>
