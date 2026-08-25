@@ -1148,6 +1148,20 @@ $('#sectionHome').addEventListener('click',e=>{
    ══════════════════════════════════════ */
 const GEO_KEY='barakat.geo.v1';
 let geoRequested=false;
+// В нативной сборке (Android APK) геолокация идёт через плагин Capacitor:
+// системный запрос разрешения + GPS провайдер
+const isNative=()=>!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+async function nativeGeoPosition(){
+ const G=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Geolocation;
+ if(!G)return null;
+ try{
+  let st=await G.checkPermissions();
+  if(st.location!=='granted'&&st.coarseLocation!=='granted'){
+   st=await G.requestPermissions();
+   if(st.location!=='granted'&&st.coarseLocation!=='granted')return{denied:true}}
+  const pos=await G.getCurrentPosition({enableHighAccuracy:true,timeout:9000});
+  return{coords:{latitude:pos.coords.latitude,longitude:pos.coords.longitude}};
+ }catch(e){return null}}
 function loadGeo(){try{const r=JSON.parse(localStorage.getItem(GEO_KEY)||'null');
  if(r&&typeof r.lat==='number'&&typeof r.lon==='number'&&Math.abs(r.lat)<=90&&Math.abs(r.lon)<=180){
   prayerState.latitude=r.lat;prayerState.longitude=r.lon;return true}}catch(e){}return false}
@@ -1159,12 +1173,20 @@ function initGeolocation(){
   const locEl=$('#locationStatus');
   if(locEl){locEl.innerHTML='<span class="location-icon">⚠️</span><span class="location-text">Не удалось определить местоположение</span>';locEl.style.color='var(--danger)'}
   $('#dashGeoHint').style.display='';};
+ if(isNative()){
+  nativeGeoPosition().then(res=>{
+   geoRequested=false;
+   if(res&&res.coords){
+    prayerState.latitude=res.coords.latitude;prayerState.longitude=res.coords.longitude;
+    saveGeo();applyLocation();toast('Локация определена 📍')}
+   else fail({code:1,message:'Доступ к геолокации не выдан'})});
+  return}
  if(!navigator.geolocation)return fail({code:0,message:'Геолокация не поддерживается'});
  navigator.geolocation.getCurrentPosition(pos=>{
   geoRequested=false;
   prayerState.latitude=pos.coords.latitude;prayerState.longitude=pos.coords.longitude;
   saveGeo();applyLocation();toast('Локация определена 📍')
- },fail,{enableHighAccuracy:false,timeout:9000,maximumAge:600000});}
+ },fail,{enableHighAccuracy:true,timeout:9000,maximumAge:600000});}
 function applyLocation(){
  const has=prayerState.latitude!==null;
  const locEl=$('#locationStatus');
