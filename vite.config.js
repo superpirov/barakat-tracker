@@ -16,8 +16,8 @@ export default {
         background_color: '#F2F4EF',
         display: 'standalone',
         orientation: 'portrait',
-        scope: './',
-        start_url: './',
+        scope: '../',
+        start_url: '../',
         icons: [
           {
             src: 'pwa-192x192.png',
