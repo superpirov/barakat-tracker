@@ -441,6 +441,15 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
 .dstat-icon{width:38px;height:38px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:17px;background:color-mix(in srgb,var(--c) 16%,transparent)}
 .dstat b{font-family:var(--fd);font-weight:800;font-size:15px;display:block;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dstat small{font-size:11.5px;color:var(--muted);font-weight:600}
+.dstat--clickable{cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s}
+.dstat--clickable:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 35%,var(--line));box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.dstat--clickable:active{transform:scale(.98)}
+.location-row{display:flex;gap:10px;align-items:center}
+.location-row .location-status{flex:1;min-width:0}
+.location-refresh{flex:none;width:38px;height:38px;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);display:grid;place-items:center;cursor:pointer;font-size:16px;transition:.18s}
+.location-refresh:hover{border-color:var(--accent);transform:translateY(-1px)}
+.location-refresh:active{transform:scale(.96)}
+.location-refresh.loading{animation:spin .9s linear infinite;pointer-events:none;opacity:.7}
 
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px}
 .tile{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:12px;min-height:112px;padding:14px;background:var(--panel);border:1px solid var(--line);border-radius:20px;cursor:pointer;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s,border-color .2s;text-align:left;font:inherit;color:inherit;min-width:0}
@@ -657,9 +666,12 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
       <div class="ibadat-card">
         <h2><span>🕋</span> Время намаза и Кибла</h2>
         <div class="prayer-times-widget">
-          <div class="location-status" id="locationStatus">
-            <span class="location-icon">📍</span>
-            <span class="location-text">Определение местоположения...</span>
+          <div class="location-row">
+            <div class="location-status" id="locationStatus">
+              <span class="location-icon">📍</span>
+              <span class="location-text">Определение местоположения...</span>
+            </div>
+            <button class="location-refresh" id="refreshLocationBtn" title="Обновить местоположение">↻</button>
           </div>
           <div class="method-selector">
             <label for="prayerMethod">Метод расчёта:</label>
@@ -705,7 +717,7 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
         </div>
       </div>
       <!-- Намазы сегодня -->
-      <div class="ibadat-card">
+      <div class="ibadat-card" id="salahTodayCard">
         <h2><span>🕌</span> Намазы сегодня</h2>
         <div class="salah-grid" id="salahGrid"></div>
       </div>
@@ -1173,27 +1185,34 @@ function loadGeo(){try{const r=JSON.parse(localStorage.getItem(GEO_KEY)||'null')
  if(r&&typeof r.lat==='number'&&typeof r.lon==='number'&&Math.abs(r.lat)<=90&&Math.abs(r.lon)<=180){
   prayerState.latitude=r.lat;prayerState.longitude=r.lon;return true}}catch(e){}return false}
 function saveGeo(){try{localStorage.setItem(GEO_KEY,JSON.stringify({lat:prayerState.latitude,lon:prayerState.longitude}))}catch(e){}}
-function initGeolocation(){
- if(prayerState.latitude!==null){applyLocation();return}
- if(geoRequested)return;geoRequested=true;
- const fail=err=>{geoRequested=false;console.warn('Ошибка геолокации:',err);
-  const locEl=$('#locationStatus');
-  if(locEl){locEl.innerHTML='<span class="location-icon">⚠️</span><span class="location-text">Не удалось определить местоположение</span>';locEl.style.color='var(--danger)'}
-  $('#dashGeoHint').style.display='';};
- if(isNative()){
-  nativeGeoPosition().then(res=>{
+function initGeolocation(force=false){
+  if(!force && prayerState.latitude!==null){applyLocation();return}
+  if(geoRequested && !force)return;geoRequested=true;
+  const fail=err=>{geoRequested=false;$('#refreshLocationBtn')?.classList.remove('loading');console.warn('Ошибка геолокации:',err);
+   const locEl=$('#locationStatus');
+   if(locEl){locEl.innerHTML='<span class="location-icon">⚠️</span><span class="location-text">Не удалось определить местоположение</span>';locEl.style.color='var(--danger)'}
+   $('#dashGeoHint').style.display='';};
+  if(isNative()){
+   $('#refreshLocationBtn')?.classList.add('loading');
+   nativeGeoPosition().then(res=>{
+    geoRequested=false;
+    $('#refreshLocationBtn')?.classList.remove('loading');
+    if(res&&res.coords){
+     prayerState.latitude=res.coords.latitude;prayerState.longitude=res.coords.longitude;
+     saveGeo();applyLocation();toast('Локация обновлена 📍')}
+    else fail({code:1,message:'Доступ к геолокации не выдан'})});
+   return}
+  if(!navigator.geolocation)return fail({code:0,message:'Геолокация не поддерживается'});
+  $('#refreshLocationBtn')?.classList.add('loading');
+  navigator.geolocation.getCurrentPosition(pos=>{
    geoRequested=false;
-   if(res&&res.coords){
-    prayerState.latitude=res.coords.latitude;prayerState.longitude=res.coords.longitude;
-    saveGeo();applyLocation();toast('Локация определена 📍')}
-   else fail({code:1,message:'Доступ к геолокации не выдан'})});
-  return}
- if(!navigator.geolocation)return fail({code:0,message:'Геолокация не поддерживается'});
- navigator.geolocation.getCurrentPosition(pos=>{
-  geoRequested=false;
-  prayerState.latitude=pos.coords.latitude;prayerState.longitude=pos.coords.longitude;
-  saveGeo();applyLocation();toast('Локация определена 📍')
- },fail,{enableHighAccuracy:true,timeout:9000,maximumAge:600000});}
+   $('#refreshLocationBtn')?.classList.remove('loading');
+   prayerState.latitude=pos.coords.latitude;prayerState.longitude=pos.coords.longitude;
+   saveGeo();applyLocation();toast('Локация обновлена 📍')
+  },err=>{
+   $('#refreshLocationBtn')?.classList.remove('loading');
+   fail(err);
+  },{enableHighAccuracy:true,timeout:9000,maximumAge: force?0:600000});}
 function applyLocation(){
  const has=prayerState.latitude!==null;
  const locEl=$('#locationStatus');
@@ -1213,10 +1232,15 @@ $('#geoPresets').innerHTML=GEO_PRESETS.map(p=>`<button type="button" data-glat="
 $('#geoManualBtn').onclick=()=>$('#geoForm').classList.toggle('show');
 $('#geoRetryBtn').onclick=()=>{$('#dashGeoHint').style.display='none';prayerState.latitude=null;prayerState.longitude=null;initGeolocation()};
 $('#geoSaveBtn').onclick=()=>{
- const la=parseFloat($('#geoLat').value),lo=parseFloat($('#geoLon').value);
- if(isNaN(la)||isNaN(lo)||Math.abs(la)>90||Math.abs(lo)>180)return toast('Проверьте координаты');
- prayerState.latitude=la;prayerState.longitude=lo;saveGeo();
- $('#geoForm').classList.remove('show');applyLocation();toast('Координаты сохранены 📍')};
+  const la=parseFloat($('#geoLat').value),lo=parseFloat($('#geoLon').value);
+  if(isNaN(la)||isNaN(lo)||Math.abs(la)>90||Math.abs(lo)>180)return toast('Проверьте координаты');
+  prayerState.latitude=la;prayerState.longitude=lo;saveGeo();
+  $('#geoForm').classList.remove('show');applyLocation();toast('Координаты сохранены 📍')};
+$('#refreshLocationBtn')?.addEventListener('click',()=>{
+  geoRequested=false;
+  initGeolocation(true);
+  setTimeout(()=>$('#refreshLocationBtn')?.classList.remove('loading'),12000);
+});
 
 /* ══════════════════════════════════════
    ОБРАТНЫЙ ОТСЧЁТ ДО НАМАЗА (тик каждую секунду)
@@ -1270,16 +1294,22 @@ function taskStreak(){
  while(days.has(ymd(c))){st++;c.setDate(c.getDate()-1)}
  return st;}
 function renderDashStats(){
- const ts=taskStreak();
- const d=getDay(todayStr());
- const n=SALAH_LIST.filter(s=>d.salah[s.id]).length;
- const items=[
-  {c:'#E8A23B',i:'🔥',v:ts+' '+plural(ts,['день','дня','дней']),l:'серия задач'},
-  {c:'#2BB3A5',i:'🕌',v:n+' / 5',l:'намазов сегодня'},
-  {c:'#4A8DF7',i:'⏱️',v:focusState.totalMinToday+' мин',l:'фокус сегодня'},
-  {c:'#9A6FE0',i:'🤲',v:String(gratitudeEntries.length),l:plural(gratitudeEntries.length,['запись','записи','записей'])+' в дневнике'}];
- $('#dashStats').innerHTML=items.map(x=>
-  `<div class="dstat" style="--c:${x.c}"><span class="dstat-icon">${x.i}</span><div><b>${x.v}</b><small>${x.l}</small></div></div>`).join('');}
+  const ts=taskStreak();
+  const d=getDay(todayStr());
+  const n=SALAH_LIST.filter(s=>d.salah[s.id]).length;
+  const items=[
+   {c:'#E8A23B',i:'🔥',v:ts+' '+plural(ts,['день','дня','дней']),l:'серия задач'},
+   {c:'#2BB3A5',i:'🕌',v:n+' / 5',l:'намазов сегодня',action:'salah'},
+   {c:'#4A8DF7',i:'⏱️',v:focusState.totalMinToday+' мин',l:'фокус сегодня'},
+   {c:'#9A6FE0',i:'🤲',v:String(gratitudeEntries.length),l:plural(gratitudeEntries.length,['запись','записи','записей'])+' в дневнике'}];
+  $('#dashStats').innerHTML=items.map(x=>
+   `<div class="dstat ${x.action?'dstat--clickable':''}" ${x.action?`data-action="${x.action}"`:''} style="--c:${x.c}"><span class="dstat-icon">${x.i}</span><div><b>${x.v}</b><small>${x.l}</small></div></div>`).join('');}
+$('#dashStats').addEventListener('click',e=>{
+  const card=e.target.closest('[data-action="salah"]');
+  if(!card) return;
+  switchSection('ibadat');
+  setTimeout(()=>{ document.getElementById('salahTodayCard')?.scrollIntoView({behavior:'smooth', block:'start'}); }, 100);
+});
 function renderTiles(){
  const defs=[
   {id:'tasks',stat:()=>{const a=state.tasks.filter(t=>!t.done).length;
