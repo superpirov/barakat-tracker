@@ -1302,13 +1302,20 @@ function renderDashStats(){
    {c:'#2BB3A5',i:'🕌',v:n+' / 5',l:'намазов сегодня',action:'salah'},
    {c:'#4A8DF7',i:'⏱️',v:focusState.totalMinToday+' мин',l:'фокус сегодня'},
    {c:'#9A6FE0',i:'🤲',v:String(gratitudeEntries.length),l:plural(gratitudeEntries.length,['запись','записи','записей'])+' в дневнике'}];
-  $('#dashStats').innerHTML=items.map(x=>
-   `<div class="dstat ${x.action?'dstat--clickable':''}" ${x.action?`data-action="${x.action}"`:''} style="--c:${x.c}"><span class="dstat-icon">${x.i}</span><div><b>${x.v}</b><small>${x.l}</small></div></div>`).join('');}
+  $('#dashStats').innerHTML=items.map(x=>{
+   const inner=`<span class="dstat-icon">${x.i}</span><div><b>${x.v}</b><small>${x.l}</small></div>`;
+   if(x.action) return `<button type="button" class="dstat dstat--clickable" data-action="${x.action}" style="--c:${x.c}">${inner}</button>`;
+   return `<div class="dstat" style="--c:${x.c}">${inner}</div>`;
+  }).join('');}
 $('#dashStats').addEventListener('click',e=>{
   const card=e.target.closest('[data-action="salah"]');
   if(!card) return;
+  e.preventDefault();
   switchSection('ibadat');
-  setTimeout(()=>{ document.getElementById('salahTodayCard')?.scrollIntoView({behavior:'smooth', block:'start'}); }, 100);
+  // ждём отрисовки секции, затем скроллим
+  requestAnimationFrame(()=> requestAnimationFrame(()=>{
+    document.getElementById('salahTodayCard')?.scrollIntoView({behavior:'smooth', block:'start'});
+  }));
 });
 function renderTiles(){
  const defs=[
