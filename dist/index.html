@@ -1304,18 +1304,17 @@ function renderDashStats(){
    {c:'#9A6FE0',i:'🤲',v:String(gratitudeEntries.length),l:plural(gratitudeEntries.length,['запись','записи','записей'])+' в дневнике'}];
   $('#dashStats').innerHTML=items.map(x=>{
    const inner=`<span class="dstat-icon">${x.i}</span><div><b>${x.v}</b><small>${x.l}</small></div>`;
-   if(x.action) return `<button type="button" class="dstat dstat--clickable" data-action="${x.action}" style="--c:${x.c}">${inner}</button>`;
+   if(x.action) return `<button type="button" class="dstat dstat--clickable" data-action="${x.action}" data-section="ibadat" onclick="event.preventDefault();switchSection('ibadat');setTimeout(()=>document.getElementById('salahTodayCard')?.scrollIntoView({behavior:'smooth', block:'start'}),180);" style="--c:${x.c}">${inner}</button>`;
    return `<div class="dstat" style="--c:${x.c}">${inner}</div>`;
   }).join('');}
-$('#dashStats').addEventListener('click',e=>{
+// надёжный делегат на весь документ (работает и в PWA, и в WebView)
+document.addEventListener('click',e=>{
   const card=e.target.closest('[data-action="salah"]');
   if(!card) return;
   e.preventDefault();
+  e.stopPropagation();
   switchSection('ibadat');
-  // ждём отрисовки секции, затем скроллим
-  requestAnimationFrame(()=> requestAnimationFrame(()=>{
-    document.getElementById('salahTodayCard')?.scrollIntoView({behavior:'smooth', block:'start'});
-  }));
+  setTimeout(()=>{ document.getElementById('salahTodayCard')?.scrollIntoView({behavior:'smooth', block:'start'}); }, 180);
 });
 function renderTiles(){
  const defs=[
