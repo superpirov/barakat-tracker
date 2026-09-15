@@ -252,6 +252,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 .method-select{flex:1;min-width:200px;padding:10px 38px 10px 14px;border:1.5px solid var(--line);border-radius:var(--rs);background:var(--panel2);font:600 13px var(--fb);color:var(--ink);outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2369736C' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;transition:border-color .2s,box-shadow .2s}
 .method-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
 .method-select option{background:var(--panel);color:var(--ink);padding:10px}
+#prayerSoundBtn.off,#prayerBgBtn.off{opacity:.45;filter:grayscale(1)}
 .prayer-times-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:8px}
 .prayer-time-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;background:var(--panel2);border:1.5px solid var(--line);border-radius:var(--rm);transition:.2s}
 .prayer-time-item:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
@@ -679,6 +680,8 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
               <option value="5">Umm al-Qura (Мекка)</option>
               <option value="1">Всемирная исламская лига</option>
             </select>
+            <button class="ibtn" id="prayerSoundBtn" title="Звук при наступлении намаза">🔔</button>
+            <button class="ibtn" id="prayerBgBtn" title="Звук намаза при закрытом приложении">📢</button>
           </div>
           <div class="prayer-times-list" id="prayerTimesList"></div>
           <div class="next-prayer" id="nextPrayer"></div>
@@ -945,7 +948,7 @@ function fmtLocal(amount){
    ══════════════════════════════════════ */
 function defaults(){return{
  v:1, filter:'all', tab:'active', search:'', newCat:'general', newPrio:null, section:'home',
- settings:{theme:null,sound:true,name:''},
+  settings:{theme:null,sound:true,name:'',prayerSound:true,prayerNotif:false},
  cats:[
   {id:'general',name:'Общие',emoji:'✨',color:'#9AA7B2',fixed:true},
   {id:'c-pers',name:'Личное',emoji:'🌿',color:'#F0645C'},
@@ -1085,6 +1088,87 @@ const tone=(f,dur=.12,type='triangle',g=.13,delay=0)=>{if(!state.settings.sound)
 const sndPop=()=>{tone(740,.1);tone(988,.14,'sine',.09,.07)};
 const sndTick=()=>tone(520,.06,'sine',.07);
 const sndFanfare=()=>[523,659,784,1047].forEach((f,i)=>tone(f,.2,'triangle',.13,i*.1));
+
+/* ── звук наступления намаза (независим от общего переключателя звука) ── */
+function prayerSoundOn(){return state.settings.prayerSound!==false}
+function unlockAudio(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(e){}}
+function prayerChime(){try{
+  AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+  if(AC.state==='suspended')AC.resume();
+  [[659,.22,0],[784,.22,.25],[1047,.45,.5]].forEach(([f,dur,delay])=>{
+   const o=AC.createOscillator(),gn=AC.createGain();
+   o.type='sine';o.frequency.value=f;const t0=AC.currentTime+delay;
+   gn.gain.setValueAtTime(.0001,t0);gn.gain.exponentialRampToValueAtTime(.14,t0+.02);gn.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+   o.connect(gn).connect(AC.destination);o.start(t0);o.stop(t0+dur+.03)});
+ }catch(e){}}
+function renderPrayerSoundBtn(){const b=$('#prayerSoundBtn');if(!b)return;
+  b.textContent=prayerSoundOn()?'🔔':'🔕';
+  b.classList.toggle('off',!prayerSoundOn());
+  b.title=prayerSoundOn()?'Звук при наступлении намаза: включён':'Звук при наступлении намаза: выключен';}
+$('#prayerSoundBtn').onclick=()=>{
+  state.settings.prayerSound=!prayerSoundOn();save();renderPrayerSoundBtn();unlockAudio();
+  if(prayerSoundOn()){setTimeout(()=>prayerChime(),60);toast('Звук намаза включён 🔔')}
+  else toast('Звук намаза выключен 🔕');};
+
+/* ── звук намаза при закрытом приложении (Android: нативные локальные
+   уведомления Capacitor с точными будильниками, кнопка 📢).
+   Разовые срабатывания планируются на ~3 дня вперёд; при каждом
+   открытии/возврате приложения список пересоздаётся по актуальному расписанию ── */
+function prayerNotifOn(){return state.settings.prayerNotif===true}
+function LN(){return window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications}
+const PN_KEYS=['fajr','dhuhr','asr','maghrib','isha'];
+const PN_BASE=4100;
+function pnAllIds(){const a=[];for(let d=0;d<3;d++)PN_KEYS.forEach((k,i)=>a.push(PN_BASE+d*10+i));return a}
+function renderPrayerBgBtn(){const b=$('#prayerBgBtn');if(!b)return;
+  if(!isNative()){b.style.display='none';return}
+  b.textContent=prayerNotifOn()?'📢':'🔇';
+  b.classList.toggle('off',!prayerNotifOn());
+  b.title=prayerNotifOn()?'Звук намаза при закрытом приложении: включён — Android сам издаст сигнал в нужное время':'Звук намаза при закрытом приложении: выключен';}
+async function clearPrayerAlarms(){const L=LN();if(!L)return;
+  try{await L.cancel({notifications:pnAllIds().map(id=>({id}))})}catch(e){}}
+async function syncPrayerAlarms(){
+  const L=LN();if(!L)return;
+  await clearPrayerAlarms();
+  if(!prayerNotifOn())return;
+  if(prayerState.latitude===null||prayerState.longitude===null)return;
+  const notes=[];
+  for(let d=0;d<3;d++){
+   let tm=prayerState.times;
+   if(d>0){try{tm=calculatePrayerTimes(prayerState.latitude,prayerState.longitude,prayerState.method,new Date(Date.now()+d*864e5))}catch(e){tm=null}}
+   if(!tm)continue;
+   PN_KEYS.forEach((k,i)=>{
+    const t=tm[k];if(!t||t.hours===null||!t.time)return;
+    const hm=t.time.split(':'),hh=parseInt(hm[0],10),mm=parseInt(hm[1],10);
+    if(isNaN(hh)||isNaN(mm))return;
+    const at=new Date();at.setDate(at.getDate()+d);at.setHours(hh,mm,0,0);
+    if(at.getTime()-Date.now()<30000)return;
+    notes.push({id:PN_BASE+d*10+i,
+     title:'🕌 Время намаза: '+(P_NAMES[k]?P_NAMES[k][0]:k),
+     body:'Наступило время намаза ('+t.time+'). Приглашение на молитву!',
+     at:at,allowWhileIdle:true});
+   });
+  }
+  if(!notes.length)return;
+  try{await L.schedule({notifications:notes});}
+  catch(e){console.warn('prayer alarms:',e);toast('Не удалось настроить уведомления: проверьте разрешения Баракат в настройках Android')}
+ }
+async function ensurePrayerPerms(){const L=LN();if(!L)return false;
+  try{
+   let st=await L.checkPermissions();
+   if(st.notifications&&st.notifications!=='granted'){try{st=await L.requestPermissions()||st}catch(e){}}
+   if(st.notifications&&st.notifications!=='granted'){toast('Нет разрешения на уведомления — разрешите в настройках 🔕');return false}
+   if(st.exact_alarm&&st.exact_alarm!=='granted'){
+    toast('Для точного времени азана разрешите «Будильники и напоминания»');
+    try{await L.changeExactNotificationSetting()}catch(e){}
+    try{st=await L.checkPermissions()}catch(e){}}
+   return true;
+  }catch(e){console.warn(e);return false}}
+$('#prayerBgBtn').onclick=async()=>{
+  if(!isNative()){toast('Фоновый звук доступен в Android-приложении 📱');return}
+  if(prayerNotifOn()){state.settings.prayerNotif=false;save();renderPrayerBgBtn();await syncPrayerAlarms();toast('Звук намаза в фоне выключен 🔇');return}
+  if(!await ensurePrayerPerms())return;
+  state.settings.prayerNotif=true;save();renderPrayerBgBtn();await syncPrayerAlarms();
+  toast('Звук намаза в фоне включён 📢 Android подаст сигнал даже с закрытым приложением');};
 
 /* ── конфетти ── */
 const cvs=$('#fx'),ctx=cvs.getContext('2d');let parts=[],raf=0;
@@ -1269,10 +1353,21 @@ function renderDashMini(){
   return `<div class="phm" data-k="${k}"><small>${P_NAMES[k][0]}</small><b>${t.time}</b></div>`}).join('');
  updateMiniCur();}
 function tickPrayer(){
- if(!prayerState.times)return;
- const info=nextPrayerInfo(),el=$('#nextPrayer'),dc=$('#dashCountdown');
- if(info){
-  const now=new Date(),curH=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600;
+  if(!prayerState.times)return;
+  const info=nextPrayerInfo(),el=$('#nextPrayer'),dc=$('#dashCountdown');
+  if(info){
+   const nid=todayStr()+'|'+info.key+(info.tomorrow?'|tm':'');
+   if(_prevNextKey===null){_prevNextKey=nid;_prevNextName=info.key}
+   else if(_prevNextKey!==nid){
+    // время предыдущего "следующего" намаза наступило
+    const startedKey=_prevNextName;
+    _prevNextKey=nid;_prevNextName=info.key;
+    if(startedKey&&startedKey!=='sunrise'&&prayerSoundOn()){
+     prayerChime();
+     toast(`🕌 Время намаза: ${P_NAMES[startedKey]?P_NAMES[startedKey][0]:startedKey}`);
+    }
+   }
+   const now=new Date(),curH=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600;
   const left=Math.max(0,Math.round((info.hours-curH)*3600));
   const nm=P_NAMES[info.key];
   if(dc){dc.textContent=fmtDur(left);
@@ -1338,9 +1433,11 @@ function renderHome(){renderDashStats();renderTiles();renderVerseOfDay('#verseOf
 
 /* Смена суток: пересчёт времён, шапки и статистики */
 let _bootDay=todayStr();
+let _prevNextKey=null,_prevNextName=null;
 function dateGuard(){
- if(todayStr()===_bootDay)return;_bootDay=todayStr();
- renderHello();
+  if(todayStr()===_bootDay)return;_bootDay=todayStr();
+  _prevNextKey=null;_prevNextName=null;
+  renderHello();
  if(prayerState.latitude!==null){prayerState.times=null;renderPrayerTimes()}
  if(state.section==='home')renderHome();else if(state.section==='ibadat')renderIbadat();}
 
@@ -1843,6 +1940,7 @@ function renderPrayerTimes(){
  
  const times=calculatePrayerTimes(prayerState.latitude,prayerState.longitude,prayerState.method,new Date());
  prayerState.times=times;
+ syncPrayerAlarms();
  
  const icons={fajr:'🌅',sunrise:'🌄',dhuhr:'☀️',asr:'🌤️',maghrib:'🌇',isha:'🌙'};
  const names={fajr:'Фаджр',sunrise:'Восход',dhuhr:'Зухр',asr:'Аср',maghrib:'Магриб',isha:'Иша'};
@@ -2251,9 +2349,10 @@ $('#catForm').addEventListener('submit',e=>{e.preventDefault();
 /* ── тема и звук ── */
 function effTheme(){return state.settings.theme||((new Date().getHours()>=19||new Date().getHours()<7)?'dark':'light')}
 function applyToggles(){
- document.documentElement.dataset.theme=effTheme();
- $$('.theme-btn').forEach(b=>b.textContent=effTheme()==='dark'?'☀️':'🌙');
- $$('.sound-btn').forEach(b=>b.textContent=state.settings.sound?'🔊':'🔇');}
+  document.documentElement.dataset.theme=effTheme();
+  $$('.theme-btn').forEach(b=>b.textContent=effTheme()==='dark'?'☀️':'🌙');
+  $$('.sound-btn').forEach(b=>b.textContent=state.settings.sound?'🔊':'🔇');
+  renderPrayerSoundBtn();renderPrayerBgBtn();}
 $$('.theme-btn').forEach(b=>b.onclick=()=>{state.settings.theme=effTheme()==='dark'?'light':'dark';save();applyToggles()});
 $$('.sound-btn').forEach(b=>b.onclick=()=>{state.settings.sound=!state.settings.sound;save();applyToggles();if(state.settings.sound)sndTick()});
 
@@ -2296,6 +2395,7 @@ applyToggles();renderHello();rescheduleAllNotifications();
 buildSectionNav();
 if(loadGeo())applyLocation();
 setInterval(tickPrayer,1000);setInterval(dateGuard,30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&isNative())syncPrayerAlarms()});
 switchSection(state.section);</script>
 </body>
 </html>
