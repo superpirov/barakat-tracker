@@ -1118,7 +1118,19 @@ function prayerNotifOn(){return state.settings.prayerNotif===true}
 function LN(){return window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.LocalNotifications}
 const PN_KEYS=['fajr','dhuhr','asr','maghrib','isha'];
 const PN_BASE=4100;
+/* Отдельный канал вместо «default»: дефолтный канал плагина использует
+   USAGE_ALARM и потому звучит даже в беззвучном режиме. Наш канал —
+   USAGE_NOTIFICATION (так задаёт createChannel плагина), т.е. молчит на
+   «беззвучном», а сам пуш приходит всегда. Звук — res/raw/prayer.wav (~4 c).
+   id с суффиксом версии: Android не даёт менять настройки существующего
+   канала, поэтому правки настроек = новый id. */
+const PN_CHANNEL='barakat-prayer-v2';
+let pnChannelReady=false;
 function pnAllIds(){const a=[];for(let d=0;d<3;d++)PN_KEYS.forEach((k,i)=>a.push(PN_BASE+d*10+i));return a}
+async function ensurePrayerChannel(){const L=LN();if(!L||pnChannelReady)return;
+  try{await L.createChannel({id:PN_CHANNEL,name:'Наступление намаза',description:'Пуш и сигнал о времени намаза (звук только в обычном режиме)',sound:'prayer.wav',importance:4,vibration:true})}
+  catch(e){console.warn('prayer channel:',e)}
+  pnChannelReady=true}
 function renderPrayerBgBtn(){const b=$('#prayerBgBtn');if(!b)return;
   if(!isNative()){b.style.display='none';return}
   b.textContent=prayerNotifOn()?'📢':'🔇';
@@ -1130,6 +1142,7 @@ async function syncPrayerAlarms(){
   const L=LN();if(!L)return;
   await clearPrayerAlarms();
   if(!prayerNotifOn())return;
+  await ensurePrayerChannel();
   if(prayerState.latitude===null||prayerState.longitude===null)return;
   const notes=[];
   for(let d=0;d<3;d++){
@@ -1143,9 +1156,9 @@ async function syncPrayerAlarms(){
     const at=new Date();at.setDate(at.getDate()+d);at.setHours(hh,mm,0,0);
     if(at.getTime()-Date.now()<30000)return;
     notes.push({id:PN_BASE+d*10+i,
-     title:'🕌 Время намаза: '+(P_NAMES[k]?P_NAMES[k][0]:k),
-     body:'Наступило время намаза ('+t.time+'). Приглашение на молитву!',
-     at:at,allowWhileIdle:true});
+     title:'🕌 '+(P_NAMES[k]?P_NAMES[k][0]:k)+' · '+t.time,
+     body:'Наступило время намаза: '+(P_NAMES[k]?P_NAMES[k][0]:k),
+     at:at,channelId:PN_CHANNEL,sound:"prayer.wav"});
    });
   }
   if(!notes.length)return;
