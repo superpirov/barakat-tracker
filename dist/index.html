@@ -782,8 +782,18 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
     <!-- ═══ РАЗДЕЛ: КОРАН ═══ -->
     <div id="sectionQuran" class="quran-section js-section" data-section="quran">
       <div id="quranContinueCard" class="ibadat-card" style="display:none;cursor:pointer"></div>
-      <div id="quranBookmarksCard" class="ibadat-card" style="display:none">
-        <h3 style="font-family:var(--fd);font-size:14px;margin-bottom:10px">🔖 Закладки</h3>
+      <div id="quranBookmarksCard" class="ibadat-card" style="display:none;cursor:pointer">
+        <div style="display:flex;align-items:center;gap:12px">
+          <h3 style="font-family:var(--fd);font-size:14px;margin:0;flex:1">🔖 Закладки <small id="quranBookmarksCount" style="font-weight:400;color:var(--muted)"></small></h3>
+          <span class="tile-arrow">→</span>
+        </div>
+      </div>
+      <div class="ibadat-card" id="quranBookmarksView" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <button class="gbtn" id="quranBookmarksBackBtn">← Назад</button>
+          <h2 style="flex:1;margin:0;font-family:var(--fd);font-size:16px">🔖 Закладки</h2>
+          <button class="gbtn" id="quranBookmarksClearBtn" title="Очистить все" style="padding:6px 10px">Очистить</button>
+        </div>
         <div id="quranBookmarksList"></div>
       </div>
       <div class="ibadat-card" id="quranListView">
@@ -1777,6 +1787,7 @@ async function openQuranSurah(n){
 async function renderQuran(){
   $('#quranListView').style.display='';
   $('#quranReaderView').style.display='none';
+  const bv=$('#quranBookmarksView'); if(bv) bv.style.display='none';
   renderContinueCard(); renderBookmarks();
   const grid=$('#surahGrid');
   if(!quranState.info){
@@ -1871,6 +1882,14 @@ $('#quranPrevBtn2')?.addEventListener('click',()=>openQuranSurah(quranState.curr
 $('#quranNextBtn2')?.addEventListener('click',()=>openQuranSurah(quranState.current+1));
 $('#quranTransSelect')?.addEventListener('change',e=>{ quranState.trans=e.target.value; try{localStorage.setItem('barakat.quran.trans',e.target.value)}catch(e){}; if(quranState.current) openQuranSurah(quranState.current); });
 try{const t=localStorage.getItem('barakat.quran.trans'); if(t) { quranState.trans=t; const s=$('#quranTransSelect'); if(s) s.value=t; }}catch(e){}
+$('#quranBookmarksCard')?.addEventListener('click', openBookmarksView);
+$('#quranBookmarksBackBtn')?.addEventListener('click', closeBookmarksView);
+$('#quranBookmarksClearBtn')?.addEventListener('click',()=>{
+  if(!confirm('Удалить все закладки?')) return;
+  saveBookmarks([]); renderBookmarks(); renderContinueCard();
+  toast('Закладки очищены');
+  const v=$('#quranBookmarksView'); if(v && v.style.display!=='none') closeBookmarksView();
+});
 $('#quranAudioToggle')?.addEventListener('click',()=>{
   const bar=$('#quranAudioBar'); if(!bar) return;
   bar.style.display=bar.style.display==='none'?'flex':'none';
@@ -1881,19 +1900,40 @@ $('#quranAudioClose')?.addEventListener('click',()=>{
   if(a) a.pause(); if(bar) bar.style.display='none';
 });
 function renderBookmarks(){
-  const wrap=$('#quranBookmarksCard'), listEl=$('#quranBookmarksList');
-  if(!wrap||!listEl) return;
+  const card=$('#quranBookmarksCard'), listEl=$('#quranBookmarksList');
+  const cntEl=$('#quranBookmarksCount');
+  if(!card||!listEl) return;
   const list=getBookmarks().slice().sort((a,b)=>b.time-a.time);
-  if(!list.length){ wrap.style.display='none'; return; }
-  wrap.style.display='';
-  listEl.innerHTML=list.slice(0,20).map(b=>`
+  if(!list.length){
+    card.style.display='none';
+    listEl.innerHTML='<div class="quran-empty">Нет закладок</div>';
+    if(cntEl) cntEl.textContent='';
+    return;
+  }
+  card.style.display='';
+  if(cntEl) cntEl.textContent=`• ${list.length} ${plural(list.length,['закладка','закладки','закладок'])}`;
+  listEl.innerHTML=list.map(b=>`
     <div class="quran-search-result" style="display:flex;align-items:center;gap:10px" data-goto="${b.surah}:${b.ayah}">
       <div style="flex:1;min-width:0">
-        <b>${b.surah}:${b.ayah}</b> <small style="color:var(--muted)">${esc(b.arabic.slice(0,60))}…</small>
+        <b>${b.surah}:${b.ayah} ${esc(surahRu(b.surah))}</b> <small style="color:var(--muted)">${esc(b.arabic.slice(0,60))}…</small>
         <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(b.trans.slice(0,80))}</div>
       </div>
       <button class="gbtn" data-delbm="${b.surah}:${b.ayah}" style="padding:6px 10px" title="Удалить">✕</button>
-    </div>`).join('')+(list.length>20?`<small style="color:var(--muted)">Показано 20 из ${list.length}</small>`:'');
+    </div>`).join('');
+}
+function openBookmarksView(){
+  $('#quranListView').style.display='none';
+  $('#quranReaderView').style.display='none';
+  $('#quranContinueCard').style.display='none';
+  const view=$('#quranBookmarksView');
+  if(view) view.style.display='';
+  renderBookmarks();
+  view?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function closeBookmarksView(){
+  const view=$('#quranBookmarksView');
+  if(view) view.style.display='none';
+  renderQuran();
 }
 
 /* ══════════════════════════════════════
