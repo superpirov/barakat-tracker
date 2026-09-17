@@ -782,15 +782,15 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
     <!-- ═══ РАЗДЕЛ: КОРАН ═══ -->
     <div id="sectionQuran" class="quran-section js-section" data-section="quran">
       <div id="quranContinueCard" class="ibadat-card" style="display:none;cursor:pointer"></div>
+      <div id="quranBookmarksCard" class="ibadat-card" style="display:none">
+        <h3 style="font-family:var(--fd);font-size:14px;margin-bottom:10px">🔖 Закладки</h3>
+        <div id="quranBookmarksList"></div>
+      </div>
       <div class="ibadat-card" id="quranListView">
         <h2><span>📖</span> Коран — 114 сур</h2>
         <input id="quranSearch" class="quran-search" placeholder="Поиск по сурам и тексту аятов..." autocomplete="off">
         <div id="surahGrid" class="surah-grid"><div class="verse-loading">Загрузка списка сур...</div></div>
         <div id="quranSearchResults" style="display:none;margin-top:16px"></div>
-        <div id="quranBookmarksSection" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)">
-          <h3 style="font-family:var(--fd);font-size:14px;margin-bottom:10px">🔖 Закладки</h3>
-          <div id="quranBookmarksList"></div>
-        </div>
       </div>
       <div class="ibadat-card" id="quranReaderView" style="display:none">
         <div class="quran-reader-head">
@@ -1564,6 +1564,8 @@ function dateGuard(){
 const QURAN_API='https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1';
 const QURAN_FALLBACK='https://cdn.jsdelivr.net/gh/superpirov/quran-api@1';
 let quranState={info:null,current:1,trans:'rus-elmirkuliev',cache:{}};
+const SURAH_RU=[null,"Аль-Фатиха","Аль-Бакара","Али Имран","Ан-Ниса","Аль-Маида","Аль-Анам","Аль-Араф","Аль-Анфаль","Ат-Тауба","Йунус","Худ","Йусуф","Ар-Раад","Ибрахим","Аль-Хиджр","Ан-Нахль","Аль-Исра","Аль-Кахф","Марьям","Та Ха","Аль-Анбия","Аль-Хаджж","Аль-Муминун","Ан-Нур","Аль-Фуркан","Аш-Шуара","Ан-Намль","Аль-Касас","Аль-Анкабут","Ар-Рум","Лукман","Ас-Саджда","Аль-Ахзаб","Саба","Фатыр","Йа Син","Ас-Саффат","Сад","Аз-Зумар","Гафир","Фуссылят","Аш-Шура","Аз-Зухруф","Ад-Духан","Аль-Джасия","Аль-Ахкаф","Мухаммад","Аль-Фатх","Аль-Худжурат","Каф","Аз-Зарият","Ат-Тур","Ан-Наджм","Аль-Камар","Ар-Рахман","Аль-Вакиа","Аль-Хадид","Аль-Муджадала","Аль-Хашр","Аль-Мумтахана","Ас-Сафф","Аль-Джумуа","Аль-Мунафикун","Ат-Тагабун","Ат-Талак","Ат-Тахрим","Аль-Мульк","Аль-Калям","Аль-Хакка","Аль-Мааридж","Нух","Аль-Джинн","Аль-Муззаммиль","Аль-Муддассир","Аль-Кыяма","Аль-Инсан","Аль-Мурсалят","Ан-Наба","Ан-Назиат","Абаса","Ат-Таквир","Аль-Инфитар","Аль-Мутаффифин","Аль-Иншикак","Аль-Бурудж","Ат-Тарик","Аль-Аля","Аль-Гашия","Аль-Фаджр","Аль-Балад","Аш-Шамс","Аль-Лейль","Ад-Духа","Аш-Шарх","Ат-Тин","Аль-Аляк","Аль-Кадр","Аль-Баййина","Аз-Зальзаля","Аль-Адийят","Аль-Кариа","Ат-Такасур","Аль-Аср","Аль-Хумаза","Аль-Филь","Курайш","Аль-Маун","Аль-Каусар","Аль-Кафирун","Ан-Наср","Аль-Масад","Аль-Ихляс","Аль-Фаляк","Ан-Нас"];
+function surahRu(n){return SURAH_RU[n]||('Сура '+n);}
 const QURAN_AUDIO_BASE='https://everyayah.com/data/Alafasy_64kbps';
 let quranAudio=null, quranAudioKey=null;
 function getBookmarks(){try{return JSON.parse(localStorage.getItem('barakat.quran.bookmarks')||'[]')}catch(e){return []}}
@@ -1582,7 +1584,7 @@ function toggleBookmark(surah,ayah,arabic,trans){
   });
 }
 function renderBookmarks(){
-  const wrap=$('#quranBookmarksSection'), listEl=$('#quranBookmarksList');
+  const wrap=$('#quranBookmarksCard'), listEl=$('#quranBookmarksList');
   if(!wrap||!listEl) return;
   const list=getBookmarks().slice().sort((a,b)=>b.time-a.time);
   if(!list.length){ wrap.style.display='none'; return; }
@@ -1609,9 +1611,9 @@ function renderContinueCard(){
   const last=getLastRead();
   if(!last||!last.surah){ card.style.display='none'; return; }
   const info=quranState.info?.chapters?.find(c=>c.chapter===last.surah);
-  const name=info?info.englishname:('Сура '+last.surah);
+  const name=surahRu(last.surah);
   const arab=info?info.arabicname:'';
-  card.innerHTML=`<div style="display:flex;align-items:center;gap:12px"><div style="flex:1;min-width:0"><small style="color:var(--muted)">Продолжить чтение</small><b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${last.surah}. ${esc(name)} <small style="color:var(--muted)">${esc(arab)}</small></b><small style="color:var(--muted)">Сура ${last.surah}:${last.ayah||1}</small></div><button class="btn-add" style="padding:8px 14px;flex:none">Открыть</button></div>`;
+  card.innerHTML=`<div style="display:flex;align-items:center;gap:12px"><div style="flex:1;min-width:0"><small style="color:var(--muted)">Продолжить чтение</small><b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${last.surah}. ${esc(name)} <small style="color:var(--muted)">${esc(arab)}</small></b><small style="color:var(--muted)">Сура ${last.surah}:${last.ayah||1}</small></div><button class="gbtn" style="padding:6px 12px;flex:none;white-space:nowrap;font-size:13px">Открыть</button></div>`;
   card.style.display='';
   card.onclick=()=>openQuranSurah(last.surah);
 }
@@ -1654,7 +1656,7 @@ function renderSearchResults(q){
     res.innerHTML=`<div style="font-size:12px;color:var(--muted);margin-bottom:8px">Найдено аятов: ${ayahHits.length}${ayahHits.length>=20?' (показано 20)':''}</div>`+
       ayahHits.map(h=>`
         <div class="quran-search-result" data-goto="${h.surah}:${h.ayah}">
-          <div style="display:flex;justify-content:space-between;gap:8px"><b>${h.surah}:${h.ayah}</b><small style="color:var(--muted)">${esc((quranState.info?.chapters?.find(c=>c.chapter===h.surah)?.englishname)||'')}</small></div>
+        <div style="display:flex;justify-content:space-between;gap:8px"><b>${h.surah}:${h.ayah}</b><small style="color:var(--muted)">${esc(surahRu(h.surah))}</small></div>
           <div class="ayah-arabic" style="font-size:20px;padding:8px 0">${esc(h.arabic.slice(0,120))}</div>
           <div style="font-size:12px;color:var(--muted)">${esc(h.russian.slice(0,140))}</div>
         </div>`).join('');
@@ -1697,7 +1699,7 @@ function renderSurahGrid(filter=''){
   const q=filter.trim().toLowerCase();
   const list=info.chapters.filter(ch=>{
     if(!q) return true;
-    return String(ch.chapter).includes(q) || (ch.englishname||'').toLowerCase().includes(q) || (ch.arabicname||'').includes(filter.trim()) || (ch.name||'').toLowerCase().includes(q);
+    return String(ch.chapter).includes(q) || surahRu(ch.chapter).toLowerCase().includes(q) || (ch.englishname||'').toLowerCase().includes(q) || (ch.arabicname||'').includes(filter.trim()) || (ch.name||'').toLowerCase().includes(q);
   });
   const cnt=$('#quranSearchCount');if(cnt) cnt.textContent=`(${list.length}/114)`;
   if(!list.length){grid.innerHTML='<div class="quran-empty">Ничего не найдено</div>';return;}
@@ -1705,7 +1707,7 @@ function renderSurahGrid(filter=''){
     <div class="surah-card" data-surah="${ch.chapter}">
       <div class="surah-num">${ch.chapter}</div>
       <div class="surah-info">
-        <b>${esc(ch.englishname||ch.name||('Сура '+ch.chapter))}</b>
+        <b>${esc(surahRu(ch.chapter))}</b>
         <small>${esc(ch.arabicname||'')} • ${ch.verses.length} аятов • ${ch.revelation==='Mecca'?'Мекка':'Медина'}</small>
       </div>
       <div class="surah-meta"><small>${ch.revelation==='Mecca'?'Мекканская':'Мединская'}</small><b>${ch.verses.length}</b></div>
@@ -1732,7 +1734,7 @@ async function openQuranSurah(n){
   content.innerHTML='<div class="verse-loading">Загрузка суры...</div>';
   const info=quranState.info?.chapters?.find(c=>c.chapter===n);
   const title=$('#quranReaderTitle');
-  if(title) title.innerHTML=info?`${n}. ${esc(info.englishname)} <small style="font-weight:400;color:var(--muted)">(${esc(info.arabicname)})</small>`: `Сура ${n}`;
+  if(title) title.innerHTML=info?`${n}. ${esc(surahRu(n))} <small style="font-weight:400;color:var(--muted)">(${esc(info.arabicname)})</small>`: `Сура ${n}`;
   ['quranPrevBtn','quranNextBtn','quranPrevBtn2','quranNextBtn2'].forEach(id=>{
     const b=document.getElementById(id);if(b){b.disabled=(id.includes('Prev')?n<=1:n>=114);}
   });
@@ -1744,7 +1746,7 @@ async function openQuranSurah(n){
     const araList=extractVerses(araData);
     const rusList=extractVerses(rusData);
     if(!araList.length) throw new Error('Пустой ответ');
-    let html=`<div style="text-align:center;padding:8px 0 16px;color:var(--muted);font-size:13px">${info?esc(info.englishname):''} • ${araList.length} аятов</div>`;
+    let html=`<div style="text-align:center;padding:8px 0 16px;color:var(--muted);font-size:13px">${esc(surahRu(n))} • ${araList.length} аятов</div>`;
     html+='<div style="border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel)">';
     for(let i=0;i<araList.length;i++){
       const a=araList[i]; const r=rusList[i]||{text:''};
@@ -1879,7 +1881,7 @@ $('#quranAudioClose')?.addEventListener('click',()=>{
   if(a) a.pause(); if(bar) bar.style.display='none';
 });
 function renderBookmarks(){
-  const wrap=$('#quranBookmarksSection'), listEl=$('#quranBookmarksList');
+  const wrap=$('#quranBookmarksCard'), listEl=$('#quranBookmarksList');
   if(!wrap||!listEl) return;
   const list=getBookmarks().slice().sort((a,b)=>b.time-a.time);
   if(!list.length){ wrap.style.display='none'; return; }
