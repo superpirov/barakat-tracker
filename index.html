@@ -472,6 +472,14 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
 .ayah-translation{font-size:14.5px;line-height:1.7;color:var(--muted);border-left:3px solid color-mix(in srgb,var(--accent) 35%,var(--line));padding-left:12px}
 .quran-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 .quran-empty{text-align:center;padding:32px;color:var(--muted)}
+.ayah-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.ayah-actions button{font-size:12px;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);cursor:pointer;transition:.15s}
+.ayah-actions button:hover{border-color:var(--accent)}
+.ayah-actions button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.quran-search-result{padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer;background:var(--panel2);transition:.15s}
+.quran-search-result:hover{border-color:var(--accent);transform:translateY(-1px)}
+.quran-search-result small{color:var(--muted);font-size:11px}
+#quranContinueCard{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--panel))}
 .location-refresh{flex:none;width:38px;height:38px;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);display:grid;place-items:center;cursor:pointer;font-size:16px;transition:.18s}
 .location-refresh:hover{border-color:var(--accent);transform:translateY(-1px)}
 .location-refresh:active{transform:scale(.96)}
@@ -773,10 +781,16 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
 
     <!-- ═══ РАЗДЕЛ: КОРАН ═══ -->
     <div id="sectionQuran" class="quran-section js-section" data-section="quran">
+      <div id="quranContinueCard" class="ibadat-card" style="display:none;cursor:pointer"></div>
       <div class="ibadat-card" id="quranListView">
         <h2><span>📖</span> Коран — 114 сур</h2>
-        <input id="quranSearch" class="quran-search" placeholder="Поиск: Аль-Фатиха, Бакара..." autocomplete="off">
+        <input id="quranSearch" class="quran-search" placeholder="Поиск по сурам и тексту аятов..." autocomplete="off">
         <div id="surahGrid" class="surah-grid"><div class="verse-loading">Загрузка списка сур...</div></div>
+        <div id="quranSearchResults" style="display:none;margin-top:16px"></div>
+        <div id="quranBookmarksSection" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)">
+          <h3 style="font-family:var(--fd);font-size:14px;margin-bottom:10px">🔖 Закладки</h3>
+          <div id="quranBookmarksList"></div>
+        </div>
       </div>
       <div class="ibadat-card" id="quranReaderView" style="display:none">
         <div class="quran-reader-head">
@@ -787,11 +801,14 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
           <select id="quranTransSelect" class="method-select" style="flex:1;min-width:180px">
-            <option value="rus-elmirkuliev">Кулиев (Эльмир Кулиев)</option>
+            <option value="rus-elmirkuliev">Кулиев</option>
             <option value="rus-abuadel">Абу-Адель</option>
-            <option value="rus-pokhova">Порохова</option>
-            <option value="rus-gordysemyonovic">Гордий Семёнович Саблуков</option>
           </select>
+          <button class="ibtn" id="quranAudioToggle" title="Вкл/выкл аудио">🔊</button>
+        </div>
+        <div id="quranAudioBar" style="display:none;margin-bottom:12px;padding:10px;background:var(--panel2);border-radius:12px;align-items:center;gap:10px">
+          <audio id="quranAudio" controls style="flex:1;min-width:0"></audio>
+          <button class="gbtn" id="quranAudioClose" style="padding:6px 10px">✕</button>
         </div>
         <div id="quranReaderContent"></div>
         <div class="quran-nav">
@@ -1511,18 +1528,19 @@ document.addEventListener('click',e=>{
   setTimeout(()=>{ document.getElementById('salahTodayCard')?.scrollIntoView({behavior:'smooth', block:'start'}); }, 180);
 });
 function renderTiles(){
- const defs=[
-  {id:'tasks',stat:()=>{const a=state.tasks.filter(t=>!t.done).length;
-    const td=state.tasks.filter(t=>t.completedAt&&ymd(new Date(t.completedAt))===todayStr()).length;
-    return`<b>${a}</b> ${plural(a,['активная','активные','активных'])} · сегодня выполнено: ${td}`}},
-  {id:'ibadat',stat:()=>{const dd=getDay(todayStr());
-    const nn=SALAH_LIST.filter(s=>dd.salah[s.id]).length;
-    return`Намазы: <b>${nn}/5</b> · Коран: <b>${dd.quran}</b> стр.`}},
-  {id:'finance',stat:()=>{const mk=currentMonthKey();
-    const sum=finance.expenses.filter(e=>e.month===mk).reduce((s,e)=>s+e.amount,0);
-    return`Расходы за месяц: <b>${fmtLocal(sum)}</b>`}},
-  {id:'gratitude',stat:()=>`${plural(gratitudeEntries.length,['Запись','Записи','Записей'])}: <b>${gratitudeEntries.length}</b>`},
-  {id:'focus',stat:()=>`Сессий сегодня: <b>${focusState.sessionsToday}</b> · ${focusState.totalMinToday} мин`}];
+  const defs=[
+   {id:'tasks',stat:()=>{const a=state.tasks.filter(t=>!t.done).length;
+     const td=state.tasks.filter(t=>t.completedAt&&ymd(new Date(t.completedAt))===todayStr()).length;
+     return`<b>${a}</b> ${plural(a,['активная','активные','активных'])} · сегодня выполнено: ${td}`}},
+   {id:'ibadat',stat:()=>{const dd=getDay(todayStr());
+     const nn=SALAH_LIST.filter(s=>dd.salah[s.id]).length;
+     return`Намазы: <b>${nn}/5</b> · Коран: <b>${dd.quran}</b> стр.`}},
+   {id:'quran',stat:()=>{const b=getBookmarks().length; const last=getLastRead(); return `114 сур • ${b?b+' закладок':''}${last?` • <b>${last.surah}:${last.ayah}</b>`:''}`.replace(/^ • /,''); if(!b&&!last) return '114 сур • чтение с переводом';}},
+   {id:'finance',stat:()=>{const mk=currentMonthKey();
+     const sum=finance.expenses.filter(e=>e.month===mk).reduce((s,e)=>s+e.amount,0);
+     return`Расходы за месяц: <b>${fmtLocal(sum)}</b>`}},
+   {id:'gratitude',stat:()=>`${plural(gratitudeEntries.length,['Запись','Записи','Записей'])}: <b>${gratitudeEntries.length}</b>`},
+   {id:'focus',stat:()=>`Сессий сегодня: <b>${focusState.sessionsToday}</b> · ${focusState.totalMinToday} мин`}];
  $('#sectionTiles').innerHTML=defs.map(df=>{const s=SECTIONS.find(x=>x.id===df.id);
   return `<button type="button" class="tile" data-section="${s.id}" style="--c:${s.color}">
    <span class="tile-top"><span class="tile-emoji">${s.emoji}</span><span class="tile-arrow">→</span></span>
@@ -1546,6 +1564,104 @@ function dateGuard(){
 const QURAN_API='https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1';
 const QURAN_FALLBACK='https://cdn.jsdelivr.net/gh/superpirov/quran-api@1';
 let quranState={info:null,current:1,trans:'rus-elmirkuliev',cache:{}};
+const QURAN_AUDIO_BASE='https://everyayah.com/data/Alafasy_64kbps';
+let quranAudio=null, quranAudioKey=null;
+function getBookmarks(){try{return JSON.parse(localStorage.getItem('barakat.quran.bookmarks')||'[]')}catch(e){return []}}
+function saveBookmarks(list){try{localStorage.setItem('barakat.quran.bookmarks',JSON.stringify(list))}catch(e){}}
+function isBookmarked(surah,ayah){return getBookmarks().some(b=>b.surah===surah&&b.ayah===ayah)}
+function toggleBookmark(surah,ayah,arabic,trans){
+  let list=getBookmarks();
+  const idx=list.findIndex(b=>b.surah===surah&&b.ayah===ayah);
+  if(idx>=0){ list.splice(idx,1); toast('Закладка удалена 🔖'); }
+  else { list.push({surah,ayah,arabic:(arabic||'').slice(0,120),trans:(trans||'').slice(0,120),time:Date.now()}); toast('Добавлено в закладки ⭐'); }
+  saveBookmarks(list); renderBookmarks(); renderContinueCard();
+  // обновить кнопку в ридере если открыта та же сура
+  document.querySelectorAll(`[data-bm="${surah}:${ayah}"]`).forEach(b=>{
+    const on=isBookmarked(surah,ayah);
+    b.classList.toggle('active',on); b.textContent=on?'★ В закладках':'☆ Закладка';
+  });
+}
+function renderBookmarks(){
+  const wrap=$('#quranBookmarksSection'), listEl=$('#quranBookmarksList');
+  if(!wrap||!listEl) return;
+  const list=getBookmarks().slice().sort((a,b)=>b.time-a.time);
+  if(!list.length){ wrap.style.display='none'; return; }
+  wrap.style.display='';
+  listEl.innerHTML=list.slice(0,20).map(b=>`
+    <div class="quran-search-result" data-goto="${b.surah}:${b.ayah}" style="display:flex;align-items:center;gap:10px">
+      <div style="flex:1;min-width:0">
+        <b>${b.surah}:${b.ayah}</b> <small style="color:var(--muted)">${esc(b.arabic.slice(0,60))}…</small>
+        <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(b.trans.slice(0,80))}</div>
+      </div>
+      <button class="gbtn" data-delbm="${b.surah}:${b.ayah}" style="padding:6px 10px" title="Удалить">✕</button>
+    </div>`).join('')+(list.length>20?`<small style="color:var(--muted)">Показано 20 из ${list.length}</small>`:'');
+}
+function getLastRead(){try{return JSON.parse(localStorage.getItem('barakat.quran.lastRead')||'null')}catch(e){return null}}
+function saveLastRead(surah,ayah=1){
+  try{
+    const info=quranState.info?.chapters?.find(c=>c.chapter===surah);
+    localStorage.setItem('barakat.quran.lastRead',JSON.stringify({surah,ayah,time:Date.now(),name:info?info.englishname:''}));
+  }catch(e){}
+  renderContinueCard();
+}
+function renderContinueCard(){
+  const card=$('#quranContinueCard'); if(!card) return;
+  const last=getLastRead();
+  if(!last||!last.surah){ card.style.display='none'; return; }
+  const info=quranState.info?.chapters?.find(c=>c.chapter===last.surah);
+  const name=info?info.englishname:('Сура '+last.surah);
+  const arab=info?info.arabicname:'';
+  card.innerHTML=`<div style="display:flex;align-items:center;gap:12px"><div style="flex:1;min-width:0"><small style="color:var(--muted)">Продолжить чтение</small><b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${last.surah}. ${esc(name)} <small style="color:var(--muted)">${esc(arab)}</small></b><small style="color:var(--muted)">Сура ${last.surah}:${last.ayah||1}</small></div><button class="btn-add" style="padding:8px 14px;flex:none">Открыть</button></div>`;
+  card.style.display='';
+  card.onclick=()=>openQuranSurah(last.surah);
+}
+function playAyahAudio(surah,ayah){
+  const audioEl=document.getElementById('quranAudio');
+  const bar=document.getElementById('quranAudioBar');
+  if(!audioEl||!bar) return;
+  const key=`${surah}:${ayah}`;
+  const url=`${QURAN_AUDIO_BASE}/${String(surah).padStart(3,'0')}${String(ayah).padStart(3,'0')}.mp3`;
+  if(quranAudioKey===key && !audioEl.paused){ audioEl.pause(); return; }
+  quranAudioKey=key;
+  bar.style.display='flex';
+  audioEl.src=url;
+  audioEl.play().catch(()=>toast('Не удалось загрузить аудио'));
+}
+function renderSearchResults(q){
+  const grid=$('#surahGrid'), res=$('#quranSearchResults');
+  if(!grid||!res) return;
+  const query=q.trim();
+  if(query.length<2){ res.style.display='none'; grid.style.display=''; return; }
+  // 1) сначала سور по имени — если есть совпадения, показываем их
+  // 2) поиск по тексту аятов (локальные txt, уже загружены для Аята дня)
+  const lower=query.toLowerCase();
+  let ayahHits=[];
+  if(verseData && verseData.arabic.length && verseData.russian.length){
+    const maxHits=20;
+    for(let i=0;i<verseData.arabic.length && ayahHits.length<maxHits;i++){
+      const aLine=verseData.arabic[i]||''; const rLine=verseData.russian[i]||'';
+      const aText=aLine.split('|').slice(2).join('|');
+      const rText=rLine.split('|').slice(2).join('|');
+      if(aText.includes(query) || rText.toLowerCase().includes(lower)){
+        const parts=aLine.split('|');
+        ayahHits.push({surah:+parts[0]||0, ayah:+parts[1]||0, arabic:aText, russian:rText});
+      }
+    }
+  }
+  if(ayahHits.length){
+    grid.style.display='none';
+    res.style.display='';
+    res.innerHTML=`<div style="font-size:12px;color:var(--muted);margin-bottom:8px">Найдено аятов: ${ayahHits.length}${ayahHits.length>=20?' (показано 20)':''}</div>`+
+      ayahHits.map(h=>`
+        <div class="quran-search-result" data-goto="${h.surah}:${h.ayah}">
+          <div style="display:flex;justify-content:space-between;gap:8px"><b>${h.surah}:${h.ayah}</b><small style="color:var(--muted)">${esc((quranState.info?.chapters?.find(c=>c.chapter===h.surah)?.englishname)||'')}</small></div>
+          <div class="ayah-arabic" style="font-size:20px;padding:8px 0">${esc(h.arabic.slice(0,120))}</div>
+          <div style="font-size:12px;color:var(--muted)">${esc(h.russian.slice(0,140))}</div>
+        </div>`).join('');
+  } else {
+    res.style.display='none'; grid.style.display='';
+  }
+}
 async function fetchQuranJson(url){
   try{const r=await fetch(url);if(!r.ok) throw new Error(''+r.status);return await r.json();}catch(e){
     const fb=url.replace(QURAN_API,QURAN_FALLBACK);
@@ -1569,6 +1685,15 @@ function renderSurahGrid(filter=''){
   const grid=$('#surahGrid');if(!grid) return;
   const info=quranState.info;
   if(!info||!info.chapters){grid.innerHTML='<div class="quran-empty">Нет данных</div>';return;}
+  // если идёт текстовый поиск — делегируем в renderSearchResults
+  if(filter.trim().length>=2 && verseData && verseData.arabic.length){
+    renderSearchResults(filter);
+    // также фильтруем сур по имени параллельно — если есть хиты по аятам, прячем сетку сур
+    const res=$('#quranSearchResults');
+    if(res && res.style.display!=='none') return;
+  } else {
+    const res=$('#quranSearchResults'); if(res) res.style.display='none'; grid.style.display='';
+  }
   const q=filter.trim().toLowerCase();
   const list=info.chapters.filter(ch=>{
     if(!q) return true;
@@ -1597,6 +1722,7 @@ function extractVerses(data){
 async function openQuranSurah(n){
   n=parseInt(n,10);if(!(n>=1&&n<=114)) return;
   quranState.current=n;
+  saveLastRead(n,1); renderContinueCard();
   const transSel=$('#quranTransSelect');
   const trans=transSel?transSel.value:quranState.trans;
   quranState.trans=trans;
@@ -1623,7 +1749,8 @@ async function openQuranSurah(n){
     for(let i=0;i<araList.length;i++){
       const a=araList[i]; const r=rusList[i]||{text:''};
       const num=a.verse||a.aya||(i+1);
-      html+=`<div class="ayah-row">
+      const bm=isBookmarked(n,num);
+      html+=`<div class="ayah-row" data-ayah="${n}:${num}">
         <div style="display:flex;align-items:center;gap:10px">
           <div class="ayah-num">${num}</div>
           <div style="flex:1"></div>
@@ -1631,6 +1758,11 @@ async function openQuranSurah(n){
         </div>
         <div class="ayah-arabic">${esc(a.text||'')}</div>
         <div class="ayah-translation">${esc(r.text||'')}</div>
+        <div class="ayah-actions">
+          <button class="${bm?'active':''}" data-bm="${n}:${num}" title="Закладка">${bm?'★ В закладках':'☆ Закладка'}</button>
+          <button data-audio="${n}:${num}" title="Слушать">▶️ Аудио</button>
+          <button data-copy="${n}:${num}" title="Копировать">📋 Копировать</button>
+        </div>
       </div>`;
     }
     html+='</div>';
@@ -1643,6 +1775,7 @@ async function openQuranSurah(n){
 async function renderQuran(){
   $('#quranListView').style.display='';
   $('#quranReaderView').style.display='none';
+  renderContinueCard(); renderBookmarks();
   const grid=$('#surahGrid');
   if(!quranState.info){
     if(grid) grid.innerHTML='<div class="verse-loading">Загрузка списка сур...</div>';
@@ -1652,19 +1785,114 @@ async function renderQuran(){
     }
   }
   renderSurahGrid($('#quranSearch')?.value||'');
+  // подгрузим txt для поиска если ещё не грузили
+  if(!verseInitialized) loadVerseFiles();
 }
 // делегирование для сур
 document.addEventListener('click',e=>{
   const c=e.target.closest('.surah-card[data-surah]');
   if(c) openQuranSurah(c.dataset.surah);
+  const bm=e.target.closest('[data-bm]');
+  if(bm){
+    const [s,a]=bm.dataset.bm.split(':').map(Number);
+    const row=bm.closest('.ayah-row');
+    const arabic=row?.querySelector('.ayah-arabic')?.textContent||'';
+    const trans=row?.querySelector('.ayah-translation')?.textContent||'';
+    toggleBookmark(s,a,arabic,trans);
+  }
+  const au=e.target.closest('[data-audio]');
+  if(au){
+    const [s,a]=au.dataset.audio.split(':').map(Number);
+    playAyahAudio(s,a);
+  }
+  const cp=e.target.closest('[data-copy]');
+  if(cp){
+    const [s,a]=cp.dataset.copy.split(':').map(Number);
+    const row=cp.closest('.ayah-row');
+    const txt=(row?.querySelector('.ayah-arabic')?.textContent||'') + "\n" + (row?.querySelector('.ayah-translation')?.textContent||'');
+    navigator.clipboard?.writeText(`${txt}\n(${s}:${a})`).then(()=>toast('Скопировано 📋')).catch(()=>toast(txt.slice(0,80)));
+  }
+  const go=e.target.closest('[data-goto]');
+  if(go){
+    const [s,a]=go.dataset.goto.split(':').map(Number);
+    openQuranSurah(s).then(()=>{
+      setTimeout(()=>{
+        const el=document.querySelector(`.ayah-row[data-ayah="${s}:${a}"]`);
+        if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
+        if(el) { el.style.outline='2px solid var(--accent)'; setTimeout(()=>el.style.outline='',1800); }
+      },600);
+    });
+  }
+  const del=e.target.closest('[data-delbm]');
+  if(del){
+    const [s,a]=del.dataset.delbm.split(':').map(Number);
+    toggleBookmark(s,a,'','');
+    e.stopPropagation();
+  }
 });
-$('#quranSearch')?.addEventListener('input',e=>renderSurahGrid(e.target.value));
-$('#quranBackBtn')?.addEventListener('click',()=>{ $('#quranReaderView').style.display='none'; $('#quranListView').style.display=''; });
+$('#quranSearch')?.addEventListener('input',e=>{
+  const v=e.target.value;
+  if(v.trim().length>=2) renderSearchResults(v); // быстрый поиск по тексту тоже
+  renderSurahGrid(v);
+});
+function renderSearchResults(q){
+  const res=$('#quranSearchResults'); const grid=$('#surahGrid');
+  if(!res||!grid) return;
+  const qq=q.trim().toLowerCase();
+  if(qq.length<2){ res.style.display='none'; grid.style.display=''; return; }
+  if(!verseData || !verseData.arabic.length){ res.style.display='none'; return; }
+  let hits=[];
+  for(let i=0;i<verseData.arabic.length && hits.length<20;i++){
+    const aLine=verseData.arabic[i]||''; const rLine=verseData.russian[i]||'';
+    const aText=aLine.split('|').slice(2).join('|');
+    const rText=rLine.split('|').slice(2).join('|');
+    if(aText.includes(qq) || rText.toLowerCase().includes(qq)){
+      const p=aLine.split('|');
+      hits.push({surah:+p[0],ayah:+p[1],arabic:aText, russian:rText});
+    }
+  }
+  if(!hits.length){ res.style.display='none'; grid.style.display=''; return; }
+  grid.style.display='none';
+  res.style.display='';
+  res.innerHTML=`<div style="font-size:12px;color:var(--muted);margin-bottom:8px">Найдено аятов: ${hits.length}${hits.length>=20?' (показано 20)':''} — нажмите чтобы открыть</div>`+
+    hits.map(h=>`
+      <div class="quran-search-result" data-goto="${h.surah}:${h.ayah}">
+        <div style="display:flex;justify-content:space-between;gap:8px"><b>${h.surah}:${h.ayah}</b><small style="color:var(--muted)">${esc((quranState.info?.chapters?.find(c=>c.chapter===h.surah)?.englishname)||'')}</small></div>
+        <div class="ayah-arabic" style="font-size:18px;padding:8px 0">${esc(h.arabic.slice(0,120))}</div>
+        <div style="font-size:12px;color:var(--muted)">${esc(h.russian.slice(0,140))}</div>
+      </div>`).join('');
+}
+$('#quranBackBtn')?.addEventListener('click',()=>{ $('#quranReaderView').style.display='none'; $('#quranListView').style.display=''; renderBookmarks(); });
 $('#quranPrevBtn')?.addEventListener('click',()=>openQuranSurah(quranState.current-1));
 $('#quranNextBtn')?.addEventListener('click',()=>openQuranSurah(quranState.current+1));
 $('#quranPrevBtn2')?.addEventListener('click',()=>openQuranSurah(quranState.current-1));
 $('#quranNextBtn2')?.addEventListener('click',()=>openQuranSurah(quranState.current+1));
-$('#quranTransSelect')?.addEventListener('change',e=>{ quranState.trans=e.target.value; if(quranState.current) openQuranSurah(quranState.current); });
+$('#quranTransSelect')?.addEventListener('change',e=>{ quranState.trans=e.target.value; try{localStorage.setItem('barakat.quran.trans',e.target.value)}catch(e){}; if(quranState.current) openQuranSurah(quranState.current); });
+try{const t=localStorage.getItem('barakat.quran.trans'); if(t) { quranState.trans=t; const s=$('#quranTransSelect'); if(s) s.value=t; }}catch(e){}
+$('#quranAudioToggle')?.addEventListener('click',()=>{
+  const bar=$('#quranAudioBar'); if(!bar) return;
+  bar.style.display=bar.style.display==='none'?'flex':'none';
+  if(bar.style.display==='none'){ const a=$('#quranAudio'); if(a) a.pause(); }
+});
+$('#quranAudioClose')?.addEventListener('click',()=>{
+  const bar=$('#quranAudioBar'); const a=$('#quranAudio');
+  if(a) a.pause(); if(bar) bar.style.display='none';
+});
+function renderBookmarks(){
+  const wrap=$('#quranBookmarksSection'), listEl=$('#quranBookmarksList');
+  if(!wrap||!listEl) return;
+  const list=getBookmarks().slice().sort((a,b)=>b.time-a.time);
+  if(!list.length){ wrap.style.display='none'; return; }
+  wrap.style.display='';
+  listEl.innerHTML=list.slice(0,20).map(b=>`
+    <div class="quran-search-result" style="display:flex;align-items:center;gap:10px" data-goto="${b.surah}:${b.ayah}">
+      <div style="flex:1;min-width:0">
+        <b>${b.surah}:${b.ayah}</b> <small style="color:var(--muted)">${esc(b.arabic.slice(0,60))}…</small>
+        <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(b.trans.slice(0,80))}</div>
+      </div>
+      <button class="gbtn" data-delbm="${b.surah}:${b.ayah}" style="padding:6px 10px" title="Удалить">✕</button>
+    </div>`).join('')+(list.length>20?`<small style="color:var(--muted)">Показано 20 из ${list.length}</small>`:'');
+}
 
 /* ══════════════════════════════════════
     🤲 ЗАКЯТ: КАЛЬКУЛЯТОР С МУЛЬТИВАЛЮТОЙ
