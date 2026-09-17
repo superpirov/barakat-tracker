@@ -931,18 +931,44 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
       </div>
     </div>
 
-    <!-- ═══ РАЗДЕЛ: ДНЕВНИК БЛАГОДАРНОСТИ ═══ -->
+    <!-- ═══ РАЗДЕЛ: ДНЕВНИК ═══ -->
     <div id="sectionGratitude" class="gratitude-section js-section" data-section="gratitude">
-      <div class="gratitude-card">
-        <h2><span>📖</span> За что я благодарен сегодня?</h2>
-        <div class="gratitude-input-wrap">
-          <textarea class="gratitude-textarea" id="gratitudeInput" placeholder="Напишите, за что вы благодарны Аллаху сегодня..." maxlength="500"></textarea>
-          <button class="btn-add" id="gratitudeAdd" style="align-self:flex-end">Сохранить</button>
+      <div id="diaryTopicsView">
+        <div class="gratitude-card">
+          <h2><span>📔</span> Дневник</h2>
+          <p style="color:var(--muted);font-size:13px;margin-bottom:12px">Выберите тему для записей</p>
+          <div id="diaryTopicsGrid" class="surah-grid"></div>
+          <button class="add-cat" id="addDiaryTopicBtn" style="margin-top:12px">＋ Добавить тему</button>
         </div>
-        <div class="gratitude-entries" id="gratitudeEntries"></div>
-        <div class="gratitude-count" id="gratitudeCount"></div>
+      </div>
+      <div id="diaryTopicView" style="display:none">
+        <div class="gratitude-card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+            <button class="gbtn" id="diaryBackBtn">← Назад</button>
+            <h2 id="diaryTopicTitle" style="flex:1;min-width:160px;margin:0"></h2>
+            <button class="gbtn" id="diaryDeleteTopicBtn" title="Удалить тему" style="padding:6px 10px">🗑️</button>
+          </div>
+          <div class="gratitude-input-wrap">
+            <textarea class="gratitude-textarea" id="gratitudeInput" placeholder="Напишите заметку..." maxlength="500"></textarea>
+            <button class="btn-add" id="gratitudeAdd" style="align-self:flex-end">Сохранить</button>
+          </div>
+          <div class="gratitude-entries" id="gratitudeEntries"></div>
+          <div class="gratitude-count" id="gratitudeCount"></div>
+        </div>
       </div>
     </div>
+    <dialog id="diaryTopicDlg">
+      <form class="dlg-card" id="diaryTopicForm">
+        <h3>Новая тема</h3>
+        <label>Название<input type="text" id="diaryTopicName" maxlength="30" required placeholder="Например: Работа" autocomplete="off"></label>
+        <label>Эмодзи<div class="egrid" id="diaryEgrid" style="text-transform:none"></div></label>
+        <label>Цвет<div class="cgrid" id="diaryCgrid" style="text-transform:none"></div></label>
+        <div class="dlg-actions">
+          <button type="button" class="gbtn" id="diaryTopicCancel">Отмена</button>
+          <button type="submit" class="btn-add">Создать</button>
+        </div>
+      </form>
+    </dialog>
     <!-- ═══ РАЗДЕЛ: ФИНАНСЫ / ЗАКЯТ ═══ -->
     <div id="sectionFinance" class="finance-section js-section" data-section="finance">
       <!-- Калькулятор закята -->
@@ -1220,7 +1246,7 @@ async function renderVerseOfDay(sel){
           container.innerHTML=`
             <div class="verse-arabic">${esc(araData.text)}</div>
             <div class="verse-translation">${esc(rusData.text)}</div>
-            <div class="verse-reference">Сура ${surah}, Аят ${ayah} • quran-api</div>
+            <div class="verse-reference">Сура ${surah}, Аят ${ayah}</div>
           `;
           return;
         }
@@ -1415,7 +1441,7 @@ const SECTIONS=[
  {id:'hadith',name:'Хадисы',emoji:'📜',color:'#8B5A2B'},
  {id:'azkar',name:'Азкары',emoji:'📿',color:'#2E7D5B'},
  {id:'finance',name:'Финансы',emoji:'💰',color:'#E8A23B'},
- {id:'gratitude',name:'Благодарность',emoji:'🙏',color:'#9A6FE0'},
+ {id:'gratitude',name:'Дневник',emoji:'📔',color:'#9A6FE0'},
  {id:'focus',name:'Фокус',emoji:'⏱️',color:'#4A8DF7'}];
 
 function buildSectionNav(){
@@ -2145,20 +2171,46 @@ async function renderHadithOfDay(){
     num=Math.floor(Math.random()*(max[book]||2000))+1;
     try{localStorage.setItem('barakat_hadith_book',book);localStorage.setItem('barakat_hadith_num',num);localStorage.setItem('barakat_hadith_date',today);}catch(e){}
   }
-  try{
-    const h=await fetchHadith(book,num);
-    // if text empty or grades indicate daif and we want sahih only? accept all for now, retry if empty
-    if(!h.text || h.text.length<10){
-      // try next number
-      const h2=await fetchHadith(book, num+1);
-      if(h2.text) { book=h2.book; num=h2.num; Object.assign(h,h2); }
+  // пробуем до 5 раз найти хадис с переводом, перебирая номера и книги
+  let h=null;
+  let tryBook=book, tryNum=num;
+  for(let attempt=0; attempt<5; attempt++){
+    try{
+      const cand=await fetchHadith(tryBook, tryNum);
+      if(cand && cand.text && cand.text.length>10){
+        h=cand; book=tryBook; num=tryNum;
+        break;
+      }
+    }catch(e){}
+    // пробуем следующий номер или другую книгу
+    tryNum++;
+    if(tryNum> (HADITH_BOOKS.find(b=>b.id===tryBook)?.max||7000)){
+      // переходим к следующей книге
+      const idx=HADITH_BOOKS.findIndex(b=>b.id===tryBook);
+      tryBook=HADITH_BOOKS[(idx+1)%HADITH_BOOKS.length].id;
+      tryNum=Math.floor(Math.random()*500)+1;
     }
-    box.innerHTML=`
+    if(attempt===4){ // последняя попытка — берём что есть
+      try{ h=await fetchHadith(tryBook, tryNum); book=tryBook; num=tryNum; }catch(e){}
+    }
+  }
+  if(!h || !h.text){
+    box.innerHTML=`<div class="verse-error">Не удалось загрузить хадис с переводом<br><button class="gbtn" onclick="localStorage.removeItem('barakat_hadith_date');renderHadithOfDay()" style="margin-top:10px">Попробовать другой</button></div>`;
+    return;
+  }
+  // сохраняем найденный хадис как дневной если он отличается от изначального
+  try{
+    if(h.book!==book || h.num!==num){
+      localStorage.setItem('barakat_hadith_book',h.book||book);
+      localStorage.setItem('barakat_hadith_num',String(h.num||num));
+    }
+  }catch(e){}
+  box.innerHTML=`
       <div class="hadith-arabic">${esc(h.arabic||'')}</div>
-      <div class="hadith-text">${esc(h.text)}</div>
+      <div class="hadith-text">${esc(h.text||'Перевод отсутствует — показывается арабский оригинал')}</div>
       <div class="hadith-meta">
-        <span class="hadith-grade">${(h.grades&&h.grades[0]?esc(h.grades[0].grade||h.grades[0]):'')}</span>
-        <span>${esc(book)} ${num}</span>
+        <span class="hadith-grade">${(h.grades&&h.grades[0]?esc(String(h.grades[0].grade||h.grades[0])):'')}</span>
+        <span>${esc(h.book||book)} ${h.num||num}</span>
       </div>`;
     // store current for copy/bookmark
     box.dataset.book=book; box.dataset.num=num;
@@ -2824,25 +2876,173 @@ $('#focusBreakMin').addEventListener('change',e=>{const v=parseInt(e.target.valu
    ══════════════════════════════════════ */
 const GRATITUDE_KEY='barakat.gratitude.v1';
 let gratitudeEntries=[];
-function loadGratitude(){try{const r=localStorage.getItem(GRATITUDE_KEY);if(r)gratitudeEntries=JSON.parse(r)}catch(e){}}
+let diaryTopics=[];
+let currentDiaryTopic=null;
+const DIARY_TOPICS_KEY='barakat.diary.topics.v1';
+const DIARY_EMOJIS=['🤲','🌿','💚','📔','🌙','✨','🎯','💪','🧠','❤️','🌟','📚','💡','🕌','🌸','🍎'];
+const DIARY_COLORS=['#2BB3A5','#7BC142','#34B87E','#2E7D5B','#4A8DF7','#9A6FE0','#E8A23B','#F0645C','#9AA7B2','#E86FB0'];
+function defaultDiaryTopics(){return[
+  {id:'gratitude',name:'Благодарность Аллаху',emoji:'🤲',color:'#2BB3A5'},
+  {id:'worldly',name:'Мирское',emoji:'🌿',color:'#7BC142'}
+];}
+function loadDiaryTopics(){
+  try{
+    const r=localStorage.getItem(DIARY_TOPICS_KEY);
+    if(r){ diaryTopics=JSON.parse(r); }
+    else diaryTopics=defaultDiaryTopics();
+    // ensure default topics exist
+    const def=defaultDiaryTopics();
+    def.forEach(d=>{ if(!diaryTopics.find(t=>t.id===d.id)) diaryTopics.unshift(d); });
+  }catch(e){ diaryTopics=defaultDiaryTopics(); }
+}
+function saveDiaryTopics(){try{localStorage.setItem(DIARY_TOPICS_KEY,JSON.stringify(diaryTopics))}catch(e){}}
+function loadGratitude(){
+  try{
+    const r=localStorage.getItem(GRATITUDE_KEY);
+    if(r){
+      const data=JSON.parse(r);
+      // migrate old entries without topicId
+      gratitudeEntries=data.map(e=> e.topicId ? e : {...e, topicId:'gratitude'});
+    }
+  }catch(e){}
+  loadDiaryTopics();
+  // ensure current topic valid
+  if(currentDiaryTopic && !diaryTopics.find(t=>t.id===currentDiaryTopic)) currentDiaryTopic=null;
+}
 function saveGratitude(){try{localStorage.setItem(GRATITUDE_KEY,JSON.stringify(gratitudeEntries))}catch(e){}}
+function renderDiaryTopics(){
+  const grid=$('#diaryTopicsGrid');
+  if(!grid) return;
+  grid.innerHTML=diaryTopics.map(t=>{
+    const count=gratitudeEntries.filter(e=> (e.topicId||'gratitude')===t.id).length;
+    return `<div class="surah-card" data-diary-topic="${t.id}" style="border-left:4px solid ${t.color}">
+      <div class="surah-num" style="background:color-mix(in srgb,${t.color} 14%,transparent);border-color:color-mix(in srgb,${t.color} 22%,var(--line));color:${t.color}">${t.emoji}</div>
+      <div class="surah-info">
+        <b>${esc(t.name)}</b>
+        <small>${count} ${plural(count,['запись','записи','записей'])}</small>
+      </div>
+      <div class="surah-meta"><span class="tile-arrow">→</span></div>
+    </div>`;
+  }).join('');
+}
+function openDiaryTopic(topicId){
+  const topic=diaryTopics.find(t=>t.id===topicId);
+  if(!topic) return;
+  currentDiaryTopic=topicId;
+  $('#diaryTopicsView').style.display='none';
+  const view=$('#diaryTopicView');
+  view.style.display='';
+  $('#diaryTopicTitle').innerHTML=`<span style="font-size:20px">${topic.emoji}</span> ${esc(topic.name)}`;
+  $('#diaryDeleteTopicBtn').style.display= (topic.id==='gratitude'||topic.id==='worldly') ? 'none' : '';
+  renderDiaryTopicEntries();
+}
+function closeDiaryTopic(){
+  currentDiaryTopic=null;
+  $('#diaryTopicView').style.display='none';
+  $('#diaryTopicsView').style.display='';
+  renderDiaryTopics();
+}
+function renderDiaryTopicEntries(){
+  const topicId=currentDiaryTopic||'gratitude';
+  const el=$('#gratitudeEntries');
+  const countEl=$('#gratitudeCount');
+  const entries=gratitudeEntries.filter(e=> (e.topicId||'gratitude')===topicId);
+  if(!entries.length){
+    el.innerHTML='<div class="empty" style="padding:20px"><p>Пока нет записей. Напишите первую заметку ✨</p></div>';
+    if(countEl) countEl.textContent='';
+    return;
+  }
+  // map to original indices for deletion
+  const indexed=gratitudeEntries.map((e,i)=>({...e, _idx:i})).filter(e=> (e.topicId||'gratitude')===topicId).reverse();
+  el.innerHTML=indexed.map(e=>`<div class="gratitude-entry"><div class="ge-date">${e.date}</div><div class="ge-text">${esc(e.text)}</div><button class="ge-del" data-gidx="${e._idx}">✕</button></div>`).join('');
+  if(countEl) countEl.textContent=`Всего записей: ${entries.length}`;
+}
 function renderGratitude(){
- const el=$('#gratitudeEntries');
- if(!gratitudeEntries.length){el.innerHTML='<div class="empty" style="padding:20px"><p>Пока нет записей. Напишите первую благодарность 🤲</p></div>';$('#gratitudeCount').textContent='';return}
- el.innerHTML=gratitudeEntries.slice().reverse().map((e,i)=>{
-  const realIdx=gratitudeEntries.length-1-i;
-  return `<div class="gratitude-entry"><div class="ge-date">${e.date}</div><div class="ge-text">${esc(e.text)}</div><button class="ge-del" data-gidx="${realIdx}">✕</button></div>`}).join('');
- $('#gratitudeCount').textContent=`Всего записей: ${gratitudeEntries.length}`}
+  // main entry point for section
+  if(currentDiaryTopic){
+    // if a topic is open, show its entries
+    const topicExists=diaryTopics.find(t=>t.id===currentDiaryTopic);
+    if(!topicExists){ currentDiaryTopic=null; }
+    else {
+      $('#diaryTopicsView').style.display='none';
+      $('#diaryTopicView').style.display='';
+      $('#diaryTopicTitle').innerHTML=`<span style="font-size:20px">${topicExists.emoji}</span> ${esc(topicExists.name)}`;
+      $('#diaryDeleteTopicBtn').style.display= (topicExists.id==='gratitude'||topicExists.id==='worldly') ? 'none' : '';
+      renderDiaryTopicEntries();
+      return;
+    }
+  }
+  $('#diaryTopicsView').style.display='';
+  $('#diaryTopicView').style.display='none';
+  renderDiaryTopics();
+  // also update the hidden entries for count consistency
+  const el=$('#gratitudeEntries');
+  if(el && currentDiaryTopic) renderDiaryTopicEntries();
+}
 $('#gratitudeAdd').onclick=()=>{
- const inp=$('#gratitudeInput');const text=inp.value.trim();if(!text)return;
- const now=new Date();const date=now.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
- gratitudeEntries.push({text,date});saveGratitude();renderGratitude();inp.value='';sndTick();toast('Благодарность сохранена 🤲')};
+  const inp=$('#gratitudeInput');const text=inp.value.trim();if(!text)return;
+  const topicId=currentDiaryTopic||'gratitude';
+  const now=new Date();const date=now.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  gratitudeEntries.push({text,date,topicId});saveGratitude();renderDiaryTopicEntries();renderDiaryTopics();inp.value='';sndTick();toast('Заметка сохранена ✨')};
 $('#gratitudeInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#gratitudeAdd').click()}});
 $('#gratitudeEntries').addEventListener('click',e=>{
- const btn=e.target.closest('[data-gidx]');if(!btn)return;
- const idx=parseInt(btn.dataset.gidx);const snap=[...gratitudeEntries];
- gratitudeEntries.splice(idx,1);saveGratitude();renderGratitude();
- toast('Запись удалена',()=>{gratitudeEntries=snap;saveGratitude();renderGratitude()})});
+  const btn=e.target.closest('[data-gidx]');if(!btn)return;
+  const idx=parseInt(btn.dataset.gidx);const snap=[...gratitudeEntries];
+  const topicId=gratitudeEntries[idx]?.topicId||'gratitude';
+  gratitudeEntries.splice(idx,1);saveGratitude();renderDiaryTopicEntries();renderDiaryTopics();
+  toast('Запись удалена',()=>{gratitudeEntries=snap;saveGratitude();renderDiaryTopicEntries();renderDiaryTopics()})});
+document.addEventListener('click',e=>{
+  const card=e.target.closest('[data-diary-topic]');
+  if(card) openDiaryTopic(card.dataset.diaryTopic);
+});
+$('#diaryBackBtn')?.addEventListener('click', closeDiaryTopic);
+$('#addDiaryTopicBtn')?.addEventListener('click',()=>{
+  const dlg=$('#diaryTopicDlg');
+  $('#diaryTopicName').value='';
+  // init emoji/color pickers
+  const eg=$('#diaryEgrid'), cg=$('#diaryCgrid');
+  if(eg && !eg.dataset.inited){
+    eg.innerHTML=DIARY_EMOJIS.map(em=>`<button type="button" data-e="${em}">${em}</button>`).join('');
+    cg.innerHTML=DIARY_COLORS.map(c=>`<button type="button" data-c="${c}" style="background:${c}"></button>`).join('');
+    eg.dataset.inited='1';
+  }
+  let selEmoji=DIARY_EMOJIS[0], selColor=DIARY_COLORS[2];
+  const updateSel=()=>{
+    eg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.e===selEmoji));
+    cg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.c===selColor));
+  };
+  eg.onclick=(ev)=>{
+    const b=ev.target.closest('button[data-e]'); if(!b) return;
+    selEmoji=b.dataset.e; updateSel();
+  };
+  cg.onclick=(ev)=>{
+    const b=ev.target.closest('button[data-c]'); if(!b) return;
+    selColor=b.dataset.c; updateSel();
+  };
+  updateSel();
+  dlg.showModal();
+  dlg.querySelector('form').onsubmit=(ev)=>{
+    ev.preventDefault();
+    const name=$('#diaryTopicName').value.trim();
+    if(!name) return;
+    const id='diary-'+Date.now().toString(36);
+    diaryTopics.push({id,name,emoji:selEmoji,color:selColor});
+    saveDiaryTopics(); renderDiaryTopics(); dlg.close();
+    toast(`Тема «${name}» создана`);
+  };
+});
+$('#diaryTopicCancel')?.addEventListener('click',()=>$('#diaryTopicDlg').close());
+$('#diaryDeleteTopicBtn')?.addEventListener('click',()=>{
+  if(!currentDiaryTopic) return;
+  if(currentDiaryTopic==='gratitude' || currentDiaryTopic==='worldly'){ toast('Эту тему нельзя удалить'); return; }
+  if(!confirm('Удалить тему и все её записи?')) return;
+  diaryTopics=diaryTopics.filter(t=>t.id!==currentDiaryTopic);
+  gratitudeEntries=gratitudeEntries.filter(e=> (e.topicId||'gratitude')!==currentDiaryTopic);
+  saveDiaryTopics(); saveGratitude();
+  currentDiaryTopic=null;
+  renderGratitude();
+  toast('Тема удалена');
+});
 /* ═══ РАСХОДЫ (в локальной валюте) ═══ */
 const EXP_CATS={food:'🍎 Еда',transport:'🚗 Транспорт',housing:'🏡 Жильё',health:'💧 Здоровье',sadaqah:'🤲 Садака',education:'📚 Учёба',other:'📦 Другое'};
 function currentMonthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
@@ -3322,6 +3522,18 @@ $('#prioPick').addEventListener('click',e=>{const b=e.target.closest('.prio');if
  $$('#prioPick .prio').forEach(x=>x.classList.toggle('on',x.dataset.p===state.newPrio));});
 
 $('#newDue').min=ymd(new Date());
+// фикс: после выбора даты снимаем фокус, иначе на десктопе оверлей календаря блокирует клики
+$('#newDue').addEventListener('change', function(){ setTimeout(()=>this.blur(), 50); });
+$('#newDue').addEventListener('blur', function(){ this.closest('label')?.classList.remove('focus'); });
+// также снимаем фокус при клике вне — страховка
+document.addEventListener('click', e=>{
+  const wrap=document.querySelector('.datein-wrap');
+  const input=document.getElementById('newDue');
+  if(!wrap || !input) return;
+  if(!wrap.contains(e.target) && document.activeElement===input){
+    input.blur();
+  }
+});
 
 function toggleDone(id,li){
  const t=byId(id);if(!t)return;
