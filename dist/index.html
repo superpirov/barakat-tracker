@@ -483,6 +483,8 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
 /* ═══ ХАДИСЫ ═══ */
 .hadith-section{display:none;flex-direction:column;gap:18px;margin-top:4px}
 .hadith-section.active{display:flex}
+.azkar-section{display:none;flex-direction:column;gap:18px;margin-top:4px}
+.azkar-section.active{display:flex}
 .hadith-card{padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--panel);margin-bottom:12px}
 .hadith-text{font-size:15px;line-height:1.7;color:var(--ink)}
 .hadith-arabic{font-size:22px;line-height:2;text-align:right;direction:rtl;font-family:'Amiri','Traditional Arabic',serif;color:var(--ink);margin-bottom:10px}
@@ -886,6 +888,23 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
           <button class="gbtn" id="hadithBookmarksClearBtn" style="padding:6px 10px">Очистить</button>
         </div>
         <div id="hadithBookmarksList"></div>
+      </div>
+    </div>
+
+    <!-- ═══ РАЗДЕЛ: АЗКАРЫ (азкар.ру) ═══ -->
+    <div id="sectionAzkar" class="azkar-section js-section" data-section="azkar">
+      <div class="ibadat-card" id="azkarCategoriesView">
+        <h2><span>📿</span> Азкары и дуа</h2>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:12px">Подборка из azkar.ru — утренние, вечерние, после намаза и тематические зикры</p>
+        <input id="azkarSearch" class="quran-search" placeholder="Поиск по азкарам..." autocomplete="off">
+        <div id="azkarGrid" class="collection-grid"></div>
+      </div>
+      <div class="ibadat-card" id="azkarReaderView" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+          <button class="gbtn" id="azkarBackBtn">← Назад</button>
+          <h2 id="azkarReaderTitle" style="flex:1;min-width:160px;margin:0"></h2>
+        </div>
+        <div id="azkarReaderContent"></div>
       </div>
     </div>
 
@@ -1394,6 +1413,7 @@ const SECTIONS=[
  {id:'ibadat',name:'Ибадат',emoji:'🕌',color:'#2BB3A5'},
  {id:'quran',name:'Коран',emoji:'📖',color:'#1B8A5A'},
  {id:'hadith',name:'Хадисы',emoji:'📜',color:'#8B5A2B'},
+ {id:'azkar',name:'Азкары',emoji:'📿',color:'#2E7D5B'},
  {id:'finance',name:'Финансы',emoji:'💰',color:'#E8A23B'},
  {id:'gratitude',name:'Благодарность',emoji:'🙏',color:'#9A6FE0'},
  {id:'focus',name:'Фокус',emoji:'⏱️',color:'#4A8DF7'}];
@@ -1410,6 +1430,7 @@ const SECTION_RENDER={
  ibadat:()=>{renderIbadat();initGeolocation();initCompass()},
  quran:renderQuran,
  hadith:renderHadith,
+ azkar:renderAzkar,
  finance:renderFinance,
  gratitude:renderGratitude,
  focus:renderFocus};
@@ -1608,7 +1629,9 @@ function renderTiles(){
    {id:'ibadat',stat:()=>{const dd=getDay(todayStr());
      const nn=SALAH_LIST.filter(s=>dd.salah[s.id]).length;
      return`Намазы: <b>${nn}/5</b> · Коран: <b>${dd.quran}</b> стр.`}},
-   {id:'quran',stat:()=>{const b=getBookmarks().length; const last=getLastRead(); return `114 сур • ${b?b+' закладок':''}${last?` • <b>${last.surah}:${last.ayah}</b>`:''}`.replace(/^ • /,''); if(!b&&!last) return '114 сур • чтение с переводом';}},
+   {id:'quran',stat:()=>{const b=getBookmarks().length; const last=getLastRead(); return `114 сур • ${b?b+' закладок':''}${last?` • <b>${last.surah}:${last.ayah}</b>`:''}`.replace(/^ • /,'');    if(!b&&!last) return '114 сур • чтение с переводом';}},
+   {id:'hadith',stat:()=>{const b=getHadithBookmarks().length; const last=getHadithLastRead(); if(last) return `Хадис ${last.book} ${last.num} • ${b?b+' закладок':''}`.replace(/^ • /,''); if(b) return `${b} закладок`; return 'Бухари, Муслим, Абу Дауд';}},
+   {id:'azkar',stat:()=>{const d=azkarData?azkarData.length:26; return `${d} разделов • 100 дуа`;}},
    {id:'finance',stat:()=>{const mk=currentMonthKey();
      const sum=finance.expenses.filter(e=>e.month===mk).reduce((s,e)=>s+e.amount,0);
      return`Расходы за месяц: <b>${fmtLocal(sum)}</b>`}},
@@ -2359,6 +2382,132 @@ document.getElementById('hadithBookmarksBackBtn')?.addEventListener('click',()=>
 document.getElementById('hadithBookmarksClearBtn')?.addEventListener('click',()=>{
   if(!confirm('Удалить все закладки хадисов?')) return;
   saveHadithBookmarks([]); renderHadithBookmarks(); toast('Закладки очищены');
+});
+
+/* ══════════════════════════════════════
+    📿 АЗКАРЫ — azkar.ru (26 разделов)
+    ══════════════════════════════════════ */
+let azkarData=null;
+let azkarCurrentCategory=null;
+async function loadAzkarData(){
+  if(azkarData) return azkarData;
+  const urls=['azkar/azkar.json','dist/azkar/azkar.json','public/azkar/azkar.json','./azkar/azkar.json','./dist/azkar/azkar.json'];
+  for(const url of urls){
+    try{
+      const r=await fetch(url);
+      if(r.ok){ const data=await r.json(); azkarData=data; return data; }
+    }catch(e){}
+  }
+  // fallback: try absolute
+  const r=await fetch('https://superpirov.github.io/barakat-tracker/azkar/azkar.json');
+  const data=await r.json(); azkarData=data; return data;
+}
+function renderAzkarCategories(filter=''){
+  const grid=document.getElementById('azkarGrid');
+  if(!grid||!azkarData) return;
+  const q=filter.trim().toLowerCase();
+  const filtered=azkarData.filter(cat=>{
+    if(!q) return true;
+    if(cat.title.toLowerCase().includes(q)) return true;
+    return cat.duas.some(d=> (d.title&&d.title.toLowerCase().includes(q)) || (d.arabic&&d.arabic.includes(filter.trim())) || (d.translation&&d.translation.toLowerCase().includes(q)) );
+  });
+  if(!filtered.length){
+    grid.innerHTML='<div class="quran-empty">Ничего не найдено</div>';
+    return;
+  }
+  grid.innerHTML=filtered.map(cat=>`
+    <div class="collection-card" data-azkar-cat="${cat.id}" style="border-left:4px solid var(--accent)">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:42px;height:42px;border-radius:12px;background:color-mix(in srgb,var(--accent) 14%,transparent);display:grid;place-items:center;font-size:20px">📿</div>
+        <div style="flex:1;min-width:0">
+          <b style="display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(cat.title)}</b>
+          <small style="color:var(--muted)">${cat.duas.length} ${plural(cat.duas.length,['дуа','дуа','дуа'])}</small>
+        </div>
+        <span class="tile-arrow">→</span>
+      </div>
+    </div>`).join('');
+}
+function openAzkarCategory(id){
+  const cat=azkarData.find(c=>c.id===id);
+  if(!cat) return;
+  azkarCurrentCategory=id;
+  document.getElementById('azkarCategoriesView').style.display='none';
+  const reader=document.getElementById('azkarReaderView');
+  const content=document.getElementById('azkarReaderContent');
+  const title=document.getElementById('azkarReaderTitle');
+  reader.style.display='';
+  if(title) title.textContent=cat.title;
+  let html='';
+  cat.duas.forEach((dua,idx)=>{
+    html+=`<div class="hadith-card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <b style="font-size:14px">${esc(dua.title||`Дуа ${idx+1}`)}</b>
+        ${dua.count?`<small style="color:var(--accent);font-weight:700">${esc(dua.count)}</small>`:''}
+      </div>
+      <div class="hadith-arabic">${esc(dua.arabic||'')}</div>
+      <div style="font-size:13px;color:var(--muted);margin:8px 0;font-style:italic">${esc(dua.transliteration||'')}</div>
+      <div class="hadith-text">${esc(dua.translation||'')}</div>
+      ${dua.source?`<div style="font-size:12px;color:var(--muted);margin-top:8px">— ${esc(dua.source)}</div>`:''}
+      <div class="ayah-actions" style="margin-top:10px">
+        ${dua.audio?`<button data-azkar-audio="${dua.id}" title="Слушать">▶️ Аудио</button>`:''}
+        <button data-azkar-copy="${dua.id}" title="Копировать">📋 Копировать</button>
+        <button data-azkar-share="${dua.id}" title="Поделиться">↗️ Поделиться</button>
+      </div>
+      ${dua.audio?`<audio id="audio-${dua.id}" src="${dua.audio}" preload="none" style="display:none"></audio>`:''}
+    </div>`;
+  });
+  content.innerHTML=html;
+  content.scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function renderAzkar(){
+  document.getElementById('azkarCategoriesView').style.display='';
+  document.getElementById('azkarReaderView').style.display='none';
+  const grid=document.getElementById('azkarGrid');
+  if(!azkarData){
+    if(grid) grid.innerHTML='<div class="verse-loading">Загрузка азкаров...</div>';
+    try{ await loadAzkarData(); }catch(e){
+      if(grid) grid.innerHTML=`<div class="verse-error">Не удалось загрузить азкары<br><small>${esc(String(e.message||e))}</small></div>`;
+      return;
+    }
+  }
+  renderAzkarCategories(document.getElementById('azkarSearch')?.value||'');
+}
+document.addEventListener('click',e=>{
+  const card=e.target.closest('[data-azkar-cat]');
+  if(card) openAzkarCategory(card.dataset.azkarCat);
+  const audioBtn=e.target.closest('[data-azkar-audio]');
+  if(audioBtn){
+    const id=audioBtn.dataset.azkarAudio;
+    const audio=document.getElementById(`audio-${id}`);
+    if(audio){ if(audio.paused) audio.play().catch(()=>toast('Не удалось воспроизвести')); else audio.pause(); }
+  }
+  const copyBtn=e.target.closest('[data-azkar-copy]');
+  if(copyBtn){
+    const id=copyBtn.dataset.azkarCopy;
+    const cat=azkarData.find(c=>c.duas.some(d=>d.id===id));
+    const dua=cat?.duas.find(d=>d.id===id);
+    if(dua){
+      const txt=`${dua.title}\n${dua.arabic}\n${dua.translation}\n${dua.transliteration}\n— ${dua.source||''}`;
+      navigator.clipboard?.writeText(txt).then(()=>toast('Скопировано 📋'));
+    }
+  }
+  const shareBtn=e.target.closest('[data-azkar-share]');
+  if(shareBtn){
+    const id=shareBtn.dataset.azkarShare;
+    const cat=azkarData.find(c=>c.duas.some(d=>d.id===id));
+    const dua=cat?.duas.find(d=>d.id===id);
+    if(dua && navigator.share){
+      navigator.share({title: dua.title, text: `${dua.arabic}\n\n${dua.translation}`}).catch(()=>{});
+    } else if(dua){
+      const txt=`${dua.title}\n${dua.arabic}\n${dua.translation}`;
+      navigator.clipboard?.writeText(txt).then(()=>toast('Скопировано для отправки'));
+    }
+  }
+});
+document.getElementById('azkarSearch')?.addEventListener('input',e=>renderAzkarCategories(e.target.value));
+document.getElementById('azkarBackBtn')?.addEventListener('click',()=>{
+  document.getElementById('azkarReaderView').style.display='none';
+  document.getElementById('azkarCategoriesView').style.display='';
 });
 
 /* ══════════════════════════════════════
