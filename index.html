@@ -480,6 +480,17 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
 .quran-search-result:hover{border-color:var(--accent);transform:translateY(-1px)}
 .quran-search-result small{color:var(--muted);font-size:11px}
 #quranContinueCard{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--panel))}
+/* ═══ ХАДИСЫ ═══ */
+.hadith-section{display:none;flex-direction:column;gap:18px;margin-top:4px}
+.hadith-section.active{display:flex}
+.hadith-card{padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--panel);margin-bottom:12px}
+.hadith-text{font-size:15px;line-height:1.7;color:var(--ink)}
+.hadith-arabic{font-size:22px;line-height:2;text-align:right;direction:rtl;font-family:'Amiri','Traditional Arabic',serif;color:var(--ink);margin-bottom:10px}
+.hadith-meta{font-size:12px;color:var(--muted);margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+.hadith-grade{padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+.collection-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.collection-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;cursor:pointer;transition:transform .2s,border-color .2s}
+.collection-card:hover{transform:translateY(-2px);border-color:var(--accent)}
 .location-refresh{flex:none;width:38px;height:38px;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);display:grid;place-items:center;cursor:pointer;font-size:16px;transition:.18s}
 .location-refresh:hover{border-color:var(--accent);transform:translateY(-1px)}
 .location-refresh:active{transform:scale(.96)}
@@ -825,6 +836,56 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
           <button class="gbtn" id="quranPrevBtn2">← Предыдущая</button>
           <button class="gbtn" id="quranNextBtn2" style="margin-left:auto">Следующая →</button>
         </div>
+      </div>
+    </div>
+
+    <!-- ═══ РАЗДЕЛ: ХАДИСЫ ═══ -->
+    <div id="sectionHadith" class="hadith-section js-section" data-section="hadith">
+      <div class="ibadat-card" id="hadithOfDayCard">
+        <h2><span>📜</span> Хадис дня</h2>
+        <div id="hadithOfDayContent"><div class="verse-loading">Загрузка хадиса...</div></div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="gbtn" id="hadithOfDayRefresh">Другой хадис</button>
+          <button class="gbtn" id="hadithOfDayCopy">Копировать</button>
+          <button class="gbtn" id="hadithOfDayBookmark" title="В закладки">☆ В закладки</button>
+        </div>
+      </div>
+      <div id="hadithContinueCard" class="ibadat-card" style="display:none;cursor:pointer"></div>
+      <div class="ibadat-card" id="hadithCollectionsView">
+        <h2><span>📚</span> Сборники хадисов</h2>
+        <div id="hadithCollectionsGrid" class="collection-grid"></div>
+        <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+          <input id="hadithSearch" class="quran-search" placeholder="Поиск по хадисам..." style="flex:1;min-width:180px" autocomplete="off">
+          <button class="gbtn" id="hadithSearchBtn">Найти</button>
+        </div>
+        <div id="hadithSearchResults" style="display:none;margin-top:12px"></div>
+      </div>
+      <div class="ibadat-card" id="hadithReaderView" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+          <button class="gbtn" id="hadithBackBtn">← Назад</button>
+          <h2 id="hadithReaderTitle" style="flex:1;min-width:160px;margin:0"></h2>
+          <button class="ibtn" id="hadithPrevBtn" title="Предыдущий">‹</button>
+          <button class="ibtn" id="hadithNextBtn" title="Следующий">›</button>
+        </div>
+        <div id="hadithReaderContent"></div>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+          <button class="gbtn" id="hadithPrevBtn2">← Предыдущий</button>
+          <button class="gbtn" id="hadithNextBtn2" style="margin-left:auto">Следующий →</button>
+        </div>
+      </div>
+      <div id="hadithBookmarksCard" class="ibadat-card" style="display:none;cursor:pointer">
+        <div style="display:flex;align-items:center;gap:12px">
+          <h3 style="font-family:var(--fd);font-size:14px;margin:0;flex:1">🔖 Закладки хадисов <small id="hadithBookmarksCount" style="font-weight:400;color:var(--muted)"></small></h3>
+          <span class="tile-arrow">→</span>
+        </div>
+      </div>
+      <div class="ibadat-card" id="hadithBookmarksView" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <button class="gbtn" id="hadithBookmarksBackBtn">← Назад</button>
+          <h2 style="flex:1;margin:0;font-family:var(--fd);font-size:16px">🔖 Закладки хадисов</h2>
+          <button class="gbtn" id="hadithBookmarksClearBtn" style="padding:6px 10px">Очистить</button>
+        </div>
+        <div id="hadithBookmarksList"></div>
       </div>
     </div>
 
@@ -1332,6 +1393,7 @@ const SECTIONS=[
  {id:'tasks',name:'Задачи',emoji:'📋',color:'#2E7D5B'},
  {id:'ibadat',name:'Ибадат',emoji:'🕌',color:'#2BB3A5'},
  {id:'quran',name:'Коран',emoji:'📖',color:'#1B8A5A'},
+ {id:'hadith',name:'Хадисы',emoji:'📜',color:'#8B5A2B'},
  {id:'finance',name:'Финансы',emoji:'💰',color:'#E8A23B'},
  {id:'gratitude',name:'Благодарность',emoji:'🙏',color:'#9A6FE0'},
  {id:'focus',name:'Фокус',emoji:'⏱️',color:'#4A8DF7'}];
@@ -1935,6 +1997,296 @@ function closeBookmarksView(){
   if(view) view.style.display='none';
   renderQuran();
 }
+
+/* ══════════════════════════════════════
+    📜 ХАДИСЫ — чтение через hadith-api
+    ══════════════════════════════════════ */
+const HADITH_API='https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1';
+const HADITH_FALLBACK='https://cdn.jsdelivr.net/gh/superpirov/hadith-api@1';
+const HADITH_BOOKS=[
+  {id:'bukhari', name:'Сахих аль-Бухари', edition:'rus-bukhari', desc:'Самый достоверный сборник', color:'#8B5A2B'},
+  {id:'muslim', name:'Сахих Муслим', edition:'rus-muslim', desc:'Второй по достоверности', color:'#5D4037'},
+  {id:'abudawud', name:'Сунан Абу Дауд', edition:'rus-abudawud', desc:'Сборник хадисов', color:'#6D4C41'},
+  {id:'tirmidhi', name:'Джами ат-Тирмизи', edition:'eng-tirmidhi', desc:'Сборник (англ.)', color:'#795548'},
+];
+let hadithState={currentBook:'bukhari',currentEdition:'rus-bukhari',currentNum:1,cache:{},bookmarks:[],lastRead:null};
+function getHadithBookmarks(){try{return JSON.parse(localStorage.getItem('barakat.hadith.bookmarks')||'[]')}catch(e){return []}}
+function saveHadithBookmarks(list){try{localStorage.setItem('barakat.hadith.bookmarks',JSON.stringify(list))}catch(e){}}
+function isHadithBookmarked(book,num){return getHadithBookmarks().some(b=>b.book===book&&b.num===num)}
+function toggleHadithBookmark(book,num,arabic,text){
+  let list=getHadithBookmarks();
+  const idx=list.findIndex(b=>b.book===book&&b.num===num);
+  if(idx>=0){ list.splice(idx,1); toast('Закладка удалена 🔖'); }
+  else { list.push({book,num,arabic:(arabic||'').slice(0,120),text:(text||'').slice(0,140),time:Date.now()}); toast('В закладки ⭐'); }
+  saveHadithBookmarks(list); renderHadithBookmarks(); renderHadithContinue();
+}
+function renderHadithBookmarks(){
+  const card=$('#hadithBookmarksCard'), listEl=document.getElementById('hadithBookmarksList');
+  const cntEl=document.getElementById('hadithBookmarksCount');
+  // card is summary, listEl is in dedicated view
+  const list=getHadithBookmarks().slice().sort((a,b)=>b.time-a.time);
+  if(card){
+    if(!list.length){ card.style.display='none'; }
+    else { card.style.display=''; if(cntEl) cntEl.textContent=`• ${list.length} ${plural(list.length,['закладка','закладки','закладок'])}`; }
+  }
+  if(listEl){
+    if(!list.length){ listEl.innerHTML='<div class="quran-empty">Нет закладок</div>'; return; }
+    listEl.innerHTML=list.slice(0,30).map(b=>`
+      <div class="quran-search-result" data-hgoto="${b.book}:${b.num}" style="display:flex;align-items:center;gap:10px">
+        <div style="flex:1;min-width:0">
+          <b>${esc(b.book)} ${b.num}</b> <small style="color:var(--muted)">${esc(b.arabic.slice(0,50))}…</small>
+          <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(b.text.slice(0,80))}</div>
+        </div>
+        <button class="gbtn" data-hdel="${b.book}:${b.num}" style="padding:6px 10px">✕</button>
+      </div>`).join('');
+  }
+}
+function getHadithLastRead(){try{return JSON.parse(localStorage.getItem('barakat.hadith.lastRead')||'null')}catch(e){return null}}
+function saveHadithLastRead(book,num){
+  try{localStorage.setItem('barakat.hadith.lastRead',JSON.stringify({book,num,time:Date.now()}));}catch(e){}
+  renderHadithContinue();
+}
+function renderHadithContinue(){
+  const card=document.getElementById('hadithContinueCard');
+  if(!card) return;
+  const last=getHadithLastRead();
+  if(!last||!last.book){ card.style.display='none'; return; }
+  const bookInfo=HADITH_BOOKS.find(b=>b.id===last.book);
+  const name=bookInfo?bookInfo.name:last.book;
+  card.innerHTML=`<div style="display:flex;align-items:center;gap:12px"><div style="flex:1;min-width:0"><small style="color:var(--muted)">Продолжить чтение</small><b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(name)} • Хадис ${last.num}</b></div><button class="gbtn" style="padding:6px 12px;flex:none;white-space:nowrap">Открыть</button></div>`;
+  card.style.display='';
+  card.onclick=()=>openHadith(last.book, last.num);
+}
+async function fetchHadithJson(url){
+  try{const r=await fetch(url);if(!r.ok) throw new Error(''+r.status);return await r.json();}catch(e){
+    const fb=url.replace(HADITH_API,HADITH_FALLBACK);
+    if(fb!==url){const r2=await fetch(fb);if(r2.ok) return await r2.json();}
+    throw e;
+  }
+}
+function hadithCacheKey(book,num){return book+':'+num}
+async function fetchHadith(book,num){
+  const edition=HADITH_BOOKS.find(b=>b.id===book)?.edition||'rus-bukhari';
+  const key=hadithCacheKey(book,num);
+  if(hadithState.cache[key]) return hadithState.cache[key];
+  // hadith API returns {hadiths:[{text, grades, reference}], metadata:{...}} for single hadith via /editions/{edition}/{num}.json
+  let data=await fetchHadithJson(`${HADITH_API}/editions/${edition}/${num}.json`).catch(()=>fetchHadithJson(`${HADITH_API}/editions/${edition}/${num}.min.json`));
+  // normalize: data.hadiths is array with one element
+  let h=null;
+  if(data.hadiths && data.hadiths[0]) h=data.hadiths[0];
+  else if(data.text) h=data;
+  else h=data;
+  // also try to get arabic original for same number
+  let arabicText='';
+  try{
+    const araEdition = book==='bukhari'?'ara-bukhari': book==='muslim'?'ara-muslim':'ara-abudawud';
+    const araData=await fetchHadithJson(`${HADITH_API}/editions/${araEdition}/${num}.json`).catch(()=>fetchHadithJson(`${HADITH_API}/editions/${araEdition}/${num}.min.json`));
+    const ah=(araData.hadiths&&araData.hadiths[0])||araData;
+    if(ah && ah.text) arabicText=ah.text;
+  }catch(e){}
+  const result={num, book, text:h.text||'', arabic:arabicText, grades:h.grades||[], reference:h.reference||{}};
+  hadithState.cache[key]=result;
+  return result;
+}
+function renderHadithCollections(){
+  const grid=document.getElementById('hadithCollectionsGrid');
+  if(!grid) return;
+  grid.innerHTML=HADITH_BOOKS.map(b=>`
+    <div class="collection-card" data-hbook="${b.id}" style="border-left:4px solid ${b.color}">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:42px;height:42px;border-radius:12px;background:color-mix(in srgb,${b.color} 14%,transparent);display:grid;place-items:center;font-size:20px">📜</div>
+        <div style="flex:1;min-width:0">
+          <b style="display:block;font-size:15px">${esc(b.name)}</b>
+          <small style="color:var(--muted)">${esc(b.desc)}</small>
+        </div>
+        <span class="tile-arrow">→</span>
+      </div>
+    </div>`).join('');
+}
+async function renderHadithOfDay(){
+  const box=document.getElementById('hadithOfDayContent');
+  if(!box) return;
+  box.innerHTML='<div class="verse-loading">Загрузка хадиса...</div>';
+  // daily random: pick random book and random hadith number (1..~7000 for bukhari, but we don't know max, try up to 2000 and rely on API 404 fallback to next)
+  const today=new Date().toDateString();
+  let s=localStorage.getItem('barakat_hadith_book');
+  let n=localStorage.getItem('barakat_hadith_num');
+  let d=localStorage.getItem('barakat_hadith_date');
+  let book, num;
+  if(s && n && d===today){ book=s; num=+n; }
+  else {
+    const books=['bukhari','muslim','abudawud'];
+    book=books[Math.floor(Math.random()*books.length)];
+    // rough max per book
+    const max={bukhari:7000,muslim:7500,abudawud:5200};
+    num=Math.floor(Math.random()*(max[book]||2000))+1;
+    try{localStorage.setItem('barakat_hadith_book',book);localStorage.setItem('barakat_hadith_num',num);localStorage.setItem('barakat_hadith_date',today);}catch(e){}
+  }
+  try{
+    const h=await fetchHadith(book,num);
+    // if text empty or grades indicate daif and we want sahih only? accept all for now, retry if empty
+    if(!h.text || h.text.length<10){
+      // try next number
+      const h2=await fetchHadith(book, num+1);
+      if(h2.text) { book=h2.book; num=h2.num; Object.assign(h,h2); }
+    }
+    box.innerHTML=`
+      <div class="hadith-arabic">${esc(h.arabic||'')}</div>
+      <div class="hadith-text">${esc(h.text)}</div>
+      <div class="hadith-meta">
+        <span class="hadith-grade">${(h.grades&&h.grades[0]?esc(h.grades[0].grade||h.grades[0]):'')}</span>
+        <span>${esc(book)} ${num}</span>
+      </div>`;
+    // store current for copy/bookmark
+    box.dataset.book=book; box.dataset.num=num;
+    box.dataset.arabic=h.arabic||''; box.dataset.text=h.text||'';
+    // update bookmark button state
+    const bmBtn=document.getElementById('hadithOfDayBookmark');
+    if(bmBtn){
+      const on=isHadithBookmarked(book,num);
+      bmBtn.textContent=on?'★ В закладках':'☆ В закладки';
+      bmBtn.classList.toggle('active',on);
+    }
+  }catch(e){
+    box.innerHTML=`<div class="verse-error">Не удалось загрузить хадис<br><small>${esc(String(e.message||e))}</small></div>`;
+  }
+}
+async function openHadith(book,num){
+  book=book||hadithState.currentBook; num=parseInt(num,10);
+  if(!(num>=1)) num=1;
+  hadithState.currentBook=book; hadithState.currentNum=num;
+  saveHadithLastRead(book,num);
+  document.getElementById('hadithCollectionsView').style.display='none';
+  document.getElementById('hadithBookmarksView').style.display='none';
+  const view=document.getElementById('hadithReaderView');
+  const content=document.getElementById('hadithReaderContent');
+  const title=document.getElementById('hadithReaderTitle');
+  view.style.display='';
+  content.innerHTML='<div class="verse-loading">Загрузка хадиса...</div>';
+  const bookInfo=HADITH_BOOKS.find(b=>b.id===book);
+  if(title) title.textContent=bookInfo?`${bookInfo.name} • ${num}`:`${book} ${num}`;
+  ['hadithPrevBtn','hadithNextBtn','hadithPrevBtn2','hadithNextBtn2'].forEach(id=>{
+    const b=document.getElementById(id); if(b) b.disabled=false;
+  });
+  try{
+    const h=await fetchHadith(book,num);
+    if(!h.text) throw new Error('Пустой хадис');
+    const bm=isHadithBookmarked(book,num);
+    content.innerHTML=`
+      <div class="hadith-card">
+        <div class="hadith-arabic">${esc(h.arabic||'')}</div>
+        <div class="hadith-text">${esc(h.text)}</div>
+        <div class="hadith-meta">
+          <span class="hadith-grade">${h.grades&&h.grades[0]?esc(h.grades[0].grade||h.grades[0]):''}</span>
+          <span>${esc(book)} ${num}</span>
+        </div>
+        <div class="ayah-actions">
+          <button class="${bm?'active':''}" data-hbm="${book}:${num}">${bm?'★ В закладках':'☆ Закладка'}</button>
+          <button data-hcopy="${book}:${num}">📋 Копировать</button>
+        </div>
+      </div>`;
+  }catch(e){
+    content.innerHTML=`<div class="verse-error">Не удалось загрузить хадис ${num}<br><small>${esc(String(e.message||e))}</small><br><button class="gbtn" onclick="openHadith('${book}',${num})" style="margin-top:10px">Повторить</button></div>`;
+  }
+}
+async function renderHadith(){
+  document.getElementById('hadithCollectionsView').style.display='';
+  document.getElementById('hadithReaderView').style.display='none';
+  const bv=document.getElementById('hadithBookmarksView'); if(bv) bv.style.display='none';
+  renderHadithCollections(); renderHadithOfDay(); renderHadithBookmarks(); renderHadithContinue();
+}
+
+// hadith bookmarks view
+function openHadithBookmarksView(){
+  document.getElementById('hadithCollectionsView').style.display='none';
+  document.getElementById('hadithReaderView').style.display='none';
+  document.getElementById('hadithBookmarksView').style.display='';
+  renderHadithBookmarks();
+}
+function closeHadithBookmarksView(){ renderHadith(); }
+document.addEventListener('click',e=>{
+  const card=e.target.closest('.collection-card[data-hbook]');
+  if(card) openHadith(card.dataset.hbook,1);
+});
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-hbm]');
+  if(b){
+    const [book,num]=b.dataset.hbm.split(':');
+    const row=b.closest('.hadith-card');
+    const arabic=row?.querySelector('.hadith-arabic')?.textContent||'';
+    const text=row?.querySelector('.hadith-text')?.textContent||'';
+    toggleHadithBookmark(book,parseInt(num,10),arabic,text);
+    b.classList.toggle('active', isHadithBookmarked(book,parseInt(num,10)));
+    b.textContent=isHadithBookmarked(book,parseInt(num,10))?'★ В закладках':'☆ Закладка';
+  }
+  const cp=e.target.closest('[data-hcopy]');
+  if(cp){
+    const [book,num]=cp.dataset.hcopy.split(':');
+    const row=cp.closest('.hadith-card');
+    const txt=(row?.querySelector('.hadith-arabic')?.textContent||'')+"\n"+(row?.querySelector('.hadith-text')?.textContent||'');
+    navigator.clipboard?.writeText(txt+`\n(${book} ${num})`).then(()=>toast('Скопировано 📋'));
+  }
+  const go=e.target.closest('[data-hgoto]');
+  if(go){
+    const [book,num]=go.dataset.hgoto.split(':');
+    openHadith(book,parseInt(num,10));
+  }
+  const del=e.target.closest('[data-hdel]');
+  if(del){
+    const [book,num]=del.dataset.hdel.split(':');
+    toggleHadithBookmark(book,parseInt(num,10),'','');
+    del.closest('.quran-search-result')?.remove();
+    if(!getHadithBookmarks().length) renderHadithBookmarks();
+    e.stopPropagation();
+  }
+});
+document.getElementById('hadithSearch')?.addEventListener('input',e=>{
+  const q=e.target.value.trim().toLowerCase();
+  const res=document.getElementById('hadithSearchResults');
+  if(q.length<2){ if(res) res.style.display='none'; return; }
+  // simple search in bookmarks? For now search in current collection's cached hadiths is heavy.
+  // Fallback: show hint
+  if(res){
+    res.style.display='';
+    res.innerHTML=`<div class="quran-empty">Поиск по хадисам в разработке — введите номер хадиса или используйте коллекции выше</div>`;
+  }
+});
+
+// hadith section buttons
+document.getElementById('hadithOfDayRefresh')?.addEventListener('click',()=>{
+  localStorage.removeItem('barakat_hadith_date');
+  renderHadithOfDay();
+});
+document.getElementById('hadithOfDayCopy')?.addEventListener('click',()=>{
+  const box=document.getElementById('hadithOfDayContent');
+  const txt=(box.querySelector('.hadith-arabic')?.textContent||'')+"\n"+(box.querySelector('.hadith-text')?.textContent||'');
+  const book=box.dataset.book, num=box.dataset.num;
+  navigator.clipboard?.writeText(txt+`\n(${book} ${num})`).then(()=>toast('Скопировано 📋'));
+});
+document.getElementById('hadithOfDayBookmark')?.addEventListener('click',()=>{
+  const box=document.getElementById('hadithOfDayContent');
+  const book=box.dataset.book, num=parseInt(box.dataset.num,10);
+  const arabic=box.querySelector('.hadith-arabic')?.textContent||'';
+  const text=box.querySelector('.hadith-text')?.textContent||'';
+  if(book&&num) toggleHadithBookmark(book,num,arabic,text);
+  const btn=document.getElementById('hadithOfDayBookmark');
+  if(btn){
+    const on=isHadithBookmarked(book,num);
+    btn.textContent=on?'★ В закладках':'☆ В закладки';
+    btn.classList.toggle('active',on);
+  }
+});
+document.getElementById('hadithBackBtn')?.addEventListener('click',()=>{ document.getElementById('hadithReaderView').style.display='none'; document.getElementById('hadithCollectionsView').style.display=''; });
+document.getElementById('hadithPrevBtn')?.addEventListener('click',()=>openHadith(hadithState.currentBook, hadithState.currentNum-1));
+document.getElementById('hadithNextBtn')?.addEventListener('click',()=>openHadith(hadithState.currentBook, hadithState.currentNum+1));
+document.getElementById('hadithPrevBtn2')?.addEventListener('click',()=>openHadith(hadithState.currentBook, hadithState.currentNum-1));
+document.getElementById('hadithNextBtn2')?.addEventListener('click',()=>openHadith(hadithState.currentBook, hadithState.currentNum+1));
+document.getElementById('hadithBookmarksCard')?.addEventListener('click',()=>{ document.getElementById('hadithCollectionsView').style.display='none'; document.getElementById('hadithBookmarksView').style.display=''; renderHadithBookmarks(); });
+document.getElementById('hadithBookmarksBackBtn')?.addEventListener('click',()=>{ document.getElementById('hadithBookmarksView').style.display='none'; document.getElementById('hadithCollectionsView').style.display=''; });
+document.getElementById('hadithBookmarksClearBtn')?.addEventListener('click',()=>{
+  if(!confirm('Удалить все закладки хадисов?')) return;
+  saveHadithBookmarks([]); renderHadithBookmarks(); toast('Закладки очищены');
+});
 
 /* ══════════════════════════════════════
     🤲 ЗАКЯТ: КАЛЬКУЛЯТОР С МУЛЬТИВАЛЮТОЙ

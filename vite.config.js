@@ -53,12 +53,25 @@ export default {
             }
           }
         },{
-          urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/gh\/(fawazahmed0|superpirov)\/quran-api.*/i,
+          urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/gh\/(fawazahmed0|superpirov)\/(quran|hadith)-api.*/i,
           handler: 'CacheFirst',
           options: {
-            cacheName: 'quran-api',
+            cacheName: 'islamic-api',
             expiration: {
-              maxEntries: 120,
+              maxEntries: 150,
+              maxAgeSeconds: 60 * 60 * 24 * 30
+            },
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
+        },{
+          urlPattern: /^https:\/\/everyayah\.com\/data\/.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'quran-audio',
+            expiration: {
+              maxEntries: 30,
               maxAgeSeconds: 60 * 60 * 24 * 30
             },
             cacheableResponse: {
