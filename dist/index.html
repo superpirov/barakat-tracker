@@ -2008,7 +2008,6 @@ const HADITH_BOOKS=[
   {id:'bukhari', name:'Сахих аль-Бухари', edition:'rus-bukhari', desc:'Самый достоверный сборник', color:'#8B5A2B'},
   {id:'muslim', name:'Сахих Муслим', edition:'rus-muslim', desc:'Второй по достоверности', color:'#5D4037'},
   {id:'abudawud', name:'Сунан Абу Дауд', edition:'rus-abudawud', desc:'Сборник хадисов', color:'#6D4C41'},
-  {id:'tirmidhi', name:'Джами ат-Тирмизи', edition:'eng-tirmidhi', desc:'Сборник (англ.)', color:'#795548'},
 ];
 let hadithState={currentBook:'bukhari',currentEdition:'rus-bukhari',currentNum:1,cache:{},bookmarks:[],lastRead:null};
 function getHadithBookmarks(){try{return JSON.parse(localStorage.getItem('barakat.hadith.bookmarks')||'[]')}catch(e){return []}}
@@ -2241,16 +2240,89 @@ document.addEventListener('click',e=>{
     e.stopPropagation();
   }
 });
-document.getElementById('hadithSearch')?.addEventListener('input',e=>{
-  const q=e.target.value.trim().toLowerCase();
+let hadithFullCache={};
+async function loadHadithCollectionFull(book){
+  if(hadithFullCache[book]) return hadithFullCache[book];
+  const edition=HADITH_BOOKS.find(b=>b.id===book)?.edition;
+  if(!edition) return null;
+  try{
+    const data=await fetchHadithJson(`${HADITH_API}/editions/${edition}.json`).catch(()=>fetchHadithJson(`${HADITH_API}/editions/${edition}.min.json`));
+    const list=data.hadiths||data.chapter||[];
+    hadithFullCache[book]=list;
+    return list;
+  }catch(e){ return null; }
+}
+let hadithSearchDebounce=null;
+async function performHadithSearch(query){
   const res=document.getElementById('hadithSearchResults');
-  if(q.length<2){ if(res) res.style.display='none'; return; }
-  // simple search in bookmarks? For now search in current collection's cached hadiths is heavy.
-  // Fallback: show hint
-  if(res){
+  if(!res) return;
+  const q=query.trim();
+  if(!q){ res.style.display='none'; return; }
+  // поиск по номеру
+  if(/^\d+$/.test(q)){
+    const num=parseInt(q,10);
     res.style.display='';
-    res.innerHTML=`<div class="quran-empty">Поиск по хадисам в разработке — введите номер хадиса или используйте коллекции выше</div>`;
+    res.innerHTML='<div class="verse-loading">Поиск хадиса №'+num+'...</div>';
+    const results=[];
+    for(const b of HADITH_BOOKS){
+      try{
+        const h=await fetchHadith(b.id,num);
+        if(h && h.text && h.text.length>5) results.push({book:b.id,bookName:b.name,num, text:h.text, arabic:h.arabic||'', grades:h.grades});
+      }catch(e){}
+    }
+    if(!results.length){ res.innerHTML='<div class="quran-empty">Хадис №'+num+' не найден</div>'; return; }
+    res.innerHTML=results.map(r=>`
+      <div class="quran-search-result" data-hgoto="${r.book}:${r.num}">
+        <div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(r.bookName)} ${r.num}</b><small style="color:var(--muted)">${r.grades&&r.grades[0]?esc(String(r.grades[0].grade||r.grades[0])):''}</small></div>
+        <div style="font-size:13px;color:var(--muted);margin-top:6px">${esc(r.text.slice(0,180))}...</div>
+        ${r.arabic?`<div style="font-size:13px;direction:rtl;text-align:right;margin-top:6px;color:var(--ink)">${esc(r.arabic.slice(0,120))}...</div>`:''}
+      </div>`).join('');
+    return;
   }
+  // текстовый поиск
+  const lower=q.toLowerCase();
+  const isArabic=/[\u0600-\u06FF]/.test(q);
+  res.style.display='';
+  res.innerHTML='<div class="verse-loading">Поиск по тексту...</div>';
+  // грузим все русские коллекции если ещё не загружены
+  const allHits=[];
+  for(const b of HADITH_BOOKS){
+    let list=hadithFullCache[b.id];
+    if(!list){
+      try{ list=await loadHadithCollectionFull(b.id); }catch(e){ continue; }
+      if(!list) continue;
+    }
+    for(const h of list){
+      const hay=isArabic ? (h.arabic||h.text||'') : (h.text||'');
+      if(!hay) continue;
+      if(hay.toLowerCase().includes(lower) || (!isArabic && (h.arabic||'').includes(q))){
+        allHits.push({book:b.id,bookName:b.name,num:h.hadithnumber||h.arabicnumber||0, text:h.text||'', arabic:h.arabic||'', grades:h.grades});
+        if(allHits.length>=20) break;
+      }
+    }
+    if(allHits.length>=20) break;
+  }
+  if(!allHits.length){ res.innerHTML='<div class="quran-empty">Ничего не найдено по запросу "'+esc(q)+'"</div>'; return; }
+  res.innerHTML=`<div style="font-size:12px;color:var(--muted);margin-bottom:8px">Найдено: ${allHits.length}${allHits.length>=20?' (показано 20)':''}</div>`+
+    allHits.map(r=>`
+      <div class="quran-search-result" data-hgoto="${r.book}:${r.num}">
+        <div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(r.bookName)} ${r.num}</b><small style="color:var(--muted)">${r.grades&&r.grades[0]?esc(String(r.grades[0].grade||r.grades[0])):''}</small></div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.text.slice(0,140))}</div>
+      </div>`).join('');
+}
+document.getElementById('hadithSearch')?.addEventListener('input',e=>{
+  clearTimeout(hadithSearchDebounce);
+  const q=e.target.value;
+  if(q.trim().length<2){
+    const res=document.getElementById('hadithSearchResults');
+    if(res) res.style.display='none';
+    return;
+  }
+  hadithSearchDebounce=setTimeout(()=>performHadithSearch(q),400);
+});
+document.getElementById('hadithSearchBtn')?.addEventListener('click',()=>{
+  const q=document.getElementById('hadithSearch')?.value||'';
+  if(q.trim()) performHadithSearch(q);
 });
 
 // hadith section buttons
