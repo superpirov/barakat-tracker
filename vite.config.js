@@ -52,6 +52,19 @@ export default {
               statuses: [0, 200]
             }
           }
+        },{
+          urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/gh\/(fawazahmed0|superpirov)\/quran-api.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'quran-api',
+            expiration: {
+              maxEntries: 120,
+              maxAgeSeconds: 60 * 60 * 24 * 30
+            },
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
         }]
       }
     })

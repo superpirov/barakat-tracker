@@ -447,6 +447,31 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
 .dstat--clickable:active{transform:scale(.98)}
 .location-row{display:flex;gap:10px;align-items:center}
 .location-row .location-status{flex:1;min-width:0}
+
+/* ═══ КОРАН ═══ */
+.quran-section{display:none;flex-direction:column;gap:18px;margin-top:4px}
+.quran-section.active{display:flex}
+.surah-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-top:8px}
+.surah-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s}
+.surah-card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 35%,var(--line));box-shadow:0 8px 20px rgba(0,0,0,.07)}
+.surah-num{flex:none;width:42px;height:42px;border-radius:12px;background:color-mix(in srgb,var(--accent) 14%,transparent);border:1px solid color-mix(in srgb,var(--accent) 22%,var(--line));display:grid;place-items:center;font-family:var(--fd);font-weight:800;font-size:14px;color:var(--accent)}
+.surah-info{flex:1;min-width:0}
+.surah-info b{display:block;font-family:var(--fd);font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.surah-info small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.surah-meta{flex:none;text-align:right}
+.surah-meta small{display:block;font-size:11px;color:var(--muted)}
+.surah-meta b{font-family:var(--fd);font-size:12px;color:var(--accent)}
+.quran-search{width:100%;border:1.5px solid var(--line);border-radius:12px;background:var(--panel);padding:11px 14px;font:500 14px var(--fb);color:var(--ink);outline:none}
+.quran-search:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent)}
+.quran-reader-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.quran-reader-head h2{flex:1;min-width:160px}
+.ayah-row{padding:18px 16px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.ayah-row:last-child{border-bottom:none}
+.ayah-num{flex:none;width:32px;height:32px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);display:grid;place-items:center;font:700 12px var(--fd);color:var(--accent)}
+.ayah-arabic{font-size:26px;line-height:2.2;text-align:right;direction:rtl;font-family:'Amiri','Traditional Arabic',serif;color:var(--ink);word-break:break-word}
+.ayah-translation{font-size:14.5px;line-height:1.7;color:var(--muted);border-left:3px solid color-mix(in srgb,var(--accent) 35%,var(--line));padding-left:12px}
+.quran-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.quran-empty{text-align:center;padding:32px;color:var(--muted)}
 .location-refresh{flex:none;width:38px;height:38px;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);display:grid;place-items:center;cursor:pointer;font-size:16px;transition:.18s}
 .location-refresh:hover{border-color:var(--accent);transform:translateY(-1px)}
 .location-refresh:active{transform:scale(.96)}
@@ -746,6 +771,36 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
       </div>
     </div>
 
+    <!-- ═══ РАЗДЕЛ: КОРАН ═══ -->
+    <div id="sectionQuran" class="quran-section js-section" data-section="quran">
+      <div class="ibadat-card" id="quranListView">
+        <h2><span>📖</span> Коран — 114 сур</h2>
+        <input id="quranSearch" class="quran-search" placeholder="Поиск: Аль-Фатиха, Бакара..." autocomplete="off">
+        <div id="surahGrid" class="surah-grid"><div class="verse-loading">Загрузка списка сур...</div></div>
+      </div>
+      <div class="ibadat-card" id="quranReaderView" style="display:none">
+        <div class="quran-reader-head">
+          <button class="gbtn" id="quranBackBtn">← Список</button>
+          <h2 id="quranReaderTitle" style="flex:1"></h2>
+          <button class="ibtn" id="quranPrevBtn" title="Предыдущая сура">‹</button>
+          <button class="ibtn" id="quranNextBtn" title="Следующая сура">›</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <select id="quranTransSelect" class="method-select" style="flex:1;min-width:180px">
+            <option value="rus-elmirkuliev">Кулиев (Эльмир Кулиев)</option>
+            <option value="rus-abuadel">Абу-Адель</option>
+            <option value="rus-pokhova">Порохова</option>
+            <option value="rus-gordysemyonovic">Гордий Семёнович Саблуков</option>
+          </select>
+        </div>
+        <div id="quranReaderContent"></div>
+        <div class="quran-nav">
+          <button class="gbtn" id="quranPrevBtn2">← Предыдущая</button>
+          <button class="gbtn" id="quranNextBtn2" style="margin-left:auto">Следующая →</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ РАЗДЕЛ: ФОКУС-ТАЙМЕР ═══ -->
     <div id="sectionFocus" class="focus-section js-section" data-section="focus">
       <div class="focus-card">
@@ -1022,52 +1077,81 @@ async function loadVerseFiles(){
  }
 }
 
-function renderVerseOfDay(sel){
- const container=$(sel||'#verseOfDayContainer');
- if(!container)return;
-
- // Проверяем, есть ли уже сохранённый случайный аят на сегодня
- const todayStr=new Date().toDateString();
- let verseIndex=localStorage.getItem('barakat_verse_index');
- let verseDate=localStorage.getItem('barakat_verse_date');
- 
- // Если нет сохранённого индекса или дата сменилась — выбираем новый случайный аят
- if(!verseIndex||verseDate!==todayStr){
-  verseIndex=Math.floor(Math.random()*6236); // 0-based индекс (0-6235)
-  localStorage.setItem('barakat_verse_index',verseIndex);
-  localStorage.setItem('barakat_verse_date',todayStr);
- }else{
-  verseIndex=parseInt(verseIndex,10);
- }
-
- if(verseData.error){
-  container.innerHTML='<div class="verse-error">Не удалось загрузить аяты</div>';
-  return;
- }
-
-  if(!verseInitialized||verseData.arabic.length===0){
-   container.innerHTML='<div class="verse-loading"><span>Загрузка аята...</span></div>';
-   loadVerseFiles().then(()=>renderVerseOfDay(sel));
+async function renderVerseOfDay(sel){
+  const container=$(sel||'#verseOfDayContainer');
+  if(!container)return;
+  // ——— гибрид: пробуем quran-api (с кэшем), фолбэк — локальные txt ———
+  try{
+    if(typeof QURAN_API!=='undefined' && typeof quranState!=='undefined'){
+      let info=quranState.info;
+      if(!info){
+        try{
+          // быстрый таймаут для info, чтобы не блокировать Аят дня
+          const p=loadQuranInfo().catch(()=>null);
+          info=await Promise.race([p, new Promise(r=>setTimeout(()=>r(null),1200))]);
+        }catch(e){}
+      }
+      if(info && info.chapters && info.chapters.length){
+        const today=new Date().toDateString();
+        let s=localStorage.getItem('barakat_api_surah');
+        let a=localStorage.getItem('barakat_api_ayah');
+        let d=localStorage.getItem('barakat_api_date');
+        let surah, ayah;
+        if(s && a && d===today){ surah=+s; ayah=+a; }
+        else {
+          const ch=info.chapters[Math.floor(Math.random()*info.chapters.length)];
+          const v=ch.verses[Math.floor(Math.random()*ch.verses.length)];
+          surah=ch.chapter; ayah=v.verse;
+          try{ localStorage.setItem('barakat_api_surah',surah); localStorage.setItem('barakat_api_ayah',ayah); localStorage.setItem('barakat_api_date',today);}catch(e){}
+        }
+        const fetchOne=(ed,su,ay)=> fetch(`${QURAN_API}/editions/${ed}/${su}/${ay}.json`,{cache:'force-cache'}).then(r=>r.ok?r.json():Promise.reject()).catch(()=>fetch(`${QURAN_API}/editions/${ed}/${su}/${ay}.min.json`).then(r=>r.ok?r.json():Promise.reject()));
+        const [araData, rusData]=await Promise.race([
+          Promise.all([fetchOne('ara-quranacademy',surah,ayah), fetchOne('rus-elmirkuliev',surah,ayah)]),
+          new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),2200))
+        ]);
+        if(araData && araData.text && rusData && rusData.text){
+          container.innerHTML=`
+            <div class="verse-arabic">${esc(araData.text)}</div>
+            <div class="verse-translation">${esc(rusData.text)}</div>
+            <div class="verse-reference">Сура ${surah}, Аят ${ayah} • quran-api</div>
+          `;
+          return;
+        }
+      }
+    }
+  }catch(e){ console.warn('quran-api ayah failed, fallback to local',e); }
+  // ——— фолбэк: локальные txt ———
+  const todayStr=new Date().toDateString();
+  let verseIndex=localStorage.getItem('barakat_verse_index');
+  let verseDate=localStorage.getItem('barakat_verse_date');
+  if(!verseIndex||verseDate!==todayStr){
+   verseIndex=Math.floor(Math.random()*6236);
+   localStorage.setItem('barakat_verse_index',verseIndex);
+   localStorage.setItem('barakat_verse_date',todayStr);
+  }else{
+   verseIndex=parseInt(verseIndex,10);
+  }
+  if(verseData.error){
+   container.innerHTML='<div class="verse-error">Не удалось загрузить аяты</div>';
    return;
   }
-
- const arabicLine=verseData.arabic[verseIndex]||'';
- const russianLine=verseData.russian[verseIndex]||'';
- 
- // Извлекаем текст аята (формат: сура|аят|текст)
- const arabicText=arabicLine.split('|').slice(2).join('|')||'...';
- const russianText=russianLine.split('|').slice(2).join('|')||'...';
- 
- // Получаем номер суры и аята из данных
- const partsA=arabicLine.split('|');
- const surahNum=partsA[0]||'?';
- const ayahNum=partsA[1]||'?';
-
- container.innerHTML=`
-  <div class="verse-arabic">${arabicText}</div>
-  <div class="verse-translation">${russianText}</div>
-  <div class="verse-reference">Сура ${surahNum}, Аят ${ayahNum}</div>
- `;
+   if(!verseInitialized||verseData.arabic.length===0){
+    container.innerHTML='<div class="verse-loading"><span>Загрузка аята...</span></div>';
+    loadVerseFiles().then(()=>renderVerseOfDay(sel));
+    return;
+   }
+  const arabicLine=verseData.arabic[verseIndex]||'';
+  const russianLine=verseData.russian[verseIndex]||'';
+  const arabicText=arabicLine.split('|').slice(2).join('|')||'...';
+  const russianText=russianLine.split('|').slice(2).join('|')||'...';
+  const partsA=arabicLine.split('|');
+  const surahNum=partsA[0]||'?';
+  const ayahNum=partsA[1]||'?';
+  container.innerHTML=`
+   <div class="verse-arabic">${arabicText}</div>
+   <div class="verse-translation">${russianText}</div>
+   <div class="verse-reference">Сура ${surahNum}, Аят ${ayahNum}</div>
+  `;
 }
 
 
@@ -1220,8 +1304,9 @@ const SECTIONS=[
  {id:'home',name:'Главная',emoji:'🏠',color:'#34B87E'},
  {id:'tasks',name:'Задачи',emoji:'📋',color:'#2E7D5B'},
  {id:'ibadat',name:'Ибадат',emoji:'🕌',color:'#2BB3A5'},
+ {id:'quran',name:'Коран',emoji:'📖',color:'#1B8A5A'},
  {id:'finance',name:'Финансы',emoji:'💰',color:'#E8A23B'},
- {id:'gratitude',name:'Благодарность',emoji:'📖',color:'#9A6FE0'},
+ {id:'gratitude',name:'Благодарность',emoji:'🙏',color:'#9A6FE0'},
  {id:'focus',name:'Фокус',emoji:'⏱️',color:'#4A8DF7'}];
 
 function buildSectionNav(){
@@ -1234,6 +1319,7 @@ const SECTION_RENDER={
  home:renderHome,
  tasks:renderAll,
  ibadat:()=>{renderIbadat();initGeolocation();initCompass()},
+ quran:renderQuran,
  finance:renderFinance,
  gratitude:renderGratitude,
  focus:renderFocus};
@@ -1455,8 +1541,134 @@ function dateGuard(){
  if(state.section==='home')renderHome();else if(state.section==='ibadat')renderIbadat();}
 
 /* ══════════════════════════════════════
-   🤲 ЗАКЯТ: КАЛЬКУЛЯТОР С МУЛЬТИВАЛЮТОЙ
-   ══════════════════════════════════════ */
+    📖 КОРАН — чтение через quran-api
+    ══════════════════════════════════════ */
+const QURAN_API='https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1';
+const QURAN_FALLBACK='https://cdn.jsdelivr.net/gh/superpirov/quran-api@1';
+let quranState={info:null,current:1,trans:'rus-elmirkuliev',cache:{}};
+async function fetchQuranJson(url){
+  try{const r=await fetch(url);if(!r.ok) throw new Error(''+r.status);return await r.json();}catch(e){
+    const fb=url.replace(QURAN_API,QURAN_FALLBACK);
+    if(fb!==url){const r2=await fetch(fb);if(r2.ok) return await r2.json();}
+    throw e;
+  }
+}
+async function loadQuranInfo(){
+  if(quranState.info) return quranState.info;
+  try{const c=JSON.parse(localStorage.getItem('barakat.quran.info')||'null');if(c&&c.chapters&&c.chapters.length===114){quranState.info=c;return c;}}catch(e){}
+  try{
+    const data=await fetchQuranJson(QURAN_API+'/info.json');
+    try{localStorage.setItem('barakat.quran.info',JSON.stringify(data));}catch(e){}
+    quranState.info=data;return data;
+  }catch(e){
+    const r=await fetchQuranJson(QURAN_API+'/info.min.json');
+    quranState.info=r;return r;
+  }
+}
+function renderSurahGrid(filter=''){
+  const grid=$('#surahGrid');if(!grid) return;
+  const info=quranState.info;
+  if(!info||!info.chapters){grid.innerHTML='<div class="quran-empty">Нет данных</div>';return;}
+  const q=filter.trim().toLowerCase();
+  const list=info.chapters.filter(ch=>{
+    if(!q) return true;
+    return String(ch.chapter).includes(q) || (ch.englishname||'').toLowerCase().includes(q) || (ch.arabicname||'').includes(filter.trim()) || (ch.name||'').toLowerCase().includes(q);
+  });
+  const cnt=$('#quranSearchCount');if(cnt) cnt.textContent=`(${list.length}/114)`;
+  if(!list.length){grid.innerHTML='<div class="quran-empty">Ничего не найдено</div>';return;}
+  grid.innerHTML=list.map(ch=>`
+    <div class="surah-card" data-surah="${ch.chapter}">
+      <div class="surah-num">${ch.chapter}</div>
+      <div class="surah-info">
+        <b>${esc(ch.englishname||ch.name||('Сура '+ch.chapter))}</b>
+        <small>${esc(ch.arabicname||'')} • ${ch.verses.length} аятов • ${ch.revelation==='Mecca'?'Мекка':'Медина'}</small>
+      </div>
+      <div class="surah-meta"><small>${ch.revelation==='Mecca'?'Мекканская':'Мединская'}</small><b>${ch.verses.length}</b></div>
+    </div>`).join('');
+}
+function extractVerses(data){
+  if(!data) return [];
+  if(Array.isArray(data)) return data;
+  if(Array.isArray(data.chapter)) return data.chapter;
+  if(Array.isArray(data.verses)) return data.verses;
+  if(data.text && data.chapter) return [data];
+  return [];
+}
+async function openQuranSurah(n){
+  n=parseInt(n,10);if(!(n>=1&&n<=114)) return;
+  quranState.current=n;
+  const transSel=$('#quranTransSelect');
+  const trans=transSel?transSel.value:quranState.trans;
+  quranState.trans=trans;
+  $('#quranListView').style.display='none';
+  $('#quranReaderView').style.display='';
+  const content=$('#quranReaderContent');
+  content.innerHTML='<div class="verse-loading">Загрузка суры...</div>';
+  const info=quranState.info?.chapters?.find(c=>c.chapter===n);
+  const title=$('#quranReaderTitle');
+  if(title) title.innerHTML=info?`${n}. ${esc(info.englishname)} <small style="font-weight:400;color:var(--muted)">(${esc(info.arabicname)})</small>`: `Сура ${n}`;
+  ['quranPrevBtn','quranNextBtn','quranPrevBtn2','quranNextBtn2'].forEach(id=>{
+    const b=document.getElementById(id);if(b){b.disabled=(id.includes('Prev')?n<=1:n>=114);}
+  });
+  try{
+    const [araData, rusData]=await Promise.all([
+      fetchQuranJson(`${QURAN_API}/editions/ara-quranacademy/${n}.json`).catch(()=>fetchQuranJson(`${QURAN_API}/editions/ara-quranacademy/${n}.min.json`)),
+      fetchQuranJson(`${QURAN_API}/editions/${trans}/${n}.json`).catch(()=>fetchQuranJson(`${QURAN_API}/editions/${trans}/${n}.min.json`)).catch(()=>fetchQuranJson(`${QURAN_API}/editions/rus-elmirkuliev/${n}.json`))
+    ]);
+    const araList=extractVerses(araData);
+    const rusList=extractVerses(rusData);
+    if(!araList.length) throw new Error('Пустой ответ');
+    let html=`<div style="text-align:center;padding:8px 0 16px;color:var(--muted);font-size:13px">${info?esc(info.englishname):''} • ${araList.length} аятов</div>`;
+    html+='<div style="border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel)">';
+    for(let i=0;i<araList.length;i++){
+      const a=araList[i]; const r=rusList[i]||{text:''};
+      const num=a.verse||a.aya||(i+1);
+      html+=`<div class="ayah-row">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="ayah-num">${num}</div>
+          <div style="flex:1"></div>
+          <small style="color:var(--muted);font-size:11px">${n}:${num}</small>
+        </div>
+        <div class="ayah-arabic">${esc(a.text||'')}</div>
+        <div class="ayah-translation">${esc(r.text||'')}</div>
+      </div>`;
+    }
+    html+='</div>';
+    content.innerHTML=html;
+    content.scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){
+    content.innerHTML=`<div class="verse-error">Не удалось загрузить суру. Проверьте интернет.<br><small>${esc(String(e.message||e))}</small><br><button class="gbtn" onclick="openQuranSurah(${n})" style="margin-top:12px">Повторить</button></div>`;
+  }
+}
+async function renderQuran(){
+  $('#quranListView').style.display='';
+  $('#quranReaderView').style.display='none';
+  const grid=$('#surahGrid');
+  if(!quranState.info){
+    if(grid) grid.innerHTML='<div class="verse-loading">Загрузка списка сур...</div>';
+    try{ await loadQuranInfo(); }catch(e){
+      if(grid) grid.innerHTML=`<div class="verse-error">Не удалось загрузить список сур<br><small>${esc(String(e))}</small></div>`;
+      return;
+    }
+  }
+  renderSurahGrid($('#quranSearch')?.value||'');
+}
+// делегирование для сур
+document.addEventListener('click',e=>{
+  const c=e.target.closest('.surah-card[data-surah]');
+  if(c) openQuranSurah(c.dataset.surah);
+});
+$('#quranSearch')?.addEventListener('input',e=>renderSurahGrid(e.target.value));
+$('#quranBackBtn')?.addEventListener('click',()=>{ $('#quranReaderView').style.display='none'; $('#quranListView').style.display=''; });
+$('#quranPrevBtn')?.addEventListener('click',()=>openQuranSurah(quranState.current-1));
+$('#quranNextBtn')?.addEventListener('click',()=>openQuranSurah(quranState.current+1));
+$('#quranPrevBtn2')?.addEventListener('click',()=>openQuranSurah(quranState.current-1));
+$('#quranNextBtn2')?.addEventListener('click',()=>openQuranSurah(quranState.current+1));
+$('#quranTransSelect')?.addEventListener('change',e=>{ quranState.trans=e.target.value; if(quranState.current) openQuranSurah(quranState.current); });
+
+/* ══════════════════════════════════════
+    🤲 ЗАКЯТ: КАЛЬКУЛЯТОР С МУЛЬТИВАЛЮТОЙ
+    ══════════════════════════════════════ */
 const ZAKAT_TYPES=[
  {id:'total',name:'💰 Общий расчёт',desc:'Деньги + золото + серебро + товары'}, 
  {id:'money',name:'💰 Деньги',desc:'Наличные, счета, депозиты'},
