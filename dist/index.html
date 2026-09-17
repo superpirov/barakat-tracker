@@ -2171,6 +2171,7 @@ async function renderHadithOfDay(){
     num=Math.floor(Math.random()*(max[book]||2000))+1;
     try{localStorage.setItem('barakat_hadith_book',book);localStorage.setItem('barakat_hadith_num',num);localStorage.setItem('barakat_hadith_date',today);}catch(e){}
   }
+  try{
   // пробуем до 5 раз найти хадис с переводом, перебирая номера и книги
   let h=null;
   let tryBook=book, tryNum=num;
