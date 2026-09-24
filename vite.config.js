@@ -7,7 +7,7 @@ export default {
     basicSsl(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'database/chapterverse/*.txt'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'database/chapterverse/*.txt', 'sounds/*.mp3'],
       manifest: {
         name: 'Баракат — трекер задач',
         short_name: 'Баракат',
@@ -38,7 +38,7 @@ export default {
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,txt,json}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,txt,json,mp3}'],
         runtimeCaching: [{
           urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
           handler: 'CacheFirst',

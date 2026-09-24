@@ -1309,15 +1309,35 @@ const sndFanfare=()=>[523,659,784,1047].forEach((f,i)=>tone(f,.2,'triangle',.13,
 /* ── звук наступления намаза (независим от общего переключателя звука) ── */
 function prayerSoundOn(){return state.settings.prayerSound!==false}
 function unlockAudio(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(e){}}
-function prayerChime(){try{
-  AC=AC||new (window.AudioContext||window.webkitAudioContext)();
-  if(AC.state==='suspended')AC.resume();
-  [[659,.22,0],[784,.22,.25],[1047,.45,.5]].forEach(([f,dur,delay])=>{
-   const o=AC.createOscillator(),gn=AC.createGain();
-   o.type='sine';o.frequency.value=f;const t0=AC.currentTime+delay;
-   gn.gain.setValueAtTime(.0001,t0);gn.gain.exponentialRampToValueAtTime(.14,t0+.02);gn.gain.exponentialRampToValueAtTime(.0001,t0+dur);
-   o.connect(gn).connect(AC.destination);o.start(t0);o.stop(t0+dur+.03)});
- }catch(e){}}
+function prayerChime(){
+  // сначала пробуем MP3 (1678303793_thalmic_powerup), фолбэк — тоновый сигнал
+  try{
+    const a=new Audio('sounds/thalmic_powerup.mp3');
+    a.volume=0.9;
+    const p=a.play();
+    if(p && p.catch) p.catch(()=>{
+      try{
+        AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+        if(AC.state==='suspended') AC.resume();
+        [[659,.22,0],[784,.22,.25],[1047,.45,.5]].forEach(([f,dur,delay])=>{
+          const o=AC.createOscillator(),gn=AC.createGain();
+          o.type='sine';o.frequency.value=f;const t0=AC.currentTime+delay;
+          gn.gain.setValueAtTime(.0001,t0);gn.gain.exponentialRampToValueAtTime(.14,t0+.02);gn.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+          o.connect(gn).connect(AC.destination);o.start(t0);o.stop(t0+dur+.03)});
+      }catch(e){}
+    });
+    return;
+  }catch(e){}
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended')AC.resume();
+    [[659,.22,0],[784,.22,.25],[1047,.45,.5]].forEach(([f,dur,delay])=>{
+      const o=AC.createOscillator(),gn=AC.createGain();
+      o.type='sine';o.frequency.value=f;const t0=AC.currentTime+delay;
+      gn.gain.setValueAtTime(.0001,t0);gn.gain.exponentialRampToValueAtTime(.14,t0+.02);gn.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+      o.connect(gn).connect(AC.destination);o.start(t0);o.stop(t0+dur+.03)});
+  }catch(e){}
+}
 function renderPrayerSoundBtn(){const b=$('#prayerSoundBtn');if(!b)return;
   b.textContent=prayerSoundOn()?'🔔':'🔕';
   b.classList.toggle('off',!prayerSoundOn());
@@ -1341,11 +1361,11 @@ const PN_BASE=4100;
    «беззвучном», а сам пуш приходит всегда. Звук — res/raw/prayer.wav (~4 c).
    id с суффиксом версии: Android не даёт менять настройки существующего
    канала, поэтому правки настроек = новый id. */
-const PN_CHANNEL='barakat-prayer-v2';
+const PN_CHANNEL='barakat-prayer-v3';
 let pnChannelReady=false;
 function pnAllIds(){const a=[];for(let d=0;d<3;d++)PN_KEYS.forEach((k,i)=>a.push(PN_BASE+d*10+i));return a}
 async function ensurePrayerChannel(){const L=LN();if(!L||pnChannelReady)return;
-  try{await L.createChannel({id:PN_CHANNEL,name:'Наступление намаза',description:'Пуш и сигнал о времени намаза (звук только в обычном режиме)',sound:'prayer.wav',importance:4,vibration:true})}
+  try{await L.createChannel({id:PN_CHANNEL,name:'Наступление намаза',description:'Пуш и сигнал о времени намаза (звук только в обычном режиме)',sound:'thalmic_powerup.mp3',importance:4,vibration:true})}
   catch(e){console.warn('prayer channel:',e)}
   pnChannelReady=true}
 function renderPrayerBgBtn(){const b=$('#prayerBgBtn');if(!b)return;
@@ -1372,10 +1392,10 @@ async function syncPrayerAlarms(){
     if(isNaN(hh)||isNaN(mm))return;
     const at=new Date();at.setDate(at.getDate()+d);at.setHours(hh,mm,0,0);
     if(at.getTime()-Date.now()<30000)return;
-    notes.push({id:PN_BASE+d*10+i,
-     title:'🕌 '+(P_NAMES[k]?P_NAMES[k][0]:k)+' · '+t.time,
-     body:'Наступило время намаза: '+(P_NAMES[k]?P_NAMES[k][0]:k),
-     at:at,channelId:PN_CHANNEL,sound:"prayer.wav"});
+     notes.push({id:PN_BASE+d*10+i,
+      title:'🕌 '+(P_NAMES[k]?P_NAMES[k][0]:k)+' · '+t.time,
+      body:'Наступило время намаза: '+(P_NAMES[k]?P_NAMES[k][0]:k),
+      at:at,channelId:PN_CHANNEL,sound:"thalmic_powerup.mp3"});
    });
   }
   if(!notes.length)return;
