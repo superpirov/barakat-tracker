@@ -272,7 +272,7 @@ dialog::backdrop{background:rgba(8,12,10,.5);backdrop-filter:blur(3px)}
 .qibla-angle{font-family:var(--fd);font-weight:800;font-size:32px;color:var(--accent)}
 .qibla-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
 .compass-wrapper{position:relative;width:220px;height:220px}
-.compass-outer{position:absolute;inset:0;border-radius:50%;background:var(--panel);border:3px solid var(--line);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center}
+.compass-outer{position:absolute;inset:0;border-radius:50%;background:var(--panel);border:3px solid var(--line);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;transition:transform .1s ease-out}
 .compass-north,.compass-south,.compass-east,.compass-west{position:absolute;font-family:var(--fd);font-weight:800;font-size:14px;color:var(--muted)}
 .compass-north{top:12px;left:50%;transform:translateX(-50%)}
 .compass-south{bottom:12px;left:50%;transform:translateX(-50%)}
@@ -1043,6 +1043,19 @@ html[data-theme="dark"] .prayer-hero{background:linear-gradient(135deg,#123B2C,#
 
 <script>
 'use strict';
+/* Нативная сборка (Android/iOS): service worker не нужен — ассеты лежат
+   локально — и вреден: он кеширует index.html и в WebView продолжает
+   отдавать устаревшую страницу даже после обновления APK (пропадают новые
+   разделы). Гасим регистрацию SW и чистим его кеши. */
+try{
+ const _cap=window.Capacitor;
+ const _native=!!(_cap&&((_cap.isNativePlatform&&_cap.isNativePlatform())||_cap.platform==='android'||_cap.platform==='ios'));
+ if(_native&&navigator.serviceWorker){
+  navigator.serviceWorker.register=function(){return Promise.resolve({unregister:function(){return Promise.resolve(true)}})};
+  try{navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>{try{r.unregister()}catch(e){}})).catch(()=>{})}catch(e){}
+  try{if(window.caches&&caches.keys)caches.keys().then(ks=>ks.forEach(k=>{try{caches.delete(k)}catch(e){}})).catch(()=>{})}catch(e){}
+ }
+}catch(e){}
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const KEY='barakat.v1';
 const IBADAT_KEY='barakat.ibadat.v1';
@@ -1358,10 +1371,10 @@ const PN_BASE=4100;
 /* Отдельный канал вместо «default»: дефолтный канал плагина использует
    USAGE_ALARM и потому звучит даже в беззвучном режиме. Наш канал —
    USAGE_NOTIFICATION (так задаёт createChannel плагина), т.е. молчит на
-   «беззвучном», а сам пуш приходит всегда. Звук — res/raw/prayer.wav (~4 c).
+   «беззвучном», а сам пуш приходит всегда. Звук — res/raw/thalmic_powerup.mp3.
    id с суффиксом версии: Android не даёт менять настройки существующего
-   канала, поэтому правки настроек = новый id. */
-const PN_CHANNEL='barakat-prayer-v3';
+   канала, поэтому правки настроек/звука = новый id (сейчас v4). */
+const PN_CHANNEL='barakat-prayer-v4';
 let pnChannelReady=false;
 function pnAllIds(){const a=[];for(let d=0;d<3;d++)PN_KEYS.forEach((k,i)=>a.push(PN_BASE+d*10+i));return a}
 async function ensurePrayerChannel(){const L=LN();if(!L||pnChannelReady)return;
@@ -1517,10 +1530,32 @@ async function nativeGeoPosition(){
   let st=await G.checkPermissions();
   if(st.location!=='granted'&&st.coarseLocation!=='granted'){
    st=await G.requestPermissions();
-   if(st.location!=='granted'&&st.coarseLocation!=='granted')return{denied:true}}
+   if(st.location!=='granted'&&st.coarseLocation!=='granted'){
+    // последняя попытка — веб-API (может показать системный диалог)
+    if(navigator.geolocation){
+     return await new Promise(resolve=>{
+      navigator.geolocation.getCurrentPosition(
+       pos=>resolve({coords:{latitude:pos.coords.latitude,longitude:pos.coords.longitude}}),
+       ()=>resolve({denied:true}),
+       {enableHighAccuracy:true,timeout:8000,prompt:true});
+     });
+    }
+    return{denied:true}}
+  }
   const pos=await G.getCurrentPosition({enableHighAccuracy:true,timeout:9000});
   return{coords:{latitude:pos.coords.latitude,longitude:pos.coords.longitude}};
- }catch(e){return null}}
+ }catch(e){
+  // если нативный плагин упал — пробуем веб-API
+  if(navigator.geolocation){
+   return await new Promise(resolve=>{
+    navigator.geolocation.getCurrentPosition(
+     pos=>resolve({coords:{latitude:pos.coords.latitude,longitude:pos.coords.longitude}}),
+     ()=>resolve({denied:true}),
+     {enableHighAccuracy:true,timeout:8000,prompt:true});
+   });
+  }
+  return null;
+ }}
 function loadGeo(){try{const r=JSON.parse(localStorage.getItem(GEO_KEY)||'null');
  if(r&&typeof r.lat==='number'&&typeof r.lon==='number'&&Math.abs(r.lat)<=90&&Math.abs(r.lon)<=180){
   prayerState.latitude=r.lat;prayerState.longitude=r.lon;return true}}catch(e){}return false}
@@ -1565,6 +1600,7 @@ function applyLocation(){
  prayerState.qiblaAngle=calculateQibla(prayerState.latitude,prayerState.longitude);
  $('#qiblaAngle').textContent=Math.round(prayerState.qiblaAngle)+'°';
  // Стрелка в положении «карта»: север сверху, угол киблы от севера
+ $('#compassOuter').style.transform='rotate(0deg)';
  $('#compassInner').style.transform=`rotate(${prayerState.qiblaAngle}deg)`;
  renderPrayerTimes();renderDashMini();tickPrayer();}
 const GEO_PRESETS=[['Москва',55.7558,37.6173],['СПб',59.9311,30.3609],['Казань',55.7963,49.1088],['Ташкент',41.2995,69.2401],['Мекка',21.4225,39.8262]];
@@ -3301,38 +3337,81 @@ function renderPrayerTimes(){
  `;
 }
 
+/* Азимут по веб-датчикам. «Сырой» alpha годится только когда телефон лежит
+   плашмя; при наклоне нужна компенсация наклона (формула из спецификации
+   W3C DeviceOrientation). */
+function compassHeadingDeg(alpha,beta,gamma){
+ const d=Math.PI/180;
+ const _x=(beta||0)*d,_y=(gamma||0)*d,_z=(alpha||0)*d;
+ const cX=Math.cos(_x),cY=Math.cos(_y),cZ=Math.cos(_z);
+ const sX=Math.sin(_x),sY=Math.sin(_y),sZ=Math.sin(_z);
+ const Vx=-cZ*sY-sZ*sX*cY, Vy=-sZ*sY+cZ*sX*cY;
+ let h=Math.atan2(Vx,Vy);
+ if(Vy<0)h+=Math.PI;else if(Vx<0)h+=2*Math.PI;
+ return (h*180/Math.PI)%360;
+}
+function webHeading(e){
+ if(typeof e.webkitCompassHeading==='number')return e.webkitCompassHeading;   // iOS
+ if(typeof e.alpha!=='number')return null;
+ const beta=e.beta||0,gamma=e.gamma||0;
+ if(Math.abs(beta)<45&&Math.abs(gamma)<45)return (360-e.alpha)%360;           // телефон плашмя
+ return compassHeadingDeg(e.alpha,beta,gamma);                                // наклон — с компенсацией
+}
+let _compassTimer=null,_compassHandler=null;
+function stopCompass(){
+ if(_compassTimer){clearInterval(_compassTimer);_compassTimer=null}
+ if(_compassHandler){window.removeEventListener('deviceorientationabsolute',_compassHandler,true);window.removeEventListener('deviceorientation',_compassHandler,true);_compassHandler=null}
+}
 function initCompass(){
+ stopCompass();
  const status=$('#qiblaStatus');
  const setStatus=(html,cls)=>{status.innerHTML=html;status.className='qibla-status'+(cls?' '+cls:'');status.style.cursor='';status.onclick=null};
- if(!window.DeviceOrientationEvent)return setStatus('<span class="status-icon">⚠️</span><span class="status-text">Компас не поддерживается</span>','error');
-
- let calibrated=false;
- function handleOrientation(e){
-  let h=null;
-  if(typeof e.webkitCompassHeading==='number')h=e.webkitCompassHeading;      // iOS
-  else if(e.absolute&&typeof e.alpha==='number')h=360-e.alpha;               // Android (absolute)
-  if(h===null||prayerState.qiblaAngle===null)return;
-  // Стрелка компаса: поворачиваем диск против хода телефона + угол киблы
+ let calibrated=false,gotAbsolute=false;
+ function applyHeading(h){
+  if(typeof h!=='number'||!(h>=0)||prayerState.qiblaAngle===null)return;
+  h=((h%360)+360)%360;
+  // роза (N/E/S/W) — против хода телефона, чтобы N указывал на реальный север
+  $('#compassOuter').style.transform=`rotate(${-h}deg)`;
+  // стрелка киблы — направление киблы относительно «верха» телефона
   $('#compassInner').style.transform=`rotate(${-h+prayerState.qiblaAngle}deg)`;
   if(!calibrated){calibrated=true;
-   setStatus('<span class="status-icon">✓</span><span class="status-text">Компас активен — держите телефон горизонтально</span>','calibrated')}}
- 
- if(typeof DeviceOrientationEvent.requestPermission==='function'){
-  setStatus('<span class="status-icon">📱</span><span class="status-text">Нажмите, чтобы включить компас</span>');
-  status.style.cursor='pointer';
-  status.onclick=async()=>{
-   try{
-    const p=await DeviceOrientationEvent.requestPermission();
-    if(p==='granted'){setStatus('<span class="status-icon">🧭</span><span class="status-text">Ожидание данных компаса…</span>');window.addEventListener('deviceorientation',handleOrientation,true)}
-    else setStatus('<span class="status-icon">⚠️</span><span class="status-text">Доступ к компасу запрещён</span>','error')
-   }catch(err){setStatus('<span class="status-icon">⚠️</span><span class="status-text">Ошибка доступа к компасу</span>','error')}};
- }else if('ondeviceorientationabsolute' in window){
-  window.addEventListener('deviceorientationabsolute',handleOrientation,true);
-  setStatus('<span class="status-icon">🧭</span><span class="status-text">Если есть магнитный датчик — поверните телефон для калибровки</span>');
- }else{
-  window.addEventListener('deviceorientation',handleOrientation,true);
-  setStatus('<span class="status-icon">🧭</span><span class="status-text">Если есть магнитный датчик — поверните телефон для калибровки</span>');
+   setStatus('<span class="status-icon">✓</span><span class="status-text">Компас активен — держите телефон ровно</span>','calibrated')}}
+ function startWebCompass(){
+  if(!window.DeviceOrientationEvent)return setStatus('<span class="status-icon">⚠️</span><span class="status-text">Компас не поддерживается</span>','error');
+  _compassHandler=e=>{
+   let h=null;
+   if(typeof e.webkitCompassHeading==='number'){h=webHeading(e);gotAbsolute=true}
+   else if(typeof e.alpha==='number'){if(e.absolute)gotAbsolute=true;if(e.absolute||!gotAbsolute)h=webHeading(e)}
+   if(h!==null)applyHeading(h)};
+  if(typeof DeviceOrientationEvent.requestPermission==='function'){
+   setStatus('<span class="status-icon">📱</span><span class="status-text">Нажмите, чтобы включить компас</span>');
+   status.style.cursor='pointer';
+   status.onclick=async()=>{
+    try{
+     const p=await DeviceOrientationEvent.requestPermission();
+     if(p==='granted'){setStatus('<span class="status-icon">🧭</span><span class="status-text">Ожидание данных компаса…</span>');window.addEventListener('deviceorientation',_compassHandler,true)}
+     else setStatus('<span class="status-icon">⚠️</span><span class="status-text">Доступ к компасу запрещён</span>','error')
+    }catch(err){setStatus('<span class="status-icon">⚠️</span><span class="status-text">Ошибка доступа к компасу</span>','error')}};
+  }else{
+   window.addEventListener('deviceorientationabsolute',_compassHandler,true);
+   window.addEventListener('deviceorientation',_compassHandler,true);
+   setStatus('<span class="status-icon">🧭</span><span class="status-text">Поверните телефон для калибровки компаса…</span>');
+   setTimeout(()=>{if(!calibrated)setStatus('<span class="status-icon">📱</span><span class="status-text">Компас недоступен. Угол киблы: '+Math.round(prayerState.qiblaAngle||0)+'° от севера</span>','error')},3000);
+  }
  }
+ // 1) нативный Android-компас (магнитометр напрямую, как системное приложение)
+ const AC=window.AndroidCompass;
+ if(AC&&typeof AC.getHeading==='function'){
+  setStatus('<span class="status-icon">🧭</span><span class="status-text">Калибровка — поводите телефоном «восьмёркой»</span>');
+  let seen=false;
+  _compassTimer=setInterval(()=>{
+   let hv=-1;try{hv=AC.getHeading()}catch(e){hv=-1}
+   if(hv>=0){seen=true;applyHeading(hv)}
+  },80);
+  setTimeout(()=>{if(!seen){stopCompass();startWebCompass()}},4000);
+  return;
+ }
+ startWebCompass();
 }
 
 
